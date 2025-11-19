@@ -1,0 +1,225 @@
+package routes
+
+import (
+	// microservice
+	"riskmanagement/routes/realisasiroutes"
+
+	"go.uber.org/fx"
+)
+
+// Module exports dependency to container
+var Module = fx.Options(
+	fx.Provide(NewUserRoutes),
+	fx.Provide(NewAuthRoutes),
+	fx.Provide(NewRoutes),
+	fx.Provide(NewActivityRoutes),
+	fx.Provide(NewSubActivityRoutes),
+	fx.Provide(NewProductRoutes),
+	fx.Provide(NewRiskIssueRoutes),
+	fx.Provide(NewRiskIndicatorRoutes),
+	fx.Provide(NewIncidentRoutes),
+	fx.Provide(NewSubIncidentRoutes),
+	fx.Provide(NewRiskTypeRoutes),
+	fx.Provide(NewTasklistsRouter),
+	fx.Provide(NewAdminSettingRouter),
+	fx.Provide(NewUnitKerjaRoutes),
+	fx.Provide(NewBriefingRoutes),
+	fx.Provide(NewMateriRoutes),
+	fx.Provide(NewCoachingRoutes),
+	fx.Provide(NewVerifikasiRoutes),
+	fx.Provide(NewRiskControlRoutes),
+	fx.Provide(NewaplikasiRoutes),
+	fx.Provide(NewMcsRoutes),
+	fx.Provide(NewFileManagerRoutes),
+	fx.Provide(NewLiniBisnisLV1Routes),
+	fx.Provide(NewLiniBisnisLV2Routes),
+	fx.Provide(NewLiniBisnisLV3Routes),
+	fx.Provide(NewEventTypeLV1Routes),
+	fx.Provide(NewEventTypeLV2Routes),
+	fx.Provide(NewEventTypeLV3Routes),
+	fx.Provide(NewMegaProsesRoutes),
+	fx.Provide(NewMajorProsesRoutes),
+	fx.Provide(NewSubMajorProsesRoutes),
+	fx.Provide(NewPenyebabKejadianLv3Routes),
+	fx.Provide(NewMsUkerRoutes),
+	fx.Provide(NewMstKriteriaRoutes),
+	fx.Provide(NewPgsUserRoutes),
+	fx.Provide(NewManagementUserRoutes),
+	fx.Provide(NewMstRoleRoutes),
+	fx.Provide(NewKridRoutes),
+	fx.Provide(NewUkerKelolaanRoutes),
+	fx.Provide(NewClientIPRoutes),
+	fx.Provide(NewAuditTrailRoutes),
+	fx.Provide(NewQuestionnerRoutes),
+	fx.Provide(NewLaporanRoutes),
+	fx.Provide(NewCommonRoutes),
+	fx.Provide(NewNotifikasiRoutes),
+	fx.Provide(NewMonitoringRoutes),
+	fx.Provide(NewPelaporanRoutes),
+	fx.Provide(NewUploadDataRoutes),
+	fx.Provide(NewDownloadRoutes),
+	fx.Provide(NewDataTematikRoutes),
+	fx.Provide(NewVerifikasiRealisasiRoutes),
+	fx.Provide(NewVerifikasiReportRealisasiRoutes),
+	fx.Provide(NewTaskAssignmentsRouter),
+	fx.Provide(NewJenisTaskRouter),
+	fx.Provide(NewPekerjaRoutes),
+	fx.Provide(NewMenuRoutes),
+
+	// notification
+	fx.Provide(NewNotificationGlobalRoutes),
+
+	// organisasi
+	fx.Provide(NewOrganisasiRoute),
+
+	// MicroService
+	fx.Provide(realisasiroutes.NewRealisasiRoutes),
+	fx.Provide(NewMQRoutes),
+	fx.Provide(NewLinkcageRouter),
+)
+
+// Routes contains multiple routes
+type Routes []Route
+
+// Route interface
+type Route interface {
+	Setup()
+}
+
+// NewRoutes sets up routes
+func NewRoutes(
+	userRoutes UserRoutes,
+	authRoutes AuthRoutes,
+	activityRoutes ActivityRoutes,
+	subActivityRoutes SubActivityRoutes,
+	productRoutes ProductRoutes,
+	riskIssueRoutes RiskIssueRoutes,
+	riskIndicatorRoutes RiskIndicatorRoutes,
+	incidentRoutes IncidentRoutes,
+	subIncidentRoutes SubIncidentRoutes,
+	riskTypeRoutes RiskTypeRoutes,
+	tasklistsRoutes TasklistsRoutes,
+	adminSettingRoutes AdminSettingRoutes,
+	unitKerjaRoutes UnitKerjaRoutes,
+	briefingRoutes BriefingRoutes,
+	materiRoutes MateriRoutes,
+	coachingRoutes CoachingRoutes,
+	verifikasiRoutes VerifikasiRoutes,
+	riskControlRoutes RiskControlRoutes,
+	aplikasiRoutes AplikasiRoutes,
+	mcsRoutes McsRoutes,
+	fileManaagerRoutes FileManagerRoutes,
+	liniBisnis1Routes LiniBisnis1Routes,
+	liniBisnis2Routes LiniBisnis2Routes,
+	liniBisnis3Routes LiniBisnis3Routes,
+	eventType1Routes EventType1Routes,
+	eventType2Routes EventType2Routes,
+	eventType3Routes EventType3Routes,
+	megaProsesRoutes MegaProsesRoutes,
+	majorProsesRoutes MajorProsesRoutes,
+	subMajorProsesRoutes SubMajorProsesRoutes,
+	penyebabKejadianlv3Routes PenyebabKejadianLv3Routes,
+	msUkerRoutes MsUkerRoutes,
+	mstKriteriaRoutes MstKriteriaRoutes,
+	pgsUserRoutes PgsUserRoutes,
+	managementUser ManagementUserRoutes,
+	mstRole MstRoleRoutes,
+	krid KridRoutes,
+	ukerKelolaan UkerKelolaanRoutes,
+	clientIp ClientIPRoutes,
+	auditTrail AuditTrailRoutes,
+	questionner QuestionnerRoutes,
+	laporan LaporanRoutes,
+	common CommonRoutes,
+	notifikasi NotifikasiRoutes,
+	monitoring MonitoringRoutes,
+	pelaporan PelaporanRoutes,
+	uploaddata UploadDataRoutes,
+	download DownloadRoutes,
+	datatematik DataTematikRoutes,
+	verifikasiRealisasiRoute VerifikasiRealisasiRoutes,
+	verifikasiReportRealisasiRoute VerifikasiReportRealisasiRoutes,
+	taskassignmentsRouter TaskAssignmentsRoutes,
+	jenisTask JenisTaskRoutes,
+	pekerjaRoute PekerjaRoutes,
+	menuRoute MenuRoutes,
+	notificationGlobalRoute NotificationGlobalRoutes,
+	organisasiRoute OrganisasiRoutes,
+
+	// microService
+	realisasiRoutes realisasiroutes.RealisasiRoutes,
+	mq MQRoutes,
+	linkcage LinkcageRoutes,
+) Routes {
+	return Routes{
+		userRoutes,
+		authRoutes,
+		activityRoutes,
+		subActivityRoutes,
+		productRoutes,
+		riskIssueRoutes,
+		riskIndicatorRoutes,
+		incidentRoutes,
+		subIncidentRoutes,
+		riskTypeRoutes,
+		tasklistsRoutes,
+		adminSettingRoutes,
+		unitKerjaRoutes,
+		briefingRoutes,
+		materiRoutes,
+		coachingRoutes,
+		verifikasiRoutes,
+		riskControlRoutes,
+		aplikasiRoutes,
+		mcsRoutes,
+		fileManaagerRoutes,
+		liniBisnis1Routes,
+		liniBisnis2Routes,
+		liniBisnis3Routes,
+		eventType1Routes,
+		eventType2Routes,
+		eventType3Routes,
+		megaProsesRoutes,
+		majorProsesRoutes,
+		subMajorProsesRoutes,
+		penyebabKejadianlv3Routes,
+		msUkerRoutes,
+		mstKriteriaRoutes,
+		pgsUserRoutes,
+		managementUser,
+		mstRole,
+		krid,
+		ukerKelolaan,
+		clientIp,
+		auditTrail,
+		questionner,
+		laporan,
+		common,
+		notifikasi,
+		monitoring,
+		pelaporan,
+		uploaddata,
+		download,
+		datatematik,
+		verifikasiRealisasiRoute,
+		verifikasiReportRealisasiRoute,
+		taskassignmentsRouter,
+		jenisTask,
+		pekerjaRoute,
+		menuRoute,
+		notificationGlobalRoute,
+		organisasiRoute,
+
+		// microservice
+		realisasiRoutes,
+		mq,
+		linkcage,
+	}
+}
+
+// Setup all the route
+func (r Routes) Setup() {
+	for _, route := range r {
+		route.Setup()
+	}
+}

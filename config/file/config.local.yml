@@ -1,0 +1,17 @@
+bserver:
+  port: ":5999"
+  enableswagger: true
+  gracefultimeout: 10
+  appurl: "http://localhost:5999"
+  appname: "riskmanagement"
+
+database:
+  slavedsn: "root:P@ssw0rd@tcp(localhost:49155)/micro_db?parseTime=true"
+  masterdsn: "root:P@ssw0rd@tcp(localhost:49155)/micro_db?parseTime=true"
+  retryinterval: 5
+  maxidleconn: 10
+  maxconn: 10
+
+
+  
+ 

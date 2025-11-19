@@ -1,0 +1,3222 @@
+func (briefing BriefingRepository) FilterBriefing(request *models.BriefingFilterRequest) (responses []models.BriefingResponseDataNull, totalRows int, totalData int, err error) {
+	query := ""
+	queryPagination := ""
+	var resultFinal int
+	fmt.Println("=====>>", request)
+
+	//FilterBy No Pelaporan
+	filter1 := request.NoPelaporan != "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter By UnitKerja
+	filter2 := request.NoPelaporan == "" && request.UnitKerja != "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	// Filter By Activity
+	filter3 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID != "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	// Filter By JudulMateri
+	filter4 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri != "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	// Filter By Status
+	filter5 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status != "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//Filter By Periode
+	filter6 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal != "" && request.TglAkhir != ""
+
+	//filter by nomor & unit kerja
+	filter7 := request.NoPelaporan != "" && request.UnitKerja != "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by nomor & activity
+	filter8 := request.NoPelaporan != "" && request.UnitKerja == "" &&
+		request.ActivityID != "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by nomor & judul materi
+	filter9 := request.NoPelaporan != "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri != "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by nomor & status
+	filter10 := request.NoPelaporan != "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status != "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by nomor & tgl
+	filter11 := request.NoPelaporan != "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal != "" && request.TglAkhir != ""
+
+	//filter by uker & activity
+	filter12 := request.NoPelaporan == "" && request.UnitKerja != "" &&
+		request.ActivityID != "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by uker & judulmateri
+	filter13 := request.NoPelaporan == "" && request.UnitKerja != "" &&
+		request.ActivityID == "" && request.JudulMateri != "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by uker & status
+	filter14 := request.NoPelaporan == "" && request.UnitKerja != "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status != "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by uker & tgl
+	filter15 := request.NoPelaporan == "" && request.UnitKerja != "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal != "" && request.TglAkhir != ""
+
+	//filter by aktivity & judulMateri
+	filter16 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID != "" && request.JudulMateri != "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by aktivity & status
+	filter17 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID != "" && request.JudulMateri == "" &&
+		request.Status != "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by aktivity & tanggal
+	filter18 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID != "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal != "" && request.TglAkhir != ""
+
+	//filter by judulMateri & status
+	filter19 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri != "" &&
+		request.Status != "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by judulMateri & tgl
+	filter20 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri != "" &&
+		request.Status == "" && request.TglAwal != "" && request.TglAkhir != ""
+
+	//filter by status & tgl
+	filter21 := request.NoPelaporan == "" && request.UnitKerja == "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status != "" && request.TglAwal != "" && request.TglAkhir != ""
+
+	//filter by nomor, uker, aktivity
+	filter22 := request.NoPelaporan != "" && request.UnitKerja != "" &&
+		request.ActivityID != "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by nomor, uker, judul
+	filter23 := request.NoPelaporan != "" && request.UnitKerja != "" &&
+		request.ActivityID == "" && request.JudulMateri != "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	//filter by nomor, uker, status
+	filter24 := request.NoPelaporan != "" && request.UnitKerja != "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status != "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	// filter bu nomor, uker, tgl
+	filter25 := request.NoPelaporan != "" && request.UnitKerja != "" &&
+		request.ActivityID == "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal != "" && request.TglAkhir != ""
+
+	// filter bu uker, aktifiti, judul
+	filter26 := request.NoPelaporan == "" && request.UnitKerja != "" &&
+		request.ActivityID != "" && request.JudulMateri != "" &&
+		request.Status == "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	// filter bu uker, aktifiti, status
+	filter27 := request.NoPelaporan == "" && request.UnitKerja != "" &&
+		request.ActivityID != "" && request.JudulMateri == "" &&
+		request.Status != "" && request.TglAwal == "" && request.TglAkhir == ""
+
+	// filter bu uker, aktifiti, tanggal
+	filter28 := request.NoPelaporan == "" && request.UnitKerja != "" &&
+		request.ActivityID != "" && request.JudulMateri == "" &&
+		request.Status == "" && request.TglAwal != "" && request.TglAkhir != ""
+
+	// var rows *sql.Rows
+	// var err error
+
+	if filter1 {
+		fmt.Println("====Filter 1")
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.no_pelaporan = ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.no_pelaporan = ?
+								GROUP BY bm.briefing_id
+							) AS totalRows`
+
+		briefing.logger.Zap.Info("briefing-query-filter-pagination", queryPagination)
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter2 {
+		fmt.Println("==== filter 2")
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.BRDESC like ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.Limit, request.Offset)
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.BRDESC like ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%").Scan(&totalRows)
+
+		fmt.Println("totalRows =>", totalRows)
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter3 {
+		fmt.Println("===== Filter 3")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND bm.activity_id = ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.ActivityID, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND bm.activity_id = ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.ActivityID).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter4 {
+		fmt.Println("===== Filter 4")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND bm.judul_materi like ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.JudulMateri+"%", request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND bm.judul_materi like ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.JudulMateri+"%").Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter5 {
+		if request.Status == "Draft" {
+			fmt.Println("==== Filter 5")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.action = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.Status, request.Limit, request.Offset)
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.action = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.Status).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Selesai" {
+			fmt.Println("==== Filter 5")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND (brief.action = 'Update' || brief.action = 'Selesai')
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND (brief.action = 'Update' || brief.action = 'Selesai')
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Semua" {
+			fmt.Println("==== Filter 5")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		}
+	} else if filter6 {
+		fmt.Println("==== Filter 6")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND CAST(brief.created_at as date) BETWEEN ? AND ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND CAST(brief.created_at as date) BETWEEN ? AND ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.TglAwal, request.TglAkhir).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter7 {
+		fmt.Println("==== Filter 7")
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.no_pelaporan = ?
+				AND brief.BRDESC like ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.no_pelaporan = ?
+								AND brief.BRDESC like ?
+								GROUP BY bm.briefing_id
+							) AS totalRows`
+
+		briefing.logger.Zap.Info("briefing-query-filter-pagination", queryPagination)
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%").Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter8 {
+		fmt.Println("==== Filter 8")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.no_pelaporan = ?
+				AND bm.activity_id = ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, request.ActivityID, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.no_pelaporan = ?
+								AND bm.activity_id = ?
+								GROUP BY bm.briefing_id
+							) AS totalRows`
+
+		briefing.logger.Zap.Info("briefing-query-filter-pagination", queryPagination)
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, request.ActivityID).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter9 {
+		fmt.Println("==== Filter 9")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.no_pelaporan = ?
+				AND bm.judul_materi like ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, "%"+request.JudulMateri+"%", request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.no_pelaporan = ?
+								AND bm.judul_materi like ?
+								GROUP BY bm.briefing_id
+							) AS totalRows`
+
+		briefing.logger.Zap.Info("briefing-query-filter-pagination", queryPagination)
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, "%"+request.JudulMateri+"%").Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter10 {
+		if request.Status == "Draft" {
+			fmt.Println("==== Filter 10")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.no_pelaporan = ?
+					AND brief.action = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, request.Status, request.Limit, request.Offset)
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.no_pelaporan = ?
+									AND brief.action = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, request.Status).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Selesai" {
+			fmt.Println("==== Filter 10")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.no_pelaporan = ?
+					AND (brief.action = 'Update' || brief.action = 'Selesai')
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.no_pelaporan = ?
+									AND (brief.action = 'Update' || brief.action = 'Selesai')
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Semua" {
+			fmt.Println("==== Filter 10")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.no_pelaporan = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.no_pelaporan = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		}
+	} else if filter11 {
+		fmt.Println("==== Filter 11")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.no_pelaporan = ?
+				AND CAST(brief.created_at as date) BETWEEN ? AND ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.no_pelaporan = ?
+								AND CAST(brief.created_at as date) BETWEEN ? AND ?
+								GROUP BY bm.briefing_id
+							) AS totalRows`
+
+		briefing.logger.Zap.Info("briefing-query-filter-pagination", queryPagination)
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.TglAwal, request.TglAkhir, request.NoPelaporan).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter12 {
+		fmt.Println("==== Filter 12")
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.BRDESC like ?
+				AND bm.activity_id = ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID, request.Limit, request.Offset)
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.BRDESC like ?
+								AND bm.activity_id = ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID).Scan(&totalRows)
+
+		fmt.Println("totalRows =>", totalRows)
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter13 {
+		fmt.Println("==== Filter 13")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.BRDESC like ?
+				AND bm.judul_materi like ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", "%"+request.JudulMateri+"%", request.Limit, request.Offset)
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.BRDESC like ?
+								AND bm.judul_materi like ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%", "%"+request.JudulMateri+"%").Scan(&totalRows)
+
+		fmt.Println("totalRows =>", totalRows)
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter14 {
+		if request.Status == "Draft" {
+			fmt.Println("==== Filter 14")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.BRDESC like ?
+					AND brief.action = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.Status, request.Limit, request.Offset)
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.BRDESC like ?
+									AND brief.action = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%", request.Status).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Selesai" {
+			fmt.Println("==== Filter 14")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.BRDESC like ?
+					AND (brief.action = 'Update' || brief.action = 'Selesai')
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.BRDESC like ?
+									AND (brief.action = 'Update' || brief.action = 'Selesai')
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%").Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Semua" {
+			fmt.Println("==== Filter 14")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.BRDESC like ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.BRDESC like ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%").Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		}
+	} else if filter15 {
+		fmt.Println("==== Filter 15")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.BRDESC like ?
+				AND CAST(brief.created_at as date) BETWEEN ? AND ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.BRDESC like ?
+								AND CAST(brief.created_at as date) BETWEEN ? AND ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%", request.TglAwal, request.TglAkhir).Scan(&totalRows)
+
+		fmt.Println("totalRows =>", totalRows)
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+
+	} else if filter16 {
+		fmt.Println("==== Filter 16")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND bm.activity_id = ?
+				AND bm.judul_materi like ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.ActivityID, "%"+request.JudulMateri+"%", request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND bm.activity_id = ?
+								AND bm.judul_materi like ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.ActivityID, "%"+request.JudulMateri+"%").Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+
+	} else if filter17 {
+		if request.Status == "Draft" {
+			fmt.Println("==== Filter 14")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND bm.activity_id = ?
+					AND brief.action = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.ActivityID, request.Status, request.Limit, request.Offset)
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND bm.activity_id = ?
+									AND brief.action = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.ActivityID, request.Status).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Selesai" {
+			fmt.Println("==== Filter 14")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND bm.activity_id = ?
+					AND (brief.action = 'Update' || brief.action = 'Selesai')
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.ActivityID, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND bm.activity_id = ?
+									AND (brief.action = 'Update' || brief.action = 'Selesai')
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.ActivityID).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Semua" {
+			fmt.Println("==== Filter 14")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND bm.activity_id = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.ActivityID, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND bm.activity_id = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.ActivityID).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		}
+	} else if filter18 {
+		fmt.Println("==== Filter 18")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND bm.activity_id = ?
+				AND CAST(brief.created_at as date) BETWEEN ? AND ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.ActivityID, request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND bm.activity_id = ?
+								AND CAST(brief.created_at as date) BETWEEN ? AND ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.ActivityID, request.TglAwal, request.TglAkhir).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter19 {
+		if request.Status == "Draft" {
+			fmt.Println("==== Filter 19")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND bm.judul_materi like ?
+					AND brief.action = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.JudulMateri+"%", request.Status, request.Limit, request.Offset)
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND bm.judul_materi like ?
+									AND brief.action = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.JudulMateri+"%", request.Status).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Selesai" {
+			fmt.Println("==== Filter 19")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND bm.judul_materi like ?
+					AND (brief.action = 'Update' || brief.action = 'Selesai')
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.JudulMateri+"%", request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND bm.judul_materi like ?
+									AND (brief.action = 'Update' || brief.action = 'Selesai')
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.JudulMateri+"%").Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Semua" {
+			fmt.Println("==== Filter 19")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND bm.judul_materi like ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.JudulMateri+"%", request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND bm.judul_materi like ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.JudulMateri+"%").Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		}
+	} else if filter20 {
+		fmt.Println("==== Filter 20")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND bm.judul_materi like ?
+				AND CAST(brief.created_at as date) BETWEEN ? AND ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.JudulMateri+"%", request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND bm.judul_materi like ?
+								AND CAST(brief.created_at as date) BETWEEN ? AND ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.JudulMateri+"%", request.TglAwal, request.TglAkhir).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter21 {
+		if request.Status == "Draft" {
+			fmt.Println("==== Filter 21")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.action = ?
+					AND CAST(brief.created_at as date) BETWEEN ? AND ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.Status, request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.action = ?
+									AND CAST(brief.created_at as date) BETWEEN ? AND ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.Status, request.TglAwal, request.TglAkhir).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Selesai" {
+			fmt.Println("==== Filter 21")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND (brief.action = 'Update' || brief.action = 'Selesai')
+					AND CAST(brief.created_at as date) BETWEEN ? AND ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND (brief.action = 'Update' || brief.action = 'Selesai')
+									AND CAST(brief.created_at as date) BETWEEN ? AND ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.TglAwal, request.TglAkhir).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Semua" {
+			fmt.Println("==== Filter 21")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND CAST(brief.created_at as date) BETWEEN ? AND ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND CAST(brief.created_at as date) BETWEEN ? AND ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.TglAwal, request.TglAkhir).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		}
+	} else if filter22 {
+		fmt.Println("==== Filter 22")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.no_pelaporan = ?
+				AND brief.BRDESC like ?
+				AND bm.activity_id = ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.ActivityID, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.no_pelaporan = ?
+								AND brief.BRDESC like ?
+								AND bm.activity_id = ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.ActivityID).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter23 {
+		fmt.Println("==== Filter 23")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.no_pelaporan = ?
+				AND brief.BRDESC like ?
+				AND bm.judul_materi like ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", "%"+request.JudulMateri+"%", request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.no_pelaporan = ?
+								AND brief.BRDESC like ?
+								AND bm.judul_materi like ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", "%"+request.JudulMateri+"%").Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter24 {
+		if request.Status == "Draft" {
+			fmt.Println("==== Filter 24")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.no_pelaporan = ?
+					AND brief.BRDESC like ?
+					AND brief.action = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.Status, request.Limit, request.Offset)
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.no_pelaporan = ?
+									AND brief.BRDESC like ?
+									AND brief.action = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.Status).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Selesai" {
+			fmt.Println("==== Filter 24")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.no_pelaporan = ?
+					AND brief.BRDESC like ?
+					AND (brief.action = 'Update' || brief.action = 'Selesai')
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.no_pelaporan = ?
+									AND brief.BRDESC like ?
+									AND (brief.action = 'Update' || brief.action = 'Selesai')
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%").Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Semua" {
+			fmt.Println("==== Filter 24")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.no_pelaporan = ?
+					AND brief.BRDESC like ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.no_pelaporan = ?
+									AND brief.BRDESC like ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%").Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		}
+	} else if filter25 {
+		fmt.Println("==== Filter 25")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.no_pelaporan = ?
+				AND brief.BRDESC like ?
+				AND CAST(brief.created_at as date) BETWEEN ? AND ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.TglAwal, request.TglAkhir, request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.no_pelaporan = ?
+								AND brief.BRDESC like ?
+								AND CAST(brief.created_at as date) BETWEEN ? AND ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, request.NoPelaporan, "%"+request.UnitKerja+"%", request.TglAwal, request.TglAkhir).Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter26 {
+		fmt.Println("==== Filter 26")
+
+		query = `SELECT 
+					DISTINCT
+					brief.id 'id',
+					brief.no_pelaporan 'no_pelaporan',
+					brief.BRDESC 'unit_kerja',
+					bm.judul_materi 'judul_materi',
+					CASE
+						WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+						WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+						WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+						ELSE "Delete"
+					END 'status_brf'
+				FROM briefing brief 
+				JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+				JOIN activity a ON a.id = bm.activity_id 
+				WHERE brief.deleted != 1 AND brief.maker_id = ?
+				AND brief.BRDESC like ?
+				AND bm.activity_id = ?
+				AND bm.judul_materi like ?
+				ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+		rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID, "%"+request.JudulMateri+"%", request.Limit, request.Offset)
+		briefing.logger.Zap.Info("briefing-query-filter", query)
+
+		briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+		briefing.logger.Zap.Info("rows ===>", rows)
+		if err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		response := models.BriefingResponseDataNull{}
+		for rows.Next() {
+			_ = rows.Scan(
+				&response.ID,
+				&response.NoPelaporan,
+				&response.UnitKerja,
+				// &response.Aktifitas,
+				&response.JudulMateri,
+				&response.StatusBrf,
+			)
+			responses = append(responses, response)
+		}
+
+		if err = rows.Err(); err != nil {
+			return responses, totalRows, totalData, err
+		}
+
+		queryPagination = `SELECT 
+								COUNT(*) 
+							FROM (SELECT 
+										brief.id
+								FROM briefing brief
+								LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+								LEFT JOIN activity a ON a.id = bm.activity_id
+								WHERE brief.deleted != 1 AND brief.maker_id = ?
+								AND brief.BRDESC like ?
+								AND bm.activity_id = ?
+								AND bm.judul_materi like ?
+								GROUP BY bm.briefing_id
+							) AS Total`
+
+		err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID, "%"+request.JudulMateri+"%").Scan(&totalRows)
+		fmt.Println("totalRows =>", totalRows)
+
+		result := float64(totalRows) / float64(request.Limit)
+		fmt.Println("result =>", result)
+
+		resultFinal = int(math.Ceil(result))
+		fmt.Println("resultFinal =>", resultFinal)
+	} else if filter27 {
+		if request.Status == "Draft" {
+			fmt.Println("==== Filter 27")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.BRDESC like ?
+					AND bm.activity_id = ?
+					AND brief.action = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID, request.Status, request.Limit, request.Offset)
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.BRDESC like ?
+									AND bm.activity_id = ?
+									AND brief.action = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID, request.Status).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Selesai" {
+			fmt.Println("==== Filter 27")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.BRDESC like ?
+					AND bm.activity_id = ?
+					AND (brief.action = 'Update' || brief.action = 'Selesai')
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.BRDESC like ?
+									AND bm.activity_id = ?
+									AND (brief.action = 'Update' || brief.action = 'Selesai')
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		} else if request.Status == "Semua" {
+			fmt.Println("==== Filter 27")
+
+			query = `SELECT 
+						DISTINCT
+						brief.id 'id',
+						brief.no_pelaporan 'no_pelaporan',
+						brief.BRDESC 'unit_kerja',
+						bm.judul_materi 'judul_materi',
+						CASE
+							WHEN brief.status = "01a" && brief.action = "Selesai" THEN "Selesai"
+							WHEN brief.status = "01a" && brief.action = "Draft" THEN "Draft"
+							WHEN brief.status = "02b" && (brief.action = "Update" || brief.action ="Selesai")   THEN "Selesai"
+							ELSE "Delete"
+						END 'status_brf'
+					FROM briefing brief 
+					JOIN briefing_materis bm ON bm.briefing_id = brief.id 
+					JOIN activity a ON a.id = bm.activity_id 
+					WHERE brief.deleted != 1 AND brief.maker_id = ?
+					AND brief.BRDESC like ?
+					AND bm.activity_id = ?
+					ORDER BY brief.created_at DESC LIMIT ? OFFSET ?`
+
+			briefing.logger.Zap.Info("briefing-query-filter", query)
+
+			rows, err := briefing.dbRaw.DB.Query(query, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID, request.Limit, request.Offset)
+
+			briefing.logger.Zap.Info("briefing-rows-filter", rows)
+
+			briefing.logger.Zap.Info("rows ===>", rows)
+			if err != nil {
+				return responses, totalRows, totalData, err
+			}
+			response := models.BriefingResponseDataNull{}
+			for rows.Next() {
+				_ = rows.Scan(
+					&response.ID,
+					&response.NoPelaporan,
+					&response.UnitKerja,
+					// &response.Aktifitas,
+					&response.JudulMateri,
+					&response.StatusBrf,
+				)
+				responses = append(responses, response)
+			}
+
+			if err = rows.Err(); err != nil {
+				return responses, totalRows, totalData, err
+			}
+
+			queryPagination = `SELECT 
+									COUNT(*) 
+								FROM (SELECT 
+											brief.id
+									FROM briefing brief
+									LEFT JOIN briefing_materis bm ON brief.id  = bm.briefing_id 
+									LEFT JOIN activity a ON a.id = bm.activity_id
+									WHERE brief.deleted != 1 AND brief.maker_id = ?
+									AND brief.BRDESC like ?
+									AND bm.activity_id = ?
+									GROUP BY bm.briefing_id
+								) AS Total`
+
+			err = briefing.dbRaw.DB.QueryRow(queryPagination, request.Pernr, "%"+request.UnitKerja+"%", request.ActivityID).Scan(&totalRows)
+			fmt.Println("totalRows =>", totalRows)
+
+			result := float64(totalRows) / float64(request.Limit)
+			fmt.Println("result =>", result)
+
+			resultFinal = int(math.Ceil(result))
+			fmt.Println("resultFinal =>", resultFinal)
+		}
+	}
+
+	return responses, resultFinal, totalRows, err
+}

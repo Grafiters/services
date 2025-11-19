@@ -1,0 +1,1749 @@
+definitions:
+  files.FilesRequest:
+    properties:
+      created_at:
+        type: string
+      extension:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      path:
+        type: string
+      size:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.AnomaliHeader:
+    properties:
+      risk_indicator:
+        type: string
+      risk_issue:
+        type: string
+      tasklist_id:
+        type: string
+    type: object
+  models.AnomaliValue:
+    properties:
+      risk_indicator:
+        example: Risk Indicator Example
+        type: string
+      risk_issue:
+        example: Risk Issue Example
+        type: string
+      tasklist_id:
+        example: "1"
+        type: string
+    type: object
+  models.CheckTableRequest:
+    properties:
+      risk_indicator_id:
+        type: integer
+      risk_issue_id:
+        type: integer
+    type: object
+  models.DataTematikRequest:
+    properties:
+      branch:
+        type: string
+      id:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      risk_event:
+        type: integer
+      risk_indicator:
+        type: integer
+    type: object
+  models.DataVerifikasiRequest:
+    properties:
+      tasklist_id:
+        example: 1
+        type: integer
+    type: object
+  models.DeleteTasklistDTO:
+    properties:
+      id:
+        example: 1
+        type: integer
+      pernr:
+        example: P0000001
+        type: string
+    type: object
+  models.GetFirstLampiranRequest:
+    properties:
+      risk_indicator:
+        example: Risk Indicator Example
+        type: string
+      risk_issue:
+        description: TasklistID    string `json:"tasklist_id"`
+        example: Risk Issue Example
+        type: string
+    type: object
+  models.GetTaskByID:
+    properties:
+      id:
+        example: 1
+        type: integer
+    type: object
+  models.LampiranIndikatorCheck:
+    properties:
+      risk_indicator_id:
+        example: "1"
+        type: string
+      risk_issue_id:
+        example: "1"
+        type: string
+    type: object
+  models.LeadAutocompleteRequest:
+    properties:
+      keyword:
+        example: KCP PONDOK INDAH
+        type: string
+      region:
+        example: DKI JAKARTA
+        type: string
+    type: object
+  models.NoTaskRequest:
+    properties:
+      orgeh:
+        type: string
+      pernr:
+        type: string
+    type: object
+  models.ProgresUpdateRequest:
+    properties:
+      id:
+        example: 1
+        type: integer
+      progres:
+        example: 50
+        type: integer
+    type: object
+  models.TaskApprovalRequest:
+    properties:
+      aktifitas:
+        type: integer
+      branches:
+        type: string
+      kanca:
+        type: string
+      kanwil:
+        type: string
+      kostl:
+        type: string
+      limit:
+        type: integer
+      offset:
+        type: integer
+      page:
+        type: integer
+      pernr:
+        type: string
+      product:
+        type: integer
+      risk_event:
+        type: integer
+      risk_indicator:
+        type: integer
+      status_approval:
+        type: string
+      status_document:
+        type: string
+      status_task:
+        type: string
+      task_type:
+        type: integer
+      uker:
+        type: string
+      validator:
+        type: string
+    type: object
+  models.TaskDetailRequest:
+    properties:
+      id:
+        type: integer
+      pernr:
+        type: string
+    type: object
+  models.TaskFilterRequest:
+    properties:
+      aktifitas:
+        example: 1
+        type: integer
+      branches:
+        example: Test
+        type: string
+      kanca:
+        example: Test
+        type: string
+      kanwil:
+        example: Test
+        type: string
+      kostl:
+        example: Test
+        type: string
+      limit:
+        example: 10
+        type: integer
+      offset:
+        example: 0
+        type: integer
+      page:
+        example: 1
+        type: integer
+      pernr:
+        example: Test
+        type: string
+      product:
+        example: 1
+        type: integer
+      risk_event:
+        example: 1
+        type: integer
+      risk_indicator:
+        example: 1
+        type: integer
+      status_approval:
+        example: Test
+        type: string
+      status_document:
+        example: Test
+        type: string
+      status_task:
+        example: Test
+        type: string
+      task_type:
+        example: 1
+        type: integer
+      tgl_akhir:
+        example: "2025-02-10"
+        type: string
+      tgl_awal:
+        example: "2025-02-01"
+        type: string
+      uker:
+        example: Test
+        type: string
+    type: object
+  models.TasklistCountRequest:
+    properties:
+      branch:
+        example: 123
+        type: integer
+      pernr:
+        example: "456"
+        type: string
+    type: object
+  models.TasklistDailyStore:
+    properties:
+      activity_id:
+        description: TasklistID      int64   `json:"tasklist_id"`
+        example: 1
+        type: integer
+      approval:
+        example: Manual
+        type: string
+      approval_name:
+        example: Manual
+        type: string
+      approval_status:
+        example: Waiting
+        type: string
+      branch:
+        example: KC JAKARTA
+        type: string
+      brdesc:
+        example: KC JAKARTA
+        type: string
+      createdAt:
+        type: string
+      end_date:
+        example: "2022-01-31"
+        type: string
+      mainbr:
+        example: KANWIL JAWA
+        type: string
+      maker_id:
+        example: "123456"
+        type: string
+      mbdesc:
+        example: KANWIL JAWA
+        type: string
+      pernr:
+        example: "123456"
+        type: string
+      product_id:
+        example: 1
+        type: integer
+      product_name:
+        example: Kredit
+        type: string
+      progres:
+        example: 1
+        type: integer
+      rap:
+        example: 1
+        type: integer
+      region:
+        example: Jawa
+        type: string
+      rgdesc:
+        example: Jawa
+        type: string
+      risk_indicator:
+        example: Kredit Macet > 3 Bulan
+        type: string
+      risk_indicator_id:
+        example: 1
+        type: integer
+      risk_issue:
+        example: Kredit Macet
+        type: string
+      risk_issue_id:
+        example: 1
+        type: integer
+      sample:
+        example: 1
+        type: integer
+      start_date:
+        example: "2022-01-01"
+        type: string
+      status:
+        example: Open
+        type: string
+      sumber_data:
+        example: Kanal
+        type: string
+      task_type:
+        example: 1
+        type: integer
+      task_type_name:
+        example: Daily
+        type: string
+      updatedAt:
+        type: string
+      validation:
+        example: Manual
+        type: string
+      validation_name:
+        example: Manual
+        type: string
+    type: object
+  models.TasklistDataAnomaliRequest:
+    properties:
+      tasklist_id:
+        example: "1"
+        type: string
+    type: object
+  models.TasklistRequestOne:
+    properties:
+      id:
+        example: 1
+        type: integer
+    type: object
+  models.TasklistsAprrovalRequest:
+    properties:
+      approval:
+        example: approve
+        type: string
+      branch:
+        example: branch
+        type: string
+      id:
+        example: 123
+        type: integer
+      notes:
+        example: notes
+        type: string
+      receiver:
+        example: receiver
+        type: string
+      uker:
+        example: uker
+        type: string
+      updated_at:
+        example: "2023-10-01T00:00:00Z"
+        type: string
+    type: object
+  models.TasklistsCheckRequest:
+    properties:
+      branch:
+        example: "001"
+        type: string
+      brdesc:
+        example: KCP BSD
+        type: string
+      brname:
+        example: KCP BSD
+        type: string
+      mainbr:
+        example: "001"
+        type: string
+      mbdesc:
+        example: KCP BSD
+        type: string
+      mbname:
+        example: KCP BSD
+        type: string
+      region:
+        example: Banten
+        type: string
+      rgdesc:
+        example: Banten
+        type: string
+      rgname:
+        example: Banten
+        type: string
+      risk_issue_id:
+        example: 1
+        type: integer
+      task_type:
+        example: "1"
+        type: string
+      unit_kerja:
+        example: KCP BSD
+        type: string
+    type: object
+  models.TasklistsDoneHistoryCheckRequest:
+    properties:
+      date:
+        example: "2023-10-01"
+        type: string
+      pernr:
+        example: "456"
+        type: string
+      tasklist_id:
+        example: 123
+        type: integer
+    type: object
+  models.TasklistsDoneHistoryRequest:
+    properties:
+      pernr:
+        example: "456"
+        type: string
+      tasklist_id:
+        example: 123
+        type: integer
+    type: object
+  models.TasklistsFilterOfficerRequest:
+    properties:
+      activity_id:
+        example: 1
+        type: integer
+      branch:
+        example: JAKARTA
+        type: string
+      brdesc:
+        example: JAKARTA
+        type: string
+      end_date:
+        example: "2021-01-31"
+        type: string
+      hilfm:
+        example: TEST
+        type: string
+      jenis_task:
+        example: TEST
+        type: string
+      limit:
+        example: 10
+        type: integer
+      mainbr:
+        example: JAKARTA
+        type: string
+      maker_id:
+        example: "100001"
+        type: string
+      mbdesc:
+        example: JAKARTA
+        type: string
+      offset:
+        example: 0
+        type: integer
+      order:
+        example: DESC
+        type: string
+      page:
+        example: 1
+        type: integer
+      pernr:
+        example: "100001"
+        type: string
+      product_id:
+        example: 1
+        type: integer
+      region:
+        example: JAKARTA
+        type: string
+      rgdesc:
+        example: JAKARTA
+        type: string
+      risk_indicator:
+        example: TEST
+        type: string
+      risk_indicator_id:
+        example: 1
+        type: integer
+      risk_issue_id:
+        example: 1
+        type: integer
+      sort:
+        example: id
+        type: string
+      start_date:
+        example: "2021-01-01"
+        type: string
+      status:
+        example: PENDING
+        type: string
+      status_approval:
+        example: APPROVED
+        type: string
+      stell_tx:
+        example: TEST
+        type: string
+      tipe_uker:
+        example: TEST
+        type: string
+    type: object
+  models.TasklistsFilterRequest:
+    properties:
+      activity_id:
+        example: 1
+        type: integer
+      branch:
+        example: JAKARTA
+        type: string
+      brdesc:
+        example: JAKARTA
+        type: string
+      end_date:
+        example: "2021-01-31"
+        type: string
+      id:
+        example: 1
+        type: integer
+      jenis_task:
+        example: TEST
+        type: string
+      limit:
+        example: 10
+        type: integer
+      mainbr:
+        example: JAKARTA
+        type: string
+      mbdesc:
+        example: JAKARTA
+        type: string
+      offset:
+        example: 0
+        type: integer
+      order:
+        example: DESC
+        type: string
+      page:
+        example: 1
+        type: integer
+      pernr:
+        example: "100001"
+        type: string
+      product_id:
+        example: 1
+        type: integer
+      region:
+        example: JAKARTA
+        type: string
+      rgdesc:
+        example: JAKARTA
+        type: string
+      risk_indicator:
+        example: TEST
+        type: string
+      risk_indikator_id:
+        example: 1
+        type: integer
+      risk_issue_id:
+        example: 1
+        type: integer
+      sort:
+        example: id
+        type: string
+      start_date:
+        example: "2021-01-01"
+        type: string
+      status:
+        example: PENDING
+        type: string
+      status_approval:
+        example: APPROVED
+        type: string
+      tipe_uker:
+        example: TEST
+        type: string
+    type: object
+  models.TasklistsStoreRequest:
+    properties:
+      activity_id:
+        type: integer
+      approval:
+        type: string
+      approval_name:
+        type: string
+      end_date:
+        type: string
+      files:
+        description: "DataAnomaliKRID\t[]TasklistsAnomaliDataKRIDRequest\t`json:\"data_anomali_krid\"`"
+        items:
+          $ref: '#/definitions/files.FilesRequest'
+        type: array
+      header_lampiran:
+        description: "IsiLampiran\t[]Lampiran\t`json:\"isi_lampiran\"`"
+        type: string
+      isi_lampiran:
+        items: {}
+        type: array
+      jenis_task:
+        type: integer
+      jumlah_kolom:
+        type: integer
+      kegiatan:
+        type: string
+      maker_id:
+        type: string
+      period:
+        type: string
+      product_id:
+        type: integer
+      product_name:
+        type: string
+      rap:
+        type: string
+      risk_indicator:
+        description: "RiskIndicator \t\t\t[]TasklistsRiskIndicator\t\t\t`json:\"risk_indicator\"`"
+        type: string
+      risk_indicator_id:
+        type: integer
+      risk_issue:
+        type: string
+      risk_issue_id:
+        type: integer
+      sample:
+        type: integer
+      start_date:
+        type: string
+      sumber_data:
+        type: string
+      task_type_name:
+        type: string
+      uker:
+        items:
+          $ref: '#/definitions/models.TasklistsUker'
+        type: array
+      validation:
+        type: string
+      validation_name:
+        type: string
+    type: object
+  models.TasklistsUker:
+    properties:
+      branch:
+        type: string
+      brdesc:
+        type: string
+      brname:
+        type: string
+      mainbr:
+        type: string
+      mbdesc:
+        type: string
+      mbname:
+        type: string
+      region:
+        type: string
+      rgdesc:
+        type: string
+      rgname:
+        type: string
+      tasklistID:
+        type: integer
+      unit_kerja:
+        type: string
+    type: object
+  models.TasklistsUpdateDelete:
+    properties:
+      id:
+        example: 123
+        type: integer
+      status:
+        example: active
+        type: string
+      updated_at:
+        example: "2023-10-01T00:00:00Z"
+        type: string
+    type: object
+  models.TasklistsUpdateEndDateRequest:
+    properties:
+      end_date:
+        example: "2023-12-31"
+        type: string
+      id:
+        example: 123
+        type: integer
+      updated_at:
+        example: "2023-10-01T00:00:00Z"
+        type: string
+    type: object
+  models.TasklistsUpdateRequest:
+    properties:
+      activity_id:
+        example: 456
+        type: integer
+      approval:
+        example: Approved
+        type: string
+      approval_name:
+        example: Approval Name
+        type: string
+      created_at:
+        example: "2023-10-01T00:00:00Z"
+        type: string
+      end_date:
+        example: "2023-12-31"
+        type: string
+      files:
+        items:
+          $ref: '#/definitions/files.FilesRequest'
+        type: array
+      header_lampiran:
+        example: Header
+        type: string
+      id:
+        example: 123
+        type: integer
+      isi_lampiran:
+        items: {}
+        type: array
+      jenis_task:
+        example: 1
+        type: integer
+      jumlah_kolom:
+        example: 5
+        type: integer
+      kegiatan:
+        example: Activity
+        type: string
+      maker_id:
+        example: Maker123
+        type: string
+      period:
+        example: 2023-10
+        type: string
+      product_id:
+        example: 789
+        type: integer
+      product_name:
+        example: Product A
+        type: string
+      rap:
+        example: RAP Data
+        type: string
+      risk_indicator:
+        example: Low
+        type: string
+      risk_indicator_id:
+        example: 223
+        type: integer
+      risk_issue:
+        example: Issue
+        type: string
+      risk_issue_id:
+        example: 112
+        type: integer
+      sample:
+        example: Sample Data
+        type: string
+      start_date:
+        example: "2023-10-01"
+        type: string
+      sumber_data:
+        example: External
+        type: string
+      task_type_name:
+        example: Type A
+        type: string
+      uker:
+        items:
+          $ref: '#/definitions/models.TasklistsUker'
+        type: array
+      validation:
+        example: Validated
+        type: string
+      validation_name:
+        example: Validation Name
+        type: string
+    type: object
+  models.TasklistsValidation:
+    properties:
+      branch:
+        example: branch
+        type: string
+      id:
+        type: integer
+      notes:
+        example: notes
+        type: string
+      receiver:
+        example: receiver
+        type: string
+      uker:
+        example: uker
+        type: string
+      updated_at:
+        example: "2023-10-01T00:00:00Z"
+        type: string
+      validation:
+        example: rejected
+        type: string
+    type: object
+  models.UserRegionRequest:
+    properties:
+      branch:
+        example: 123
+        type: integer
+    type: object
+  riskmanagement_models_taskassignment.ApprovalRequest:
+    properties:
+      approval:
+        description: This is of type ApprovalEnum
+        example: approve
+        type: string
+      branch:
+        example:
+        - "0"
+        items:
+          type: string
+        type: array
+      id:
+        example: 1
+        type: integer
+      notes:
+        example: Test Create something
+        type: string
+      pernr:
+        example: P0000001
+        type: string
+    type: object
+  riskmanagement_models_tasklists.Paginate:
+    properties:
+      branch:
+        example: KCP PONDOK INDAH
+        type: string
+      hilfm:
+        example: KCP001
+        type: string
+      id:
+        example: 1
+        type: integer
+      limit:
+        example: 10
+        type: integer
+      mainbr:
+        example: KCP PONDOK INDAH
+        type: string
+      offset:
+        example: 0
+        type: integer
+      order:
+        example: asc
+        type: string
+      page:
+        example: 1
+        type: integer
+      period:
+        example: "2022"
+        type: string
+      pernr:
+        example: "123456"
+        type: string
+      region:
+        example: DKI JAKARTA
+        type: string
+      sort:
+        example: id
+        type: string
+      stell_tx:
+        example: KCP PONDOK INDAH
+        type: string
+      tipe_uker:
+        example: KCP
+        type: string
+      unit_kerja:
+        example: KCP PONDOK INDAH
+        type: string
+    type: object
+  riskmanagement_models_tasklists.TasklistsRejected:
+    properties:
+      notes:
+        example: notes
+        type: string
+      status:
+        example: rejected
+        type: string
+      tasklist_id:
+        example: 1
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/task-assignment/:
+    get:
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get All Tasklist
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/{id}:
+    get:
+      parameters:
+      - description: Tasklist ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get One Tasklist By Id
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/approval:
+    post:
+      parameters:
+      - description: Approval Request
+        in: body
+        name: approvalRequest
+        required: true
+        schema:
+          $ref: '#/definitions/riskmanagement_models_taskassignment.ApprovalRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Approve Tasklist
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/checkTableExist:
+    post:
+      parameters:
+      - description: Task Filter
+        in: body
+        name: taskFilter
+        required: true
+        schema:
+          $ref: '#/definitions/models.CheckTableRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Check If Table Exist
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/deleteLampiran:
+    post:
+      parameters:
+      - description: Task Filter
+        in: body
+        name: taskFilter
+        required: true
+        schema:
+          $ref: '#/definitions/models.DataTematikRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Delete Lampiran
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/deleteTasklist:
+    delete:
+      parameters:
+      - description: Delete Payload
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteTasklistDTO'
+      responses: {}
+      summary: Delete Tasklist
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/generateNoTask:
+    post:
+      parameters:
+      - description: Task Filter
+        in: body
+        name: taskFilter
+        required: true
+        schema:
+          $ref: '#/definitions/models.NoTaskRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Generate No Task
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/getDetailTematik:
+    post:
+      parameters:
+      - description: Task Filter
+        in: body
+        name: taskFilter
+        required: true
+        schema:
+          $ref: '#/definitions/models.DataTematikRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Detail Tematik
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/getRejectionNotes:
+    post:
+      parameters:
+      - description: Task Filter
+        in: body
+        name: taskFilter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskDetailRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Rejection Notes
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/getTaskApprovalList:
+    post:
+      parameters:
+      - description: Task Filter
+        in: body
+        name: taskFilter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskApprovalRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Data Task Approval List
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/getTaskData:
+    post:
+      parameters:
+      - description: Task Filter
+        in: body
+        name: taskFilter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskFilterRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Data Task
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/getTaskDataDatail:
+    post:
+      parameters:
+      - description: Task Filter
+        in: body
+        name: taskFilter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskDetailRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Data Task Detail
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/myTasklist:
+    post:
+      parameters:
+      - description: My Task Filter
+        in: body
+        name: approvalRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskFilterRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: MyTasklist
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/myTasklistDetail:
+    post:
+      parameters:
+      - description: My Task Detail
+        in: body
+        name: approvalRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskDetailRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: MyTasklistDetail
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/store:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - example: 1
+        in: formData
+        name: activity_id
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: approval
+        type: string
+      - example: Test Create something
+        in: formData
+        name: approval_name
+        type: string
+      - example: Quarter, Semester, Angka, Montly
+        in: formData
+        name: enable_range
+        type: string
+      - example: Test Create something
+        in: formData
+        name: end_date
+        type: string
+      - example: Test Create something
+        in: formData
+        name: kegiatan
+        type: string
+      - example: Test Create something
+        in: formData
+        name: maker_id
+        type: string
+      - example: Test Create something
+        in: formData
+        name: nama_tasklist
+        type: string
+      - example: Test Create something
+        in: formData
+        name: no_tasklist
+        type: string
+      - example: Test Create something
+        in: formData
+        name: period
+        type: string
+      - example: 1
+        in: formData
+        name: product_id
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: product_name
+        type: string
+      - example: "1"
+        in: formData
+        name: range_date
+        type: string
+      - example: true
+        in: formData
+        name: rap
+        type: boolean
+      - example: Test Create something
+        in: formData
+        name: risk_indicator
+        type: string
+      - example: 1
+        in: formData
+        name: risk_indicator_id
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: risk_issue
+        type: string
+      - example: 1
+        in: formData
+        name: risk_issue_id
+        type: integer
+      - example: 1
+        in: formData
+        name: sample
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: start_date
+        type: string
+      - example: Test Create something
+        in: formData
+        name: sumber_data
+        type: string
+      - example: 1
+        in: formData
+        name: task_type
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: task_type_name
+        type: string
+      - example: Test Create something
+        in: formData
+        name: validation
+        type: string
+      - example: Test Create something
+        in: formData
+        name: validation_name
+        type: string
+      - description: File Uploader
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses: {}
+      summary: Create Tasklist
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/update/{id}:
+    put:
+      parameters:
+      - description: Tasklist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - example: 1
+        in: formData
+        name: activity_id
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: approval
+        type: string
+      - example: Test Create something
+        in: formData
+        name: approval_name
+        type: string
+      - example: Quarter, Semester, Angka, Montly
+        in: formData
+        name: enable_range
+        type: string
+      - example: Test Create something
+        in: formData
+        name: end_date
+        type: string
+      - example: Test Create something
+        in: formData
+        name: kegiatan
+        type: string
+      - example: Test Create something
+        in: formData
+        name: maker_id
+        type: string
+      - example: Test Create something
+        in: formData
+        name: nama_tasklist
+        type: string
+      - example: Test Create something
+        in: formData
+        name: no_tasklist
+        type: string
+      - example: Test Create something
+        in: formData
+        name: period
+        type: string
+      - example: 1
+        in: formData
+        name: product_id
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: product_name
+        type: string
+      - example: "1"
+        in: formData
+        name: range_date
+        type: string
+      - example: true
+        in: formData
+        name: rap
+        type: boolean
+      - example: Test Create something
+        in: formData
+        name: risk_indicator
+        type: string
+      - example: 1
+        in: formData
+        name: risk_indicator_id
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: risk_issue
+        type: string
+      - example: 1
+        in: formData
+        name: risk_issue_id
+        type: integer
+      - example: 1
+        in: formData
+        name: sample
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: start_date
+        type: string
+      - example: Test Create something
+        in: formData
+        name: sumber_data
+        type: string
+      - example: 1
+        in: formData
+        name: task_type
+        type: integer
+      - example: Test Create something
+        in: formData
+        name: task_type_name
+        type: string
+      - example: Test Create something
+        in: formData
+        name: validation
+        type: string
+      - example: Test Create something
+        in: formData
+        name: validation_name
+        type: string
+      - description: File Uploader
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses: {}
+      summary: Update Tasklist
+      tags:
+      - Tasklist
+  /api/v1/task-assignment/validation:
+    post:
+      parameters:
+      - description: Tasklist Validation
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsValidation'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Validation Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/anomaliHeader:
+    post:
+      parameters:
+      - description: Tasklist Anomali Header
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.AnomaliHeader'
+      responses: {}
+      summary: Get Anomali Header
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/anomaliValue:
+    post:
+      parameters:
+      - description: Tasklist Anomali Value
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.AnomaliValue'
+      responses: {}
+      summary: Get Anomali Value
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/approval:
+    post:
+      parameters:
+      - description: Tasklist Approval
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsAprrovalRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Approval Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/checkAvailability:
+    post:
+      parameters:
+      - description: Tasklist Filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsCheckRequest'
+      responses: {}
+      summary: Check Availability
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/count:
+    post:
+      parameters:
+      - description: Tasklist Count
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistCountRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Count Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/delete:
+    post:
+      parameters:
+      - description: Tasklist Filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsUpdateDelete'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Delete Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/downloadLampiranIndicatorTemplate:
+    post:
+      parameters:
+      - description: Lampiran Indicator
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.LampiranIndikatorCheck'
+      responses: {}
+      summary: Download Lampiran Indicator Template
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/filter:
+    post:
+      parameters:
+      - description: Tasklist Filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsFilterRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Tasklist Filter
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/filterByID:
+    post:
+      parameters:
+      - description: Tasklist Filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsFilterRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Tasklist Filter By ID
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/filterOfficer:
+    post:
+      parameters:
+      - description: Tasklist Filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsFilterOfficerRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Tasklist Filter By Officer
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getAll:
+    post:
+      parameters:
+      - description: Tasklist ID
+        in: body
+        name: paginate
+        required: true
+        schema:
+          $ref: '#/definitions/riskmanagement_models_tasklists.Paginate'
+      responses: {}
+      summary: Get All Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getAllOfficer:
+    post:
+      parameters:
+      - description: Tasklist ID
+        in: body
+        name: paginate
+        required: true
+        schema:
+          $ref: '#/definitions/riskmanagement_models_tasklists.Paginate'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get All Officer
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getDataAnomali:
+    post:
+      parameters:
+      - description: Tasklist ID
+        in: body
+        name: TasklistID
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistDataAnomaliRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Data Anomaly
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getDataVerifikasi:
+    post:
+      parameters:
+      - description: Data Verifikasi
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.DataVerifikasiRequest'
+      responses: {}
+      summary: Get Data Verifikasi
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getDone:
+    post:
+      parameters:
+      - description: Tasklist Done History
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsDoneHistoryCheckRequest'
+      responses: {}
+      summary: Get Done Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getFirstLampiran:
+    post:
+      parameters:
+      - description: Tasklist Get First Lampiran
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.GetFirstLampiranRequest'
+      responses: {}
+      summary: Get First Lampiran
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getLampiranIndicator:
+    post:
+      parameters:
+      - description: Lampiran Indicator
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.LampiranIndikatorCheck'
+      responses: {}
+      summary: Get Lampiran Indicator
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getOne:
+    post:
+      parameters:
+      - description: Tasklist ID
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistRequestOne'
+      responses: {}
+      summary: Get One Tasklist By Id
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/getTaskByID:
+    post:
+      parameters:
+      - description: Tasklist ID
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/models.GetTaskByID'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get One Tasklist By Id
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/insertTasklistRejected:
+    post:
+      parameters:
+      - description: Tasklist Rejected
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/riskmanagement_models_tasklists.TasklistsRejected'
+      responses: {}
+      summary: Insert Tasklist Rejected
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/leadAutocompleteApr:
+    post:
+      parameters:
+      - description: Lead Autocomplete
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.LeadAutocompleteRequest'
+      responses: {}
+      summary: Lead Autocomplete Apr
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/leadAutocompleteVal:
+    post:
+      parameters:
+      - description: Lead Autocomplete
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.LeadAutocompleteRequest'
+      responses: {}
+      summary: Lead Autocomplete Val
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/store:
+    post:
+      parameters:
+      - description: Tasklist Filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsStoreRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Store Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/storeDaily:
+    post:
+      parameters:
+      - description: Tasklist Daily Store
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistDailyStore'
+      responses: {}
+      summary: Insert StoreDaily
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/storeDone:
+    post:
+      parameters:
+      - description: Tasklist Done History
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsDoneHistoryRequest'
+      responses: {}
+      summary: Store Done Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/update:
+    post:
+      parameters:
+      - description: Tasklist Filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsUpdateRequest'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Update Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/updateDaily:
+    post:
+      parameters:
+      - description: Tasklist Daily Store
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProgresUpdateRequest'
+      responses: {}
+      summary: Update Daily
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/updateEndDate:
+    post:
+      parameters:
+      - description: Tasklist Filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.TasklistsUpdateEndDateRequest'
+      responses: {}
+      summary: Update End Date Tasklist
+      tags:
+      - Tasklist (Old)
+  /api/v1/tasklists/userRegion:
+    post:
+      parameters:
+      - description: User Region
+        in: body
+        name: tasklist
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRegionRequest'
+      responses: {}
+      summary: User Region
+      tags:
+      - Tasklist (Old)
+swagger: "2.0"

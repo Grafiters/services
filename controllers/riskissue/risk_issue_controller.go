@@ -1,0 +1,663 @@
+package controllers
+
+import (
+	"database/sql"
+	"fmt"
+	"riskmanagement/lib"
+	models "riskmanagement/models/riskissue"
+	services "riskmanagement/services/riskissue"
+
+	"github.com/gin-gonic/gin"
+	"gitlab.com/golang-package-library/logger"
+)
+
+type RiskIssueController struct {
+	logger  logger.Logger
+	service services.RiskIssueDefinition
+}
+
+func NewRiskIssueController(
+	RiskIssueService services.RiskIssueDefinition,
+	logger logger.Logger,
+) RiskIssueController {
+	return RiskIssueController{
+		service: RiskIssueService,
+		logger:  logger,
+	}
+}
+
+func (riskIssue RiskIssueController) GetAll(c *gin.Context) {
+	datas, err := riskIssue.service.GetAll()
+
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "200", "Internal Error", "")
+		return
+	}
+
+	if len(datas) == 0 {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Data tidak ditemukan", "")
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", datas)
+}
+func (riskIssue RiskIssueController) GetOne(c *gin.Context) {
+	requests := models.RiskIssueRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, status, err := riskIssue.service.GetOne(requests.ID)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", false)
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "404", "Data tidak ditemukan", nil)
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
+}
+
+func (riskIssue RiskIssueController) Store(c *gin.Context) {
+	data := models.RiskIssueRequest{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai :"+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.Store(data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Input data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) Update(c *gin.Context) {
+	data := models.RiskIssueRequest{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.Update(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Update data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) DeleteMapAktifitas(c *gin.Context) {
+	data := models.MapAktifitas{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.DeleteMapAktifitas(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) DeleteMapEvent(c *gin.Context) {
+	data := models.MapEvent{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.DeleteMapEvent(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) DeleteMapKejadian(c *gin.Context) {
+	data := models.MapKejadian{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.DeleteMapKejadian(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) DeleteMapLiniBisnis(c *gin.Context) {
+	data := models.MapLiniBisnis{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.DeleteMapLiniBisnis(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) DeleteMapProduct(c *gin.Context) {
+	data := models.MapProduct{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.DeleteMapProduct(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) DeleteMapProses(c *gin.Context) {
+	data := models.MapProses{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.DeleteMapProses(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) GetKode(c *gin.Context) {
+	datas, err := riskIssue.service.GetKode()
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+		return
+	}
+
+	if len(datas) == 0 {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "404", "Data Tidak Ditemukan !", nil)
+		return
+	}
+
+	Kode := "RE." + lib.GetTimeNow("date2") + "." + datas[0].Kode
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", Kode)
+}
+
+func (riskIssue RiskIssueController) MappingRiskControl(c *gin.Context) {
+	data := models.MappingControlRequest{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.MappingRiskControl(data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Mapping data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) GetMappingControlbyID(c *gin.Context) {
+	requests := models.RiskIssueRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, err := riskIssue.service.GetMappingControlbyID(requests.ID)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", false)
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
+}
+
+func (riskIssue RiskIssueController) DeleteMapControl(c *gin.Context) {
+	data := models.MapControl{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.DeleteMapControl(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) SearchRiskIssue(c *gin.Context) {
+	requests := models.KeywordRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	datas, pagination, err := riskIssue.service.SearchRiskIssue(requests)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+	}
+
+	if pagination.Total == 0 {
+		lib.ReturnToJson(c, 200, "404", "Data Tidak Ditemukan", datas)
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+		return
+	}
+
+	lib.ReturnToJsonWithPaginate(c, 200, "200", "Inquery Data Berhasil", datas, pagination)
+}
+
+func (riskIssue RiskIssueController) SearchRiskIssueWithoutSub(c *gin.Context) {
+	requests := models.RiskIssueWithoutSub{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	fmt.Println("request Controller", requests)
+	datas, pagination, err := riskIssue.service.SearchRiskIssueWithoutSub(requests)
+
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+	}
+
+	// if pagination.Total == 0 {
+	// 	// lib.ReturnToJson(c, 200, "404", "Data Tidak Ditemukan", datas)
+	// 	lib.ReturnToJson(c, 200, "404", "Data Tidak Ditemukan", nil)
+	// 	return
+	// }
+
+	// if err == sql.ErrNoRows {
+	// 	lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+	// 	return
+	// }
+
+	lib.ReturnToJsonWithPaginate(c, 200, "200", "Inquery Data Berhasil", datas, pagination)
+}
+
+func (riskIssue RiskIssueController) MappingRiskIndicator(c *gin.Context) {
+	data := models.MappingIndicatorRequest{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.MappingRiskIndicator(data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Mapping data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) GetMappingIndicatorbyID(c *gin.Context) {
+	requests := models.RiskIssueRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, err := riskIssue.service.GetMappingIndicatorbyID(requests.ID)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", false)
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
+}
+
+func (riskIssue RiskIssueController) DeleteMapIndicator(c *gin.Context) {
+	data := models.MapIndicator{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.DeleteMapIndicator(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error status", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) Delete(c *gin.Context) {
+	data := models.RiskIssueDeleteRequest{}
+
+	if err := c.Bind(&data); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	status, err := riskIssue.service.Delete(&data)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Data Gagal Dihapus", false)
+		return
+	}
+	lib.ReturnToJson(c, 200, "200", "Hapus data berhasil", true)
+}
+
+func (riskIssue RiskIssueController) FilterRiskIssue(c *gin.Context) {
+	requests := models.FilterRiskIssueRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	datas, pagination, err := riskIssue.service.FilterRiskIssue(requests)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+	}
+
+	if pagination.Total == 0 {
+		lib.ReturnToJson(c, 200, "404", "Data Kosong", nil)
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+		return
+	}
+
+	lib.ReturnToJsonWithPaginate(c, 200, "200", "Inquery data berhasil", datas, pagination)
+}
+
+func (riskIssue RiskIssueController) GetRiskIssueByActivity(c *gin.Context) {
+	requests := models.RiskIssueRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, err := riskIssue.service.GetRiskIssueByActivity(requests.ID)
+
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", false)
+		return
+	}
+
+	if len(data) == 0 {
+		riskIssue.logger.Zap.Error(data)
+		lib.ReturnToJson(c, 200, "404", "Data tidak ditemukan", nil)
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery Data Berhasil", data)
+}
+
+func (riskIssue RiskIssueController) GetRekomendasiMateri(c *gin.Context) {
+	requests := models.RiskIssueRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, err := riskIssue.service.GetRekomendasiMateri(requests.ID)
+
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", false)
+		return
+	}
+
+	if len(data) == 0 {
+		// riskIssue.logger.Zap.Error(data)
+		lib.ReturnToJson(c, 200, "404", "Data tidak ditemukan", nil)
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery Data Berhasil", data)
+}
+
+func (riskIssue RiskIssueController) GetMateriByCode(c *gin.Context) {
+	requests := models.RiskIssueCode{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, err := riskIssue.service.GetMateriByCode(requests)
+
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+	}
+
+	if len(data) == 0 {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "404", "Data tidak ditemukan", nil)
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
+}
+
+func (riskIssue RiskIssueController) GetAllWithPaginate(c *gin.Context) {
+	requests := models.Paginate{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	datas, pagination, err := riskIssue.service.GetAllWithPaginate(requests)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+	}
+
+	if pagination.Total == 0 {
+		lib.ReturnToJson(c, 200, "404", "Data Kosong", nil)
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+		return
+	}
+
+	lib.ReturnToJsonWithPaginate(c, 200, "200", "Inquery data berhasil", datas, pagination)
+}
+
+func (riskIssue RiskIssueController) GetRiskIssueByActivityID(c *gin.Context) {
+	requests := models.RiskIssueRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, err := riskIssue.service.GetRiskIssueByActivityID(requests.ID)
+
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", false)
+		return
+	}
+
+	if len(data) == 0 {
+		riskIssue.logger.Zap.Error(data)
+		lib.ReturnToJson(c, 200, "404", "Data tidak ditemukan", false)
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery Data Berhasil", data)
+}

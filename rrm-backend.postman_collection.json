@@ -1,0 +1,6977 @@
+{
+	"info": {
+		"_postman_id": "7533dab2-3a20-4b14-a9e0-4873311c96fa",
+		"name": "rrm-backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20025493"
+	},
+	"item": [
+		{
+			"name": "Activity",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc3NzQ3NDI2LCJwZXJuciI6IjAwMjczNDg1In0.VKqdXXn9O87vEUS4JXJDzYpNtgnu9ywN4zI-P3AuQDE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00273485\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/activity/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"activity",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://172.18.241.57/api-riskmanagement/api/v1/activity/getOne/1",
+							"protocol": "http",
+							"host": [
+								"172",
+								"18",
+								"241",
+								"57"
+							],
+							"path": [
+								"api-riskmanagement",
+								"api",
+								"v1",
+								"activity",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_activity\": \"14\",\r\n    \"name\": \"Example\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/activity/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"activity",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : 16,\r\n    \"kode_activity\": \"14\",\r\n    \"name\": \"Example Risk\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/activity/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"activity",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/activity/delete/24",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"activity",
+								"delete",
+								"24"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getKodeActivity",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Briefing",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc1OTExOTE5LCJwZXJuciI6IjAwMzEwMjYxIn0._mrn3rVhpEcA47b7m_kAvnR5u_0-Y31rgJoDEjE68PI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNDAzNDQyLCJwZXJuciI6IjAwMzEwMjYxIn0.Gd_OtXIJtTl7XOt1ZsO2WtvfgJsSdL-pBJC_29EBOOg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"id\": 8\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/getOne",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"getOne"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteMateriBriefing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 13,\r\n    \"briefing_id\" : 7\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/deleteBriefingMateri",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"deleteBriefingMateri"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 7,\r\n    \"no_pelaporan\": \"BR-50046567-100522-0004\",\r\n    \"unit_kerja\": \"Kantor Cabang Medan\",\r\n    \"peserta\": \"Semua\",\r\n    \"jumlah_peserta\": 27,\r\n    \"maker_id\": \"00304155\",\r\n    \"maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"maker_date\": \"2022-09-05T11:00:18+07:00\",\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_date\": \"2022-09-05T11:00:18+07:00\",\r\n    \"materi\": [\r\n        {\r\n            \"id\": 12,\r\n            \"briefing_id\": 7,\r\n            \"activity_id\": 1,\r\n            \"sub_activity_id\": 1,\r\n            \"product_id\": 1,\r\n            \"judul_materi\": \"PDP 1 - RISIKO STRATEGIS\",\r\n            \"rekomendasi_materi\": \"Risk Awarness\",\r\n            \"materi_tambahan\": \"Materi yang disampaikan pada pertemuaan briefing\"\r\n        },\r\n        {\r\n            \"briefing_id\": 7,\r\n            \"activity_id\" : 2,\r\n            \"product_id\" : 2,\r\n            \"sub_activity_id\" : 1,\r\n            \"judul_materi\" : \"PDP 1 - RISIKO STRATEGIS\",\r\n            \"rekomendasi_materi\" : \"Risk Awarness\",\r\n            \"materi_tambahan\" : \"Materi yang disampaikan pada pertemuaan briefing\"\r\n        }\r\n    ],\r\n    \"created_at\": \"2022-09-05T11:00:18+07:00\"\r\n}\r\n    ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateDelete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 7,\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getData",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/getData",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"getData"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwMzk5MDQ1LCJwZXJuciI6IjAwMzEwMjYxIn0.ewnG7fe6qLutH8ag1dcK9qbC33PViL8IdDbmYTygyFY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"no_pelaporan\": \"BR-00304155-200922-20003\",\r\n    \"unit_kerja\": \"Kantor Cabang Khusus\",\r\n    \"peserta\": \"Semua\",\r\n    \"jumlah_peserta\": 27,\r\n    \"maker_id\": \"00304155\",\r\n    \"maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"materi\" : [\r\n        {\r\n            \"activity_id\" : 1,\r\n            \"product_id\" : 1,\r\n            \"sub_activity_id\" : 1,\r\n            \"judul_materi\" : \"Penegasan Protokol Penangan COVID-19 bagi Pekerja BRI\",\r\n            \"rekomendasi_materi\" : \"1,2,3\",\r\n            \"materi_tambahan\" : \"Materi yang disampaikan pada pertemuaan briefing\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FilterBriefing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"order\":\"\",\"sort\":\"DESC\",\"offset\":0,\"limit\":10,\"page\":0,\"jenis_laporan\":\"\",\"opsi_uker\":\"\",\"unit_kerja\":\"\",\"activity_id\":\"\",\"product_id\":\"\",\"judul_materi\":\"\",\"periode\":\"bulanan\",\"tgl_awal\":\"\",\"tgl_akhir\":\"\",\"report_type\":\"aktivitas\",\"uker\":\"bank_wide\",\"activity\":\"1\",\"product\":\"102\",\"title\":\"Penegasan Protokol Penangan COVID-19 bagi Pekerja BRI\",\"startDate\":\"2022-07-01\",\"endDate\":\"2022-12-31\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/BriefingReportFinalFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"BriefingReportFinalFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getNoPelaporan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orgeh\": \"70267801\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/getNoPelaporan",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"getNoPelaporan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Briefing Report Filter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc4MDk3NTg0LCJwZXJuciI6IjAwMjczNDg1In0.GOK4TUOmVaBCn6-SackCXIhlzCHRgQ2cK28VrYaFWvI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00273485\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas\",  \r\n    \"uker\": \"229,5663,5191\",\r\n    \"activity\": \"all\",\r\n    \"product\": \"all\",\r\n    \"title\": \"Semua\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/BriefingReportFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"BriefingReportFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Briefing Report Filter By Uker",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc1OTI5NDY2LCJwZXJuciI6IjAwMzEwMjYxIn0.W8HIfdVwJ0-Sk9RrLXgFHtQK6zkDz5_flG-VwiolRdE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"unitkerja\",  \r\n    \"uker\": \"bank_wide\",\r\n    \"REGION\": \"R\",\r\n    \"MAINBR\": \"429\",\r\n    \"BRANCH\": \"3124\",\r\n    \"startDate\": \"2022-12-01\",\r\n    \"endDate\": \"2022-12-30\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/BriefingReportByUkerFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"BriefingReportByUkerFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Briefing Report Filter Complete By Uker",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc1OTI5NDY2LCJwZXJuciI6IjAwMzEwMjYxIn0.W8HIfdVwJ0-Sk9RrLXgFHtQK6zkDz5_flG-VwiolRdE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 1,\r\n    \"offset\" : 1,\r\n    \"page\" : 0,\r\n    \"report_type\": \"unitkerja\",  \r\n    \"uker\": \"bank_wide\",\r\n    \"REGION\": \"R\",\r\n    \"MAINBR\": \"429\",\r\n    \"BRANCH\": \"3124\",\r\n    \"startDate\": \"2022-12-01\",\r\n    \"endDate\": \"2022-12-30\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/BriefingReportFilterByUkerComplete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"BriefingReportFilterByUkerComplete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Briefing Report Detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNTc0MzE4LCJwZXJuciI6IjAwMzEwMjYxIn0.oo1pTyk9gII0yB5bFPWLInFnpT0RS1LRSGQAW2InNeA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"15\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/BriefingReportDetail",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"BriefingReportDetail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Briefing Report Filter Complete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc1OTMzMTIzLCJwZXJuciI6IjAwMzEwMjYxIn0.IULuhS3tuIW40Kqp78oM8vFDAFns7neanqkJNZ4yTZI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas\",  \r\n    \"uker\": \"bank_wide\",\r\n    \"activity\": \"1\",\r\n    \"product\": \"3\",\r\n    \"title\": \"Kontrak/perjanjian dengan pihak ketiga tidak sesuai dengan kaidah hukum dan/atau memperlemah posisi\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/briefing/BriefingReportFinalFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"briefing",
+								"BriefingReportFinalFilter"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Coaching",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/getOne/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"getOne",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"no_pelaporan\": \"BR-50046567-100522-0003\",\r\n    \"unit_kerja\": \"Kantor Cabang Medan\",\r\n    \"peserta\": \"Semua\",\r\n    \"jumlah_peserta\": 27,\r\n    \"activity_id\" : 1,\r\n    \"sub_activity_id\" : 1,\r\n    \"maker_id\": \"00304155\",\r\n    \"maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"activity\" : [\r\n        {\r\n            \"risk_issue_id\" : 1,\r\n            \"judul_materi\" : \"PDP 1 - RISIKO STRATEGIS\",\r\n            \"rekomendasi_materi\" : \"Risk Awarness\",\r\n            \"materi_tambahan\" : \"Materi yang disampaikan pada pertemuaan briefing\"\r\n        },\r\n        {\r\n            \"risk_issue_id\" : 1,\r\n            \"judul_materi\" : \"PDP 2 - RISIKO STRATEGIS\",\r\n            \"rekomendasi_materi\" : \"Risk Awarness\",\r\n            \"materi_tambahan\" : \"Materi yang disampaikan pada pertemuaan briefing\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 3,\r\n    \"no_pelaporan\": \"BR-50046567-100522-0003\",\r\n    \"unit_kerja\": \"Kantor Cabang Medan Utara\",\r\n    \"peserta\": \"Semua\",\r\n    \"jumlah_peserta\": 27,\r\n    \"activity_id\": 1,\r\n    \"sub_activity_id\": 1,\r\n    \"maker_id\": \"00304155\",\r\n    \"maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"maker_date\": \"2022-09-05T11:00:18+07:00\",\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_Date\": null,\r\n    \"status\": \"01a\",\r\n    \"action\": \"Draft\",\r\n    \"deleted\": false,\r\n    \"activity\": [\r\n        {\r\n            \"id\": 6,\r\n            \"coaching_id\": 3,\r\n            \"risk_issue_id\": 1,\r\n            \"judul_materi\": \"PDP 1 - RISIKO STRATEGIS\",\r\n            \"rekomendasi_materi\": \"Risk Awarness\",\r\n            \"materi_tambahan\": \"Materi yang disampaikan pada pertemuaan briefing\"\r\n        },\r\n        {\r\n            \"id\": 7,\r\n            \"coaching_id\": 3,\r\n            \"risk_issue_id\": 1,\r\n            \"judul_materi\": \"PDP 2 - RISIKO STRATEGIS\",\r\n            \"rekomendasi_materi\": \"Risk Awarness\",\r\n            \"materi_tambahan\": \"Materi yang disampaikan pada pertemuaan briefing\"\r\n        },\r\n        {\r\n            \"coaching_id\": 3,\r\n            \"risk_issue_id\": 1,\r\n            \"judul_materi\": \"PDP 3 - RISIKO STRATEGIS\",\r\n            \"rekomendasi_materi\": \"Risk Awarness\",\r\n            \"materi_tambahan\": \"Materi yang disampaikan pada pertemuaan briefing\"\r\n        }\r\n    ],\r\n    \"created_at\": \"2022-09-05T11:00:18+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteCoachinMateri",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 10,\r\n    \"coaching_id\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/deleteCoachingMateri",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"deleteCoachingMateri"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateDelete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 3,\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_Date\": \"2022-09-05T11:00:18+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "filterCoaching",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\" : \"\",\r\n    \"sort\": \"\",\r\n    \"offset\" : 0,\r\n    \"limit\" : 10,\r\n    \"page\" : 0,\r\n    \"no_pelaporan\" : \"\",\r\n    \"unit_kerja\" : \"\",\r\n    \"activity_id\" : \"\",\r\n    \"risk_issue_id\" : \"\",\r\n    \"judul_materi\" : \"\",\r\n    \"status\" : \"\",\r\n    \"tgl_awal\" : \"\",\r\n    \"tgl_akhir\" : \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/filterCoaching",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"filterCoaching"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getNoPelaporan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orgeh\": \"70267801\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/getNoPelaporan",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"getNoPelaporan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getData",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/getData",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"getData"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Coaching Report Filter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc1OTMzMTIzLCJwZXJuciI6IjAwMzEwMjYxIn0.IULuhS3tuIW40Kqp78oM8vFDAFns7neanqkJNZ4yTZI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas\",  \r\n    \"uker\": \"bank_wide\",\r\n    \"activity\": \"1\",\r\n    \"product\": \"1\",\r\n    \"riskIssue\": \"1\",\r\n    \"title\": \"1\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/coachingReportFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"coachingReportFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Coaching Final Report Filter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNTc0MzE4LCJwZXJuciI6IjAwMzEwMjYxIn0.oo1pTyk9gII0yB5bFPWLInFnpT0RS1LRSGQAW2InNeA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 10,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas\",  \r\n    \"uker\": \"bank_wide\",\r\n    \"activity\": \"2\",\r\n    \"product\": \"100\",\r\n    \"title\": \"KPD1 - Peningkatan Kualitas Review atas ketentuan internal BRI\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/coachingFinalReportFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"coachingFinalReportFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Coaching Report Detail",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"13\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/coachingReportDetail",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"coachingReportDetail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Coaching Report Materi List",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"4,5\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/coachingReportMateriList",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"coachingReportMateriList"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Coaching Report Filter By Uker All Activity",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNTc0MzE4LCJwZXJuciI6IjAwMzEwMjYxIn0.oo1pTyk9gII0yB5bFPWLInFnpT0RS1LRSGQAW2InNeA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 10,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas_all_uker\",  \r\n    \"uker\": \"bank_wide\",\r\n    \"activity\": \"all\",\r\n    \"product\": \"all\",\r\n    \"riskIssue\": \"all\",\r\n    \"title\": \"all\",\r\n    \"startDate\": \"2022-08-24 00:00:00\",\r\n    \"endDate\": \"2022-08-30 23:59:59\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/coachingReportFilterByUkerAllActivity",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"coachingReportFilterByUkerAllActivity"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Coaching Report Filter By Uker",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNTc0MzE4LCJwZXJuciI6IjAwMzEwMjYxIn0.oo1pTyk9gII0yB5bFPWLInFnpT0RS1LRSGQAW2InNeA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 10,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"unitkerja\",  \r\n    \"uker\": \"bank_wide\",\r\n    \"REGION\": \"\",\r\n    \"MAINBR\": \"\",\r\n    \"BRANCH\": \"\",\r\n    \"startDate\": \"2022-12-01\",\r\n    \"endDate\": \"2022-12-30\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/coachingReportByUkerFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"coachingReportByUkerFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Coaching Report Filter Complete By Uker",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNTc0MzE4LCJwZXJuciI6IjAwMzEwMjYxIn0.oo1pTyk9gII0yB5bFPWLInFnpT0RS1LRSGQAW2InNeA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 10,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"unitkerja\",  \r\n    \"uker\": \"bank_wide\",\r\n    \"REGION\": \"R\",\r\n    \"MAINBR\": \"429\",\r\n    \"BRANCH\": \"1467\",\r\n    \"startDate\": \"2022-12-01\",\r\n    \"endDate\": \"2022-12-30\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/coaching/coachingReportFilterByUkerComplete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"coaching",
+								"coachingReportFilterByUkerComplete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Incident",
+			"item": [
+				{
+					"name": "getAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/incident/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"incident",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_kejadian\": \"PK1.MOP.0005\",\r\n    \"penyebab_kejadian\": \"Bencana Alam\",\r\n    \"deskripsi\": \"-\",\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/incident/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"incident",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/incident/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"incident",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 4,\r\n    \"kode_kejadian\": \"PK1.MOP.0004\",\r\n    \"penyebab_kejadian\": \"Gangguan Eksternal\",\r\n    \"deskripsi\": \"-\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-08-16T11:42:36+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/incident/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"incident",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/incident/delete/8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"incident",
+								"delete",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetKodePenyebabKejadian",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/incident/getKode",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"incident",
+								"getKode"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Materi",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/materi/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"materi",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"Risk Awarness\",\r\n    \"files\" : [\r\n        {\r\n            \"filename\": \"Risk Awarness.txt\",\r\n            \"path\": \"tmp/materi/2022/10/4/5a135314-d4ee-4a2c-af05-41f405bdb8ad/2022-10-04-Risk Awarness.txt\",\r\n            \"extension\": \"text document\",\r\n            \"size\": 0\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/materi/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"materi",
+								"store"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/product/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"product",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_product\": \"PROD.0002\",\r\n    \"product\" : \"ACQUIRING\",\r\n    \"activity_id\" : \"01\",\r\n    \"lini_bisnis_lv1\": \"\",\r\n    \"lini_bisnis_lv2\": \"\",\r\n    \"lini_bisnis_lv3\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/product/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"product",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/product/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"product",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"kode_product\": \"PROD.0001\",\r\n    \"product\": \"ACCOUNT SWEEP\",\r\n    \"activity_id\": \"\",\r\n    \"lini_bisnis_lv1\": \"\",\r\n    \"lini_bisnis_lv2\": \"\",\r\n    \"lini_bisnis_lv3\": \"\",\r\n    \"created_at\": \"2022-10-25T11:22:38+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/product/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"product",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/product/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"product",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetKodeProduct",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/product/getKodeProduct",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"product",
+								"getKodeProduct"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAllWithPage",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\" : \"\",\r\n    \"sort\": \"\",\r\n    \"offset\" : 0,\r\n    \"limit\" : 10,\r\n    \"page\" : 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/product/getAllWithPage",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"product",
+								"getAllWithPage"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Risk Indicator",
+			"item": [
+				{
+					"name": "getAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskindicator/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskindicator",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"risk_indicator_code\": \"KPD2\",\r\n    \"risk_indicator\": \"Peningkatan indicator\",\r\n    \"activity_id\" : 1,\r\n    \"product_id\" : 1,\r\n    \"deskripsi\" : \"-\",\r\n    \"satuan\" : \"Nilai\",\r\n    \"sifat\" : \"Leading/Predictive\",\r\n    \"sumber_data\" : \"DWH\",\r\n    \"periode_pemantauan\" : \"Semesteran\",\r\n    \"owner\" : \"Kanpus\",\r\n    \"kpi\" : \"-\",\r\n    \"status\" : true,\r\n    \"lampiran_indicator\" : [\r\n        {\r\n            \"nama_lampiran\" : \"Risk Awarness\",\r\n            \"nomor_lampiran\" : \"03/001239/210002\",\r\n            \"jenis_file\" : \"Upload Document\",\r\n            \"path\" : \"tmp/Risk Indicator/2022/11/15/702555ad-ef2c-440c-9892-6402031e5ede/2022-11-15-Risk Awarness.txt\",\r\n            \"filename\" : \"Risk Awarness.txt\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskindicator/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskindicator",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskindicator/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskindicator",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"risk_indicator_code\": \"KPD1\",\r\n    \"risk_indicator\": \"Peningkatan Kualitas Review atas ketentuan internal BRI\",\r\n    \"activity_id\": 1,\r\n    \"product_id\": 1,\r\n    \"deskripsi\": \"-\",\r\n    \"satuan\": \"Nilai\",\r\n    \"sifat\": \"Leading/Predictive\",\r\n    \"sla_verifikasi\": 7,\r\n    \"sla_tindak_lanjut\": 7,\r\n    \"sumber_data\": \"DWH (Critical Report)\",\r\n    \"periode_pemantauan\": \"Semesteran1\",\r\n    \"owner\": \"Kanpus\",\r\n    \"kpi\": \"-\",\r\n    \"status\": true,\r\n    \"lampiran_indicator\": [\r\n        {\r\n            \"id\": 1,\r\n            \"id_indicator\": 1,\r\n            \"nama_lampiran\": \"Risk Awarness\",\r\n            \"nomor_lampiran\": \"-\",\r\n            \"jenis_file\": \"Upload Document\",\r\n            \"path\": \"riskindicator/2022/11/17/2022/risk issue.xlsx\",\r\n            \"filename\": \"risk issue.xlsx\"\r\n        }\r\n    ],\r\n    \"created_at\": \"2022-11-17T13:17:37+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskindicator/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskindicator",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskindicator/delete/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskindicator",
+								"delete",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteFileByID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskindicator/deleteFileByID/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskindicator",
+								"deleteFileByID",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Risk Issue",
+			"item": [
+				{
+					"name": "Delete Mapping",
+					"item": [
+						{
+							"name": "deleteMapAktifitas",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\" : 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/v1/riskissue/deleteMapAktifitas",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"v1",
+										"riskissue",
+										"deleteMapAktifitas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteMapEvent",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\" : 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/v1/riskissue/deleteMapEvent",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"v1",
+										"riskissue",
+										"deleteMapEvent"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteMapKejadian",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\" : 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/v1/riskissue/deleteMapKejadian",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"v1",
+										"riskissue",
+										"deleteMapKejadian"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteMapLiniBisnis",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\" : 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/v1/riskissue/deleteMapLiniBisnis",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"v1",
+										"riskissue",
+										"deleteMapLiniBisnis"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteMapProduct",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\" : 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/v1/riskissue/deleteMapProduct",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"v1",
+										"riskissue",
+										"deleteMapProduct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteMapProses",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\" : 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/v1/riskissue/deleteMapProses",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"v1",
+										"riskissue",
+										"deleteMapProses"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "getAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/getOne/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"getOne",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"risk_type_id\" : 1,\r\n\t\"risk_issue_code\" : \"EPR\",\r\n\t\"risk_issue\": \"Realisasi RKA dan atau RKF tidak sesuai dengan target yang telah ditetapkan/tidak tercapai\",\r\n\t\"deskripsi\" : \"-\",\r\n\t\"kategori_risiko\" : \"BCM\",\r\n    \"status\" : true,\r\n    \"likelihood\" : \"\",\r\n    \"impact\" : \"\",\r\n    \"map_proses\" :[\r\n        {\r\n            \"mega_proses\" : \"\",\r\n            \"major_proses\" : \"\",\r\n            \"sub_major_proses\": \"\"\r\n        }\r\n    ],\r\n    \"map_event\" :[\r\n        {\r\n            \"event_type_lv1\" : \"\",\r\n            \"event_type_lv2\" : \"\",\r\n            \"event_type_lv3\" : \"\"\r\n        }\r\n    ],\r\n    \"map_kejadian\" :[\r\n        {\r\n            \"penyebab_kejadian_lv1\" : \"\",\r\n            \"penyebab_kejadian_lv2\" : \"\",\r\n            \"penyebab_kejadian_lv3\" : \"\"\r\n        }\r\n    ],\r\n    \"map_product\" : [\r\n        {\r\n            \"product\" : 1\r\n        }\r\n    ],\r\n    \"map_lini_bisnis\" : [\r\n        {\r\n            \"lini_bisnis_lv1\" : \"\",\r\n            \"lini_bisnis_lv2\" : \"\",\r\n            \"lini_bisnis_lv3\" : \"\"\r\n        }\r\n    ],\r\n    \"map_aktifitas\": [\r\n        {\r\n            \"aktifitas\" : 1,\r\n            \"sub_aktifitas\": 1\r\n        }\r\n    ]\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"risk_type_id\": 1,\r\n    \"risk_issue_code\": \"EPR1\",\r\n    \"risk_issue\": \"Realisasi RKA dan atau RKF tidak sesuai dengan target yang telah ditetapkan/tidak tercapai\",\r\n    \"deskripsi\": \"-\",\r\n    \"kategori_risiko\": \"BCM\",\r\n    \"status\": true,\r\n    \"likelihood\": \"sangat tinggi\",\r\n    \"impact\": \"sangat tinggi\",\r\n    \"map_proses\": [\r\n        {\r\n            \"id\": 1,\r\n            \"id_risk_issue\": 1,\r\n            \"mega_proses\": 1,\r\n            \"major_proses\": 1,\r\n            \"sub_major_proses\": 1\r\n        }\r\n    ],\r\n    \"map_event\": [\r\n        {\r\n            \"id\": 1,\r\n            \"id_risk_issue\": 1,\r\n            \"event_type_lv1\": 1,\r\n            \"event_type_lv2\": 1,\r\n            \"event_type_lv3\": 1\r\n        }\r\n    ],\r\n    \"map_kejadian\": [\r\n        {\r\n            \"id\": 1,\r\n            \"id_risk_issue\": 1,\r\n            \"penyebab_kejadian_lv1\": 1,\r\n            \"penyebab_kejadian_lv2\": 1,\r\n            \"penyebab_kejadian_lv3\": 1\r\n        }\r\n    ],\r\n    \"map_product\": [\r\n        {\r\n            \"id\": 1,\r\n            \"id_risk_issue\": 1,\r\n            \"product\": 1\r\n        }\r\n    ],\r\n    \"map_lini_bisnis\": [\r\n        {\r\n            \"id\": 1,\r\n            \"id_risk_issue\": 1,\r\n            \"lini_bisnis_lv1\": 1,\r\n            \"lini_bisnis_lv2\": 1,\r\n            \"lini_bisnis_lv3\": 1\r\n        }\r\n    ],\r\n    \"map_aktifitas\": [\r\n        {\r\n            \"id\": 1,\r\n            \"id_risk_issue\": 1,\r\n            \"aktifitas\": 1,\r\n            \"sub_aktifitas\": 1\r\n        }\r\n    ],\r\n    \"created_at\": \"2022-10-25T09:27:43+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/delete/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"delete",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetKode",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_sub_major\" : \"AMP\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/getKode",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"getKode"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mapping Risk Control",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : 1,\r\n    \"map_control\" : [\r\n        {\r\n            \"id\": 1,\r\n            \"id_control\" : 1,\r\n            \"is_checked\" : true\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/mappingControl",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"mappingControl"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetControlByID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/getControlByID/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"getControlByID",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteMapControl",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : 8\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/deleteMapControl",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"deleteMapControl"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SearchRiskIssue",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"keyword\" : \"ADH\",\r\n    \"order\" : \"\",\r\n    \"sort\": \"\",\r\n    \"offset\" : 0,\r\n    \"limit\" : 10,\r\n    \"page\" : 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/searchRiskIssue",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"searchRiskIssue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getIndicatorByID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/getIndicatorByID/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"getIndicatorByID",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mappingIndicator",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : 1,\r\n    \"map_indicator\" : [\r\n        {\r\n            \"id\": 1,\r\n            \"id_indicator\" : 1,\r\n            \"is_checked\" : true\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/mappingIndicator",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"mappingIndicator"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteMapIndicator",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/deleteMapIndicator",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"deleteMapIndicator"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Risk Issue",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\" : \"\",\r\n    \"sort\": \"\",\r\n    \"offset\" : 0,\r\n    \"limit\" : 10,\r\n    \"page\" : 0,\r\n    \"kode\" : \"\",\r\n\t\"risk_issue\": \"\",\r\n\t\"risk_type_id\": \"\",\r\n\t\"kategori_risiko\": \"\",\r\n\t\"status\": \"\",\r\n\t\"product\": \"\",\r\n\t\"lini_bisnis\": \"\",\r\n\t\"aktifitas\": \"11\",\r\n\t\"proses\": \"\",\r\n\t\"event_type\": \"\",\r\n\t\"kejadian\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskissue/filterRiskIssue",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskissue",
+								"filterRiskIssue"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Risk Type",
+			"item": [
+				{
+					"name": "getAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/risktype/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"risktype",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/risktype/getOne/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"risktype",
+								"getOne",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"risk_type_code\": \"KEP0008\",\r\n    \"risk_type\": \"Risiko External\",\r\n    \"deskripsi\" : \"Ini Risiko\",\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/risktype/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"risktype",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 3,\r\n    \"risk_type_code\": \"KRE0001\",\r\n    \"risk_type\": \"Risiko Kredit\",\r\n    \"deskripsi\" : \"Ini Risiko\",\r\n    \"status\": 1,\r\n    \"created_at\": \"2022-09-05T10:43:48+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/risktype/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"risktype",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/risktype/delete/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"risktype",
+								"delete",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sub Activity",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subactivity/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subactivity",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subactivity/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subactivity",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"activity_id\": 1,\r\n    \"kode_sub_activity\": \"1.1\",\r\n    \"name\": \"MR PASAR & LIKUIDITAS\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subactivity/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subactivity",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 5,\r\n    \"activity_id\": 1,\r\n    \"kode_sub_activity\": \"1.1\",\r\n    \"name\": \"MR PASAR\",\r\n    \"created_at\": \"2022-09-05T09:58:06+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subactivity/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subactivity",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subactivity/delete/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subactivity",
+								"delete",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getSubActivity",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subactivity/getSubactivity/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subactivity",
+								"getSubactivity",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getKodeSubs",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_activity\" : \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subactivity/getKodeSub",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subactivity",
+								"getKodeSub"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sub Incident",
+			"item": [
+				{
+					"name": "getAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subincident/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subincident",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n    \"kode_kejadian\": \"PK1.MOP.0001\",\r\n    \"kode_sub_kejadian\": \"PK2.MOP.0005\",\r\n    \"kriteria_penyebab_kejadian\": \"Benefit dan Kompensasi\",\r\n    \"deskripsi\" : \"-\",\r\n    \"status\": true\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subincident/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subincident",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subincident/getOne/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subincident",
+								"getOne",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 3,\r\n    \"kode_kejadian\": \"PK1.MOP.0001\",\r\n    \"kode_sub_kejadian\": \"PK2.MOP.0003\",\r\n    \"kriteria_penyebab_kejadian\": \"Budaya Kerja\",\r\n    \"deskripsi\": \"-\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-09-16T14:39:51+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subincident/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subincident",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subincident/delete/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subincident",
+								"delete",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getSubIncident",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_kejadian\" : \"PK1.MOP.0001\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subincident/getSubIncidentByID",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subincident",
+								"getSubIncidentByID"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetKode",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/subincident/getKode",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"subincident",
+								"getKode"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Unit Kerja",
+			"item": [
+				{
+					"name": "getall",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/unitkerja/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"unitkerja",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getone",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/unitkerja/getOne/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"unitkerja",
+								"getOne",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_uker\": 42,\r\n    \"nama_uker\": \"KC LANGSA\",\r\n    \"kode_cabang\": 201,\r\n    \"nama_cabang\": \"KANWIL MEDAN\",\r\n    \"kanwil_id\": 13,\r\n    \"kode_kanwil\": \"B\",\r\n    \"kanwil\": \"MEDAN\",\r\n    \"status\": 1\r\n}\r\n       ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/unitkerja/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"unitkerja",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 3,\r\n    \"kode_uker\": 42,\r\n    \"nama_uker\": \"KC LHOKSUEMAWE\",\r\n    \"kode_cabang\": 201,\r\n    \"nama_cabang\": \"KANWIL MEDAN\",\r\n    \"kanwil_id\": 13,\r\n    \"kode_kanwil\": \"B\",\r\n    \"kanwil\": \"MEDAN\",\r\n    \"status\": 1\r\n}\r\n       ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/unitkerja/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"unitkerja",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/unitkerja/delete/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"unitkerja",
+								"delete",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verifikasi",
+			"item": [
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"no_pelaporan\": \"VER-70267801-041022-0002\",\r\n    \"unit_kerja\": \"Kantor Cabang Medan\",\r\n    \"activity_id\" : 2,\r\n    \"sub_activity_id\" : 2,\r\n    \"product_id\" : 2,\r\n    \"risk_issue_id\": 2,\r\n    \"risk_indicator_id\": 2,\r\n    \"incident_cause_id\": 2,\r\n    \"sub_incident_cause_id\": 2,\r\n    \"application_id\" : 1,\r\n    \"hasil_verifikasi\" :\"ini hasil dari verifikasi\",\r\n    \"kunjungan_nasabah\" : true,\r\n    \"perbaikan\": true,\r\n    \"indikasi_fraud\": true,\r\n    \"jenis_kerugian_finansial\": true,\r\n    \"jumlah_perkiraan_kerugian\": 200000000,\r\n    \"jenis_kerugian_non_finansial\" : \"ada deh\", \r\n    \"rekomendasi_tindak_lanjut\": \"apaan ya\",\r\n    \"rencana_tindak_lanjut\": \"apaan ya\",\r\n    \"risk_type_id\": 1,\r\n    \"tanggal_ditemukan\": \"2022-09-01 13:37:00\",\r\n    \"tanggal_mulai_rtl\":\r\n    \"2022-09-01 13:37:00\",\r\n    \"tanggal_target_selesai\":\r\n    \"2022-09-30 00:00:00\",\r\n    \"maker_id\": \"00304155\",\r\n    \"maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"data_anomali\" : [\r\n        {\r\n            \"tanggal_kejadian\" : \"2022-09-01 13:37:00\",\r\n            \"nomor_rekening\" : \"54321123456\",\r\n            \"nominal\" : 200000000,\r\n            \"keterangan\" : \"SCAMMING\"\r\n        }\r\n    ],\r\n    \"risk_control\" : [\r\n        {\r\n            \"risk_control_id\" : 2\r\n        }\r\n    ],\r\n    \"pic_tindak_lanjut\" : [\r\n        {\r\n            \"pic_id\" : 1,\r\n            \"tanggal_tindak_lanjut\" : \"2022-09-30 00:00:00\",\r\n            \"deskripsi_tindak_lanjut\": \"Akan ditindak lanjuti\"\r\n        }\r\n    ],\r\n    \"files\" : [\r\n        {\r\n            \"filename\": \"lampiran.txt\",\r\n            \"path\": \"tmp/verifikasi/2022/10/4/2f87d4ec-5471-4886-b959-41a6db3e20a0/2022-10-04-lampiran.txt\",\r\n            \"extension\": \"plain/text\",\r\n            \"size\": 12\r\n        }\r\n    ]\r\n    \r\n}\r\n    ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteLampiran",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"files_id\" : 3,\r\n    \"verifikasi_lampiran_id\": 1,\r\n    \"path\": \"verifikasi/2022/9/5/timesheet.pdf\"\r\n}\r\n    ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/deleteLampiran",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"deleteLampiran"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"no_pelaporan\": \"VER-50046567-010922-0001\",\r\n    \"unit_kerja\": \"Kantor Cabang Khusus\",\r\n    \"activity_id\" : 1,\r\n    \"sub_activity_id\" : 1,\r\n    \"product_id\" : 1,\r\n    \"risk_issue_id\": 1,\r\n    \"risk_indicator_id\": 1,\r\n    \"incident_cause_id\": 1,\r\n    \"sub_incident_cause_id\": 1,\r\n    \"application_id\" : 1,\r\n    \"hasil_verifikasi\" :\"Verifikasi ininih\",\r\n    \"kunjungan_nasabah\" : true,\r\n    \"indikasi_fraud\": true,\r\n    \"jenis_kerugian_finansial\": true,\r\n    \"jumlah_perkiraan_kerugian\": 200000000,\r\n    \"jenis_kerugian_non_finansial\" : \"ada deh\", \r\n    \"rekomendasi_tindak_lanjut\": \"apaan ya\",\r\n    \"rencana_tindak_lanjut\": \"apaan ya\",\r\n    \"risk_type_id\": 1,\r\n    \"tanggal_ditemukan\": \"2022-09-01 13:37:00\",\r\n    \"tanggal_mulai_rtl\":\r\n    \"2022-09-01 13:37:00\",\r\n    \"tanggal_target_selesai\":\r\n    \"2022-09-30 00:00:00\",\r\n    \"maker_id\": \"00304155\",\r\n    \"maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"data_anomali\" : \r\n    [\r\n        {\r\n            \"tanggal_kejadian\" : \"2022-09-01 13:37:00\",\r\n            \"nomor_rekening\" : \"54321123456\",\r\n            \"nominal\" : 200000000,\r\n            \"keterangan\" : \"Ini keterangan ya\"\r\n        }\r\n    ],\r\n    \"pic_tindak_lanjut\" :\r\n    [\r\n        {\r\n            \"pic_id\" : 1,\r\n            \"tanggal_tindak_lanjut\" : \"2022-09-30 00:00:00\",\r\n            \"deskripsi_tindak_lanjut\": \"ini deskripsi tindak lanjut\"\r\n        }\r\n    ],\r\n     \"files\" : [\r\n        {\r\n            \"filename\": \"BRD RRM Tools fase 1.pdf\",\r\n            \"path\": \"D:/Dokumen BRS RRM/BRD RRM Tools fase 1.pdf\",\r\n            \"extension\": \"application/pdf\",\r\n            \"size\": 6748\r\n        }\r\n    ]\r\n}\r\n    ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/getOne/8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"getOne",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 2,\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_Date\": \"2022-09-05T11:00:18+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "konfirmsave",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 3,\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_Date\": \"2022-09-05T11:00:18+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/konfirm",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"konfirm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 8,\r\n    \"no_pelaporan\": \"VER-70267801-041022-0002\",\r\n    \"unit_kerja\": \"Kantor Cabang Medan\",\r\n    \"activity_id\": 2,\r\n    \"sub_activity_id\": 2,\r\n    \"product_id\": 2,\r\n    \"risk_issue_id\": 2,\r\n    \"risk_indicator_id\": 2,\r\n    \"incident_cause_id\": 2,\r\n    \"sub_incident_cause_id\": 2,\r\n    \"application_id\": 1,\r\n    \"hasil_verifikasi\": \"ini hasil dari verifikasi\",\r\n    \"kunjungan_nasabah\": true,\r\n    \"perbaikan\": true,\r\n    \"indikasi_fraud\": true,\r\n    \"jenis_kerugian_finansial\": true,\r\n    \"jumlah_perkiraan_kerugian\": 200000000,\r\n    \"jenis_kerugian_non_finansial\": \"ada deh\",\r\n    \"rekomendasi_tindak_lanjut\": \"apaan ya\",\r\n    \"rencana_tindak_lanjut\": \"apaan ya\",\r\n    \"risk_type_id\": 1,\r\n    \"tanggal_ditemukan\": \"2022-09-01T13:37:00+07:00\",\r\n    \"tanggal_mulai_rtl\": \"2022-09-01T13:37:00+07:00\",\r\n    \"tanggal_target_selesai\": \"2022-09-30T00:00:00+07:00\",\r\n    \"maker_id\": \"00304155\",\r\n    \"maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"maker_date\": \"2022-10-04T09:56:53+07:00\",\r\n    \"last_maker_id\": \"00304155\",\r\n    \"last_maker_desc\": \"00304155 | Feb'hana Faradilla Bimantari | Teller\",\r\n    \"last_maker_date\": \"2022-10-04T09:56:53+07:00\",\r\n   \"data_anomali\": [\r\n        {\r\n            \"id\": 10,\r\n            \"verifikasi_id\": 8,\r\n            \"tanggal_kejadian\": \"2022-09-01T13:37:00+07:00\",\r\n            \"nomor_rekening\": \"54321123456\",\r\n            \"nominal\": 200000000,\r\n            \"keterangan\": \"SCAMMING\"\r\n        }\r\n    ],\r\n    \"pic_tindak_lanjut\": [\r\n        {\r\n            \"id\": 8,\r\n            \"verifikasi_id\": 8,\r\n            \"pic_id\": 1,\r\n            \"tanggal_tindak_lanjut\": \"2022-09-30T00:00:00+07:00\",\r\n            \"deskripsi_tindak_lanjut\": \"Akan ditindak lanjuti\"\r\n        }\r\n    ],\r\n    \"files\" : [\r\n        {\r\n            \"id\" : 15,\r\n            \"filename\": \"lampiran.txt\",\r\n            \"path\": \"verifikasi/2022/10/4/2022/lampiran.txt\",\r\n            \"extension\": \"plain/text\",\r\n            \"size\": 12\r\n        }\r\n    ],\r\n    \"risk_control\" : [\r\n        {\r\n            \"id\" : 2,\r\n            \"risk_control_id\" : 2\r\n        }\r\n    ]\r\n\r\n}\r\n    ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetListData",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/getListData",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"getListData"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FilterVerifikasi",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\" : \"\",\r\n    \"sort\": \"\",\r\n    \"offset\" : 0,\r\n    \"limit\" : 10,\r\n    \"page\" : 0,\r\n    \"no_pelaporan\" : \"\",\r\n    \"unit_kerja\" : \"\",\r\n    \"activity_id\" : \"\",\r\n    \"risk_issue_id\" : \"\",\r\n    \"status\" : \"\",\r\n    \"tgl_awal\" : \"\",\r\n    \"tgl_akhir\" : \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/filterVerifikasi",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"filterVerifikasi"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getNoPelaporan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orgeh\": \"70267801\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/getNoPelaporan",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"getNoPelaporan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Report",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\" : \"\",\r\n    \"sort\": \"ASC\",\r\n    \"offset\" : 0,\r\n    \"limit\" : 10,\r\n    \"page\" : 0,\r\n    \"jenis_laporan\" : \"\",\r\n    \"unit_kerja\" : \"\",\r\n    \"activity_id\" : \"\",\r\n    \"risk_issue_id\" : \"\",\r\n    \"judul_materi\" : \"\",\r\n    \"perbaikan\" :\"\",\r\n    \"indikasi_fraud\" : \"\",\r\n    \"status\" : \"draft\",\r\n    \"periode\" : \"\",\r\n    \"tgl_awal\" : \"\",\r\n    \"tgl_akhir\" : \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/filterReport",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"filterReport"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verifikasi Report Filter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNTc0MzE4LCJwZXJuciI6IjAwMzEwMjYxIn0.oo1pTyk9gII0yB5bFPWLInFnpT0RS1LRSGQAW2InNeA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 10,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas\", \r\n    \"uker\": \"'bank_wide'\",\r\n    \"activity\": \"all\",\r\n    \"product\": \"all\",\r\n    \"risk_issue\": \"all\",\r\n    \"title\": \"all\",\r\n    \"periode\": \"\",\r\n    \"fraud_indication\": \"1\",\r\n    \"status\": \"draft\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verifikasiReportFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verifikasiReportFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verifikasi Report Filter Complete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc4NDQxNzExLCJwZXJuciI6IjAwMjczNDg1In0.HzC8aFnbsvzHApsni9Sh65Jw_BydSxvaMx_2PlfCuBw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00273485\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas\",\r\n    \"uker\": \"bank_wide\",\r\n    \"activity\": \"1\",\r\n    \"product\": \"1\",\r\n    \"risk_issue\": \"1\",\r\n    \"title\": \"all\",\r\n    \"periode\": \"\",\r\n    \"risk_indicator\": \"2\",\r\n    \"fraud_indication\": \"\",\r\n    \"status\": \"\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verifikasiReportFilterComplete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verifikasiReportFilterComplete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verifikasi Report Detail",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"7\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verifikasiReportDetail",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verifikasiReportDetail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Risk Control By Verification Id",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"weakness\": \"'0','1'\",\r\n    \"activity\": \"1\",\r\n    \"product\": \"1\",\r\n    \"risk_issue\": \"1\",\r\n    \"risk_indicator\": \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/riskControlByVerificationId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"riskControlByVerificationId"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verifikasi Report With Weakness Only Filter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNTc0MzE4LCJwZXJuciI6IjAwMzEwMjYxIn0.oo1pTyk9gII0yB5bFPWLInFnpT0RS1LRSGQAW2InNeA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas\",  \r\n    \"REGION\": \"\",\r\n    \"MAINBR\": \"\",\r\n    \"BRANCH\": \"\",\r\n    \"uker\": \"'2237'\",\r\n    \"activity\": \"all\",\r\n    \"product\": \"all\",\r\n    \"risk_issue\": \"all\",\r\n    \"title\": \"all\",\r\n    \"periode\": \"\",\r\n    \"fraud_indication\": \"'1'\",\r\n    \"status\": \"\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verifikasiReportWithWeaknessOnlyFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verifikasiReportWithWeaknessOnlyFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verifikasi Report With Non Weakness Only Filter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjcwNTc0MzE4LCJwZXJuciI6IjAwMzEwMjYxIn0.oo1pTyk9gII0yB5bFPWLInFnpT0RS1LRSGQAW2InNeA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"aktivitas\",  \r\n    \"REGION\": \"\",\r\n    \"MAINBR\": \"\",\r\n    \"BRANCH\": \"\",\r\n    \"uker\": \"'2237'\",\r\n    \"activity\": \"all\",\r\n    \"product\": \"all\",\r\n    \"risk_issue\": \"all\",\r\n    \"title\": \"all\",\r\n    \"periode\": \"\",\r\n    \"fraud_indication\": \"'1'\",\r\n    \"status\": \"selesai\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verifikasiReportWithNonWeaknessOnlyFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verifikasiReportWithNonWeaknessOnlyFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Risk Indicator as Materi",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"activity\": \"1\"s,\r\n    \"product\": \"1\",\r\n    \"risk_issue\": \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/getRiskIndicatorAsMateri",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"getRiskIndicatorAsMateri"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verification Report By Uker Filter",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"kanwil\",  \r\n    \"REGION\": \"\",\r\n    \"MAINBR\": \"\",\r\n    \"BRANCH\": \"\",\r\n    \"uker\": \"bank_wide\",\r\n    \"periode\": \"\",\r\n    \"risk_indicator\": \"2\",\r\n    \"fraud_indication\": \"'0','1'\",\r\n    \"status\": \"\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verificationReportByUkerFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verificationReportByUkerFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verification Report Filter By Uker Complete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 5,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"total_type\": \"weakness\",\r\n    \"report_type\": \"kanwil\",  \r\n    \"REGION\": \"R\",\r\n    \"MAINBR\": \"429\",\r\n    \"BRANCH\": \"2237\",\r\n    \"uker\": \"bank_wide\",\r\n    \"activity\": \"1\",\r\n    \"product\": \"1\",\r\n    \"risk_issue\": \"1\",\r\n    \"title\": \"all\",\r\n    \"periode\": \"\",\r\n    \"risk_indicator\": \"2\",\r\n    \"fraud_indication\": \"\",\r\n    \"status\": \"\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verificationReportFilterByUkerComplete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verificationReportFilterByUkerComplete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verifikasi Report By Fraud Indicator Filter",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 3,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"fraud_indication\",  \r\n    \"REGION\": \"R\",\r\n    \"MAINBR\": \"429\",\r\n    \"uker\": \"bank_wide\",\r\n    \"activity\": \"1\",\r\n    \"product\": \"1\",\r\n    \"risk_issue\": \"1\",\r\n    \"title\": \"all\",\r\n    \"periode\": \"\",\r\n    \"risk_indicator\": \"2\",\r\n    \"fraud_indication\": \"\",\r\n    \"status\": \"\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verifikasiReportByFraudIndicatorFilter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verifikasiReportByFraudIndicatorFilter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verification Report Filter By FraudIndicator Complete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00310261\",\r\n    \"limit\" : 1,\r\n    \"offset\" : 0,\r\n    \"page\" : 0,\r\n    \"report_type\": \"fraud_indication\",  \r\n    \"REGION\": \"R\",\r\n    \"MAINBR\": \"429\",\r\n    \"BRANCH\": \"2237\",\r\n    \"uker\": \"bank_wide\",\r\n    \"activity\": \"1\",\r\n    \"product\": \"1\",\r\n    \"risk_issue\": \"1\",\r\n    \"title\": \"all\",\r\n    \"periode\": \"\",\r\n    \"risk_indicator\": \"2\",\r\n    \"fraud_indication\": \"\",\r\n    \"status\": \"\",\r\n    \"startDate\": \"2022-01-01\",\r\n    \"endDate\": \"2022-12-31\",\r\n    \"sort\": \"DESC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/verifikasi/verificationReportFilterByFraudIndicatorComplete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"verifikasi",
+								"verificationReportFilterByFraudIndicatorComplete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RiskControl",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskcontrol/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskcontrol",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode\" : \"\",\r\n    \"risk_control\" : \"\",\r\n    \"deskripsi\" : \"\",\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskcontrol/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskcontrol",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskcontrol/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskcontrol",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"kode\": \"C1\",\r\n    \"risk_control\": \"Terdapat panduan/kebijakan/prosedur yang terkait\",\r\n    \"deskripsi\": \"Terdapat panduan/kebijakan/prosedur yang terkait\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-09-21T11:16:10+07:00\"\r\n}    ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskcontrol/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskcontrol",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskcontrol/delete/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskcontrol",
+								"delete",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetKode",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/riskcontrol/getKode",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"riskcontrol",
+								"getKode"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Aplikasi",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/aplikasi/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"aplikasi",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode\" : \"APP-7\",\r\n    \"application_name\" : \"Mass Debet\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/aplikasi/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"aplikasi",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/aplikasi/getOne/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"aplikasi",
+								"getOne",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 7,\r\n    \"kode\": \"APP-7\",\r\n    \"application_name\": \"Auto Debet\",\r\n    \"CreatedAt\": \"2022-09-23T09:55:07+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/aplikasi/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"aplikasi",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/aplikasi/delete/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"aplikasi",
+								"delete",
+								"7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "mcs",
+			"item": [
+				{
+					"name": "getUker",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"keyword\": \"169\",\r\n  \"offset\": 0,\r\n  \"limit\": 20\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/mcs/getUker",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"mcs",
+								"getUker"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPIC",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"keyword\": \"Dicky Firmansyah\",\r\n    \"limit\": 10,\r\n    \"offset\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/mcs/getPIC",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"mcs",
+								"getPIC"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetJabatan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"keyword\": \"officer\",\r\n  \"offset\": 7,\r\n  \"limit\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/mcs/getJabatan",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"mcs",
+								"getJabatan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOrgeh",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"keyword\": \"OPERATION RISK\",\r\n  \"offset\": 0,\r\n  \"limit\": 20\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/mcs/getOrgeh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"mcs",
+								"getOrgeh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "FileManager",
+			"item": [
+				{
+					"name": "UploadFile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/D:/Risk Awarness.txt"
+								},
+								{
+									"key": "subdir",
+									"value": "Risk Indicator",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/fileManager/uploadFile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"fileManager",
+								"uploadFile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"subdir\": \"verifikasi/2022/9/21/Risk Awarness.txt\",\r\n    \"filename\": \"Risk Awarness.txt\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/fileManager/getFile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"fileManager",
+								"getFile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeFile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"object_name\": \"tmp/verifikasi/2022/10/3/cf5baab4-8e7d-49ca-a304-87df3d943cc0/2022-10-03-3.JPG\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/fileManager/removeFile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"fileManager",
+								"removeFile"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lini Bisnis Lv1",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv1/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv1",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getKodeLiniBisnis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv1/getKodeLiniBisnis",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv1",
+								"getKodeLiniBisnis"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv1/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv1",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_lini_bisnis\" : \"LB1.0007\",\r\n    \"lini_bisnis1\": \"Retail Brockerage\",\r\n    \"Deskripsi\" : \"-\",\r\n    \"Status\" : true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv1/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv1",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"kode_lini_bisnis\": \"LB1.0001\",\r\n    \"lini_bisnis1\": \"Corporate Finance\",\r\n    \"deskripsi\": \"Ini Deskripsi\",\r\n    \"status\": false,\r\n    \"created_at\": \"2022-10-18T11:38:32+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv1/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv1",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv1/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv1",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lini Bisnis Lv2",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv2/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv2",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv2/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv2",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getKodeLiniBisnis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv2/getKodeLiniBisnis",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv2",
+								"getKodeLiniBisnis"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id_lini_bisnis_lv1\" : \"LB1.0001\",\r\n    \"kode_lini_bisnis_lv2\" : \"LB2.0001\",\r\n    \"lini_bisnis_lv2\": \"Corporate Finance\",\r\n    \"Deskripsi\" : \"Ini Deskripsi\",\r\n    \"Status\" : true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv2/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv2",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"id_lini_bisnis_lv1\": \"LB1.0001\",\r\n    \"kode_lini_bisnis_lv2\": \"LB2.0001\",\r\n    \"lini_bisnis_lv2\": \"Corporate Finance\",\r\n    \"deskripsi\": \"Ini Deskripsi\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-10-18T14:03:09+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv2/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv2",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv2/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv2",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetDataByID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_lb\" : \"LB1.0002\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv2/getLbById",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv2",
+								"getLbById"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lini Bisnis Lv3",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv3/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv3",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Getkodlinibisnis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv3/getKodeLiniBisnis",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv3",
+								"getKodeLiniBisnis"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv3/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv3",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id_lini_bisnis_lv2\" : \"LB2.0001\",\r\n    \"kode_lini_bisnis_lv3\" : \"LB3.0001\",\r\n    \"lini_bisnis_lv3\": \"Corporate Finance\",\r\n    \"Deskripsi\" : \"Jasa Sindikasi\",\r\n    \"Status\" : true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv3/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv3",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"id_lini_bisnis_lv2\": \"LB2.0001\",\r\n    \"kode_lini_bisnis_lv3\": \"LB3.0001\",\r\n    \"lini_bisnis_lv3\": \"Jasa Sindikasi\",\r\n    \"deskripsi\": \"Jasa Sindikasi\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-10-18T14:34:37+07:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv3/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv3",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv3/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv3",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getLbById",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_lb\" : \"LB2.0002\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/linibisnislv3/getLbById",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"linibisnislv3",
+								"getLbById"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Type Lv1",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv1/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv1",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetKodeEventType",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv1/getKodeEventType",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv1",
+								"getKodeEventType"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv1/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv1",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_event_type\" : \"ET1.0007\",\r\n    \"event_type\": \"Eksekusi Pengiriman dan Manajemen Proses\",\r\n    \"Deskripsi\" : \"-\",\r\n    \"Status\" : true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv1/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv1",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"kode_event_type\": \"ET1.0001\",\r\n    \"event_type\": \"Fraud External\",\r\n    \"deskripsi\": \"Ini Deskripsi\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-10-19T09:09:37+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv1/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv1",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv1/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv1",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Type Lv2",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv2/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv2",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetKodeEventType",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv2/getKodeEventType",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv2",
+								"getKodeEventType"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv2/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv2",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \r\n    \"id_event_type_lv1\" : \"ET1.0001\",\r\n    \"kode_event_type_lv2\" : \"ET2.MOP.0001\",\r\n    \"event_type_lv2\": \"Aktifitas yang tidak diotorisasi\",\r\n    \"Deskripsi\" : \"Ini Deskripsi\",\r\n    \"Status\" : true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv2/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv2",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"id_event_type_lv1\": \"ET1.0001\",\r\n    \"kode_event_type_lv2\": \"ET2.0001\",\r\n    \"event_type_lv2\": \"Aktifitas yang tidak diotorisasi\",\r\n    \"deskripsi\": \"aktifitas tanpa otoritas\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-10-19T11:33:37+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv2/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv2",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv2/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv2",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEventByID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id_event_type_lv1\" : \"ET1.0001\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv2/getEventlv2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv2",
+								"getEventlv2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Type Lv3",
+			"item": [
+				{
+					"name": "GetKodeEventType",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv3/getKodeEventType",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv3",
+								"getKodeEventType"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv3/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv3",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv3/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv3",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \r\n    \"id_event_type_lv2\" : \"ET2.0001\",\r\n    \"kode_event_type_lv3\" : \"ET3.0001\",\r\n    \"event_type_lv3\": \"Mismarking of position yang disengaja\",\r\n    \"Deskripsi\" : \"Ini Deskripsi\",\r\n    \"Status\" : true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv3/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv3",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"id_event_type_lv2\": \"ET2.0001\",\r\n    \"kode_event_type_lv3\": \"ET3.0001\",\r\n    \"event_type_lv3\": \"Mismarking of position yang disengaja\",\r\n    \"deskripsi\": \"Ini Deskripsi\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-10-19T14:16:28+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv3/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv3",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv3/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv3",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEventByID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id_event_type_lv2\" : \"ET2.MOP.0002\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/eventtypelv3/getEventlv3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"eventtypelv3",
+								"getEventlv3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Mega Proses",
+			"item": [
+				{
+					"name": "GetKodeMegaProses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/megaproses/getKodeMegaProses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"megaproses",
+								"getKodeMegaProses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/megaproses/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"megaproses",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/megaproses/getOne/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"megaproses",
+								"getOne",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_mega_proses\" : \"7\",\r\n    \"mega_proses\" : \"Teknologi Informasi\",\r\n    \"deskripsi\" : \"-\",\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/megaproses/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"megaproses",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n    \"id\": 2,\r\n    \"kode_mega_proses\": \"2\",\r\n    \"mega_proses\": \"Pengembangan Produk dan Aktifitas\",\r\n    \"deskripsi\": \"Deskripsi Pengembangan Produk dan Aktifitas\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-10-20T08:35:59+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/megaproses/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"megaproses",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/megaproses/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"megaproses",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Major Proses",
+			"item": [
+				{
+					"name": "getKodeMajorProses",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_mega_proses\" : \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/majorproses/getKodeMajorProses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"majorproses",
+								"getKodeMajorProses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/majorproses/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"majorproses",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/majorproses/getOne/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"majorproses",
+								"getOne",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id_mega_proses\" : \"1\",\r\n    \"kode_major_proses\" : \"1.2\",\r\n    \"major_proses\": \"Kebijakan dan Prosedur\",\r\n    \"deskripsi\" : \"Deskripsi Kebijakan dan Prosedur\",\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/majorproses/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"majorproses",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 2,\r\n    \"id_mega_proses\": \"1\",\r\n    \"kode_major_proses\": \"1.2\",\r\n    \"major_proses\": \"Kebijakan dan Prosedur\",\r\n    \"deskripsi\": \"deskripsi Kebijakan dan Prosedur\",\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/majorproses/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"majorproses",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/majorproses/delete/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"majorproses",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getMajorByMegaProses",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_mega_proses\" : \"2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/majorproses/getMajorByMegaProses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"majorproses",
+								"getMajorByMegaProses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sub Major Proses",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/v1/submajorproses/getAll",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"submajorproses",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/v1/submajorproses/getOne/1",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"submajorproses",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id_major_proses\" : \"1.1\",\r\n    \"kode_sub_major_proses\" : \"EPR\",\r\n    \"sub_major_proses\": \"Evaluasi & Penyempurnaan Rencana Strategis\",\r\n    \"deskripsi\" : \"Deskripsi Hukum & Litigasi\",\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/v1/submajorproses/store",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"submajorproses",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"id_major_proses\": \"1.1\",\r\n    \"kode_sub_major_proses\": \"EPR\",\r\n    \"sub_major_proses\": \"Evaluasi & Penyempurnaan Rencana Strategis\",\r\n    \"deskripsi\": \"Deskripsi Hukum & Litigasi\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-10-20T14:26:45+07:00\"\r\n}\r\n    ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/v1/submajorproses/update",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"submajorproses",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sub major proses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/v1/submajorproses/delete/1",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"submajorproses",
+								"delete",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDataByID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_major\" : \"6.2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/v1/submajorproses/getDataByID",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"submajorproses",
+								"getDataByID"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Penyebab Kejadian LV3",
+			"item": [
+				{
+					"name": "GetKode",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/penyebabkejadianlv3/getKode",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"penyebabkejadianlv3",
+								"getKode"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/penyebabkejadianlv3/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"penyebabkejadianlv3",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_sub_kejadian\" : \"PK2.MOP.0001\",\r\n    \"kode_penyebab_kejadian_lv3\" : \"PK3.MOP.0002\",\r\n    \"penyebab_kejadian_lv3\" : \"Perencanaan training tidak memadai\",\r\n    \"deskripsi\" : \"-\",\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/penyebabkejadianlv3/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"penyebabkejadianlv3",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/penyebabkejadianlv3/getOne/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"penyebabkejadianlv3",
+								"getOne",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n    \"id\": 2,\r\n    \"kode_sub_kejadian\": \"PK2.MOP.0001\",\r\n    \"kode_penyebab_kejadian_lv3\": \"PK3.MOP.0002\",\r\n    \"penyebab_kejadian_lv3\": \"Perencanaan training tidak memadai\",\r\n    \"deskripsi\": \"-\",\r\n    \"status\": true,\r\n    \"created_at\": \"2022-10-21T11:15:07+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/penyebabkejadianlv3/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"penyebabkejadianlv3",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/penyebabkejadianlv3/delete/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"penyebabkejadianlv3",
+								"delete",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getKejadianByID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"kode_sub_kejadian\" : \"PK2.MOP.0001\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/penyebabkejadianlv3/getKejadianByID",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"penyebabkejadianlv3",
+								"getKejadianByID"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MsUker",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/msuker/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"msuker",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/msuker/getUkerByBranch/318",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"msuker",
+								"getUkerByBranch",
+								"318"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SearchUker",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"keyword\" : \"padang\",\r\n    \"order\" : \"\",\r\n    \"sort\": \"\",\r\n    \"offset\" : 0,\r\n    \"limit\" : 10,\r\n    \"page\" : 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/msuker/searchUker",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"msuker",
+								"searchUker"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PgsUser",
+			"item": [
+				{
+					"name": "Getall",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/pgsuser/getAll/000000",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"pgsuser",
+								"getAll",
+								"000000"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pn\" : \"00000002\",\r\n    \"nama_pekerja\" : \"Siapa Ini\",\r\n    \"unit_kerja\" : \"229 - Kantor Pusat\",\r\n    \"jabatan_pgs\" : \"Staf & Jabatan setingkat\",\r\n    \"periode_awal\" : \"2022-11-23\",\r\n    \"periode_akhir\" : \"2025-11-23\",\r\n    \"maker_id\" : \"000000\",\r\n    \"maker_desc\" : \"000000| Admininstrator | Admininstrator\",\r\n    \"approval\" : [\r\n        {\r\n            \"approval_id\" : \"000000\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/pgsuser/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"pgsuser",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPgsApproval",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pn\" : \"0000000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/pgsuser/getPgsApproval",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"pgsuser",
+								"getPgsApproval"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/pgsuser/getOne/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"pgsuser",
+								"getOne",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"pn\": \"00273485\",\r\n    \"nama_pekerja\": \"Ainun Na'imah\",\r\n    \"unit_kerja\": \"229 - Kantor Pusat\",\r\n    \"jabatan_pgs\": \"Staf & Jabatan setingkat\",\r\n    \"periode_awal\": \"2022-11-23\",\r\n    \"periode_akhir\": \"2025-11-23\",\r\n    \"last_maker_id\": \"0000000\",\r\n    \"last_maker_desc\": \"0000000| Admininstrator | Admininstrator\",\r\n    \"approval\": [\r\n        {\r\n            \"id\": 1,\r\n            \"id_pgs_user\": 1,\r\n            \"approval_id\": \"0000000\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/pgsuser/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"pgsuser",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"last_maker_id\": \"0000000\",\r\n    \"last_maker_desc\": \"0000000| Admininstrator | Admininstrator\",\r\n    \"approval\": [\r\n        {\r\n            \"id\": 1\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/pgsuser/approve",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"pgsuser",
+								"approve"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reject",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 2,\r\n    \"last_maker_id\": \"0000000\",\r\n    \"last_maker_desc\": \"0000000| Admininstrator | Admininstrator\",\r\n    \"approval\": [\r\n        {\r\n            \"id\": 2\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/pgsuser/reject",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"pgsuser",
+								"reject"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pernr\": \"00273485\",\r\n    \"password\": \"P@ssw0rd\"\r\n}   ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/v1/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ManagementUser",
+			"item": [
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/getAll",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"getAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nama_jabatan\" : \"Staff\",\r\n    \"level_uker\" : \"KP\",\r\n    \"level_id\" : \"158\",\r\n    \"ORGEH\" : \"70353460\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/getOne/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"getOne",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"nama_jabatan\": \"Staff\",\r\n    \"level_uker\": \"KP\",\r\n    \"level_id\": \"157\",\r\n    \"orgeh\": \"70353460\",\r\n    \"created_at\": \"2022-11-28T09:38:36+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/delete/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"delete",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetMapMenu",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/getMappingMenu/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"getMappingMenu",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MappingMenu",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : 1,\r\n    \"map_menu\" : [\r\n        {\r\n            \"id\": 1,\r\n            \"id_menu\" : 1,\r\n            \"keterangan\" : \"in dev\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/mappingMenu",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"mappingMenu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAllMenu",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/getAllMenu",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"getAllMenu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteMapMenu",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : 20\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/deleteMapMenu",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"deleteMapMenu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getMenu",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"levelUker\" : \"KP\",\r\n    \"levelId\" : \"157\",\r\n    \"orgeh\" : \"70353460\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/managementuser/getMenu",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"managementuser",
+								"getMenu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Uker Kelolaan User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJRCI6InYyIiwiYXBwTmFtZSI6InJpc2ttYW5hZ2VtZW50IiwiZXhwIjoxNjc2NDM2ODM3LCJwZXJuciI6IjAwMzEwMjYxIn0.d2MVT25PxUNW-TJqaXdR9jO27d0hat8a1Qnv0O2Bnrg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"PERNR\": \"00310261\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://172.18.241.57/api-riskmanagement/api/v1/pgsuser/login",
+							"protocol": "http",
+							"host": [
+								"172",
+								"18",
+								"241",
+								"57"
+							],
+							"path": [
+								"api-riskmanagement",
+								"api",
+								"v1",
+								"pgsuser",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
