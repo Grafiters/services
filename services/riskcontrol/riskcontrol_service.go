@@ -11,6 +11,7 @@ import (
 	modelsControlAttribute "riskmanagement/models/riskcontrolattribute"
 	repoOrganisasi "riskmanagement/repository/organisasi"
 	repository "riskmanagement/repository/riskcontrol"
+	"riskmanagement/services/arlords"
 	jwt "riskmanagement/services/auth"
 	"strconv"
 	"strings"
@@ -31,7 +32,7 @@ type RiskControlDefinition interface {
 	GetKodeRiskControl() (responses []models.KodeRiskControl, err error)
 	GenCode() (string, error)
 	UpdateStatus(id int64) (err error)
-	Preview(data [][]string) (dto.PreviewFileRiskControl, error)
+	Preview(pernr string, data [][]string) (dto.PreviewFileRiskControl, error)
 	Template() ([]byte, string, error)
 	ImportData(pernr string, data [][]string) error
 	Download(pernr, format string) (blob []byte, name string, err error)
@@ -39,26 +40,29 @@ type RiskControlDefinition interface {
 }
 
 type RiskControlService struct {
-	logger     logger.Logger
-	repository repository.RiskControlDefinition
-	jwtService jwt.JWTAuthService
-	orgRepo    repoOrganisasi.OrganisasiDefinition
-	db         lib.Database
+	logger        logger.Logger
+	repository    repository.RiskControlDefinition
+	jwtService    jwt.JWTAuthService
+	arlodsService arlords.ArlordsServiceDefinition
+	orgRepo       repoOrganisasi.OrganisasiDefinition
+	db            lib.Database
 }
 
 func NewRiskControService(
 	db lib.Database,
 	logger logger.Logger,
+	arlodsService arlords.ArlordsServiceDefinition,
 	repository repository.RiskControlDefinition,
 	orgRepo repoOrganisasi.OrganisasiDefinition,
 	jwtService jwt.JWTAuthService,
 ) RiskControlDefinition {
 	return RiskControlService{
-		db:         db,
-		logger:     logger,
-		repository: repository,
-		orgRepo:    orgRepo,
-		jwtService: jwtService,
+		db:            db,
+		logger:        logger,
+		arlodsService: arlodsService,
+		repository:    repository,
+		orgRepo:       orgRepo,
+		jwtService:    jwtService,
 	}
 }
 
@@ -283,7 +287,7 @@ func (rc RiskControlService) GenCode() (string, error) {
 	return code, nil
 }
 
-func (rc RiskControlService) Preview(data [][]string) (dto.PreviewFileRiskControl, error) {
+func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.PreviewFileRiskControl, error) {
 	jabatan, err := rc.orgRepo.GetHilfm(modelsOrganisasi.JabatanRequest{})
 	if err != nil {
 		rc.logger.Zap.Error("Errored to query jabatan: %s", err)
@@ -304,6 +308,7 @@ func (rc RiskControlService) Preview(data [][]string) (dto.PreviewFileRiskContro
 
 	previewFile := dto.PreviewFileRiskControl{}
 	body := []dto.PreviewRiskControl{}
+	cacheControlAttribute := make(map[string]bool)
 
 	for index, row := range data {
 		if index == 0 {
@@ -369,10 +374,52 @@ func (rc RiskControlService) Preview(data [][]string) (dto.PreviewFileRiskContro
 		}
 
 		if exists {
-			validation += fmt.Sprintf("Nama risk control: %s sudah ada; ", row[0])
+			validation += fmt.Sprintf("Nama risk control: %s sudah terdaftar; ", row[0])
 		}
 
-		for i := 0; i < 10; i++ {
+		parseCodeControAttribute := lib.ParseStringToArray(row[9], ";")
+
+		// Step 1: cari code yang belum ada dalam cache
+		var needFetch []string
+		for _, code := range parseCodeControAttribute {
+			if _, ok := cacheControlAttribute[code]; !ok {
+				needFetch = append(needFetch, code)
+			}
+		}
+
+		// Step 2: Jika ada yg belum di-cache → fetch API
+		if len(needFetch) > 0 {
+			controlAttribute, err := rc.arlodsService.GetControlAttribute("", needFetch)
+			if err != nil {
+				rc.logger.Zap.Error("failed to request data control attribute %s", err)
+				continue
+			}
+
+			rc.logger.Zap.Debug(needFetch)
+			rc.logger.Zap.Debug(controlAttribute)
+			// Code yang valid → set true
+			for _, item := range controlAttribute.Data.List {
+				cacheControlAttribute[item.Code] = true
+			}
+			rc.logger.Zap.Debug(cacheControlAttribute)
+
+			// Code yang tidak muncul dalam response → invalid
+			for _, code := range needFetch {
+				if _, ok := cacheControlAttribute[code]; !ok {
+					cacheControlAttribute[code] = false
+				}
+			}
+		}
+
+		// Step 3: Validasi dari cache (super cepat)
+		rc.logger.Zap.Debug(cacheControlAttribute)
+		for _, code := range parseCodeControAttribute {
+			if !cacheControlAttribute[code] {
+				validation += fmt.Sprintf("Code control attribute %s Tidak terdaftar atau masih non active; ", code)
+			}
+		}
+
+		for i := range 10 {
 			if i < len(row) {
 				col[i] = row[i]
 			}
@@ -485,7 +532,7 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 		return err
 	}
 
-	rc.logger.Zap.Debug(data)
+	cacheControlAttribute := make(map[string]bool)
 	code := ""
 	for i, v := range data {
 		if i == 0 {
@@ -497,11 +544,10 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 			jabExists bool = false
 		)
 
-		parseAttribute := lib.ParseStringToArray(v[9], ";")
+		parseCodeControAttribute := lib.ParseStringToArray(v[9], ";")
 		for _, c := range control {
 			if strings.EqualFold(c.RiskControl, v[0]) {
 				exists = true
-				attribute[c.Kode] = parseAttribute
 				break
 			}
 		}
@@ -550,7 +596,6 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 				}
 			}
 
-			attribute[code] = parseAttribute
 			newRecord = append(newRecord, models.RiskControlRequest{
 				Kode:        code,
 				RiskControl: v[0],
@@ -566,9 +611,59 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 			})
 		}
 
-	}
+		// Step 1: cari code yang belum ada dalam cache
+		var needFetch []string
+		for _, codes := range parseCodeControAttribute {
+			if _, ok := cacheControlAttribute[codes]; !ok {
+				needFetch = append(needFetch, codes)
+			}
+		}
 
-	rc.logger.Zap.Debug(newRecord)
+		// Step 2: Jika ada yg belum di-cache → fetch API
+		if len(needFetch) > 0 {
+			controlAttribute, err := rc.arlodsService.GetControlAttribute("", needFetch)
+			if err != nil {
+				rc.logger.Zap.Error("failed to request data control attribute %s", err)
+				continue
+			}
+
+			// Code yang valid → set true
+			for _, item := range controlAttribute.Data.List {
+				cacheControlAttribute[item.Code] = true
+			}
+
+			// Code yang tidak muncul dalam response → invalid
+			for _, code := range needFetch {
+				if _, ok := cacheControlAttribute[code]; !ok {
+					cacheControlAttribute[code] = false
+				}
+			}
+		}
+
+		// Step 3: Validasi dari cache (super cepat)
+		var validCodes []string
+		for _, codeA := range parseCodeControAttribute {
+			if !cacheControlAttribute[codeA] {
+				continue
+			}
+
+			validCodes = append(validCodes, codeA)
+		}
+
+		exists = false
+		for _, c := range control {
+			if strings.EqualFold(c.RiskControl, v[0]) {
+				attribute[c.Kode] = validCodes
+				exists = true
+				break
+			}
+		}
+
+		if !exists {
+			attribute[code] = validCodes
+		}
+
+	}
 
 	tx := rc.db.DB.Begin()
 
@@ -579,12 +674,12 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 		return err
 	}
 
-	// err = rc.RequestAttributeStore(pernr, attribute)
-	// if err != nil {
-	// 	tx.Rollback()
-	// 	rc.logger.Zap.Error(err)
-	// 	return err
-	// }
+	err = rc.RequestAttributeStore(pernr, attribute)
+	if err != nil {
+		tx.Rollback()
+		rc.logger.Zap.Error(err)
+		return err
+	}
 
 	tx.Commit()
 	return nil
@@ -597,7 +692,7 @@ func (rc RiskControlService) RequestAttributeStore(pernr string, data map[string
 		return fmt.Errorf("errored when got url arlods: %s", err)
 	}
 
-	url := baseUrl + "/control/bulkCreateAttribute"
+	url := baseUrl + "/control/bulk-create-attribute"
 
 	authToken := rc.jwtService.CreateArlordsToken(pernr)
 
@@ -607,6 +702,7 @@ func (rc RiskControlService) RequestAttributeStore(pernr string, data map[string
 		"pernr":         pernr,
 	}
 
+	rc.logger.Zap.Debug(data)
 	for i, v := range data {
 		attrReqest = append(attrReqest, models.RiskControlAttributeRequest{
 			ControlID: i,

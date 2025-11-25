@@ -220,6 +220,11 @@ func (riskControl RiskControlController) Template(c *gin.Context) {
 }
 
 func (riskControl RiskControlController) PreviewImport(c *gin.Context) {
+	pernr := c.PostForm("pernr")
+	if pernr == "" {
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, nil)
+		return
+	}
 	file, err := c.FormFile("file")
 	if err != nil {
 		riskControl.logger.Zap.Error(err)
@@ -262,7 +267,7 @@ func (riskControl RiskControlController) PreviewImport(c *gin.Context) {
 		}
 	}
 
-	data, err := riskControl.service.Preview(extract)
+	data, err := riskControl.service.Preview(pernr, extract)
 	if err != nil {
 		riskControl.logger.Zap.Error("Error validate data: %s ", err)
 		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
