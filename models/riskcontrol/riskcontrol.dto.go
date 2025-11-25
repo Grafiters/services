@@ -76,7 +76,7 @@ type KodeRiskControl struct {
 
 type RiskControlAttributeRequest struct {
 	ControlID string   `json:"control_id"`
-	Attribute []string `json:"attribute"`
+	Attribute []string `json:"attributes"`
 }
 
 type RiskControlAttributeRequestBody struct {
