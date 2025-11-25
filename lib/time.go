@@ -79,3 +79,16 @@ func FixEndDate(request string) (response string) {
 
 	return newDateString
 }
+
+func FormatDatePtr(s *string) string {
+	if s == nil {
+		return ""
+	}
+
+	t, err := time.Parse(time.RFC3339, *s)
+	if err != nil {
+		return *s
+	}
+
+	return t.Format("2006-01-02 15:04:05")
+}
