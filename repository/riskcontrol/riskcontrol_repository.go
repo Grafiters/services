@@ -1,6 +1,7 @@
 package riskcontrol
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"riskmanagement/lib"
@@ -20,6 +21,9 @@ type RiskControlDefinition interface {
 	Delete(id int64) (err error)
 	WithTrx(trxHandle *gorm.DB) RiskControlRepository
 	GetKodeRiskControl() (responses []models.KodeRiskControl, err error)
+	GenLastCode() (string, error)
+	UpdateStatus(id int64, status bool) error
+	BulkCreateRiskControl(items []models.RiskControlRequest, tx *gorm.DB) error
 	SearchRiskControlByIssue(request *models.KeywordRequest) (responses []models.RiskControlResponses, totalRows int, totalData int, err error)
 }
 
@@ -61,12 +65,19 @@ func (rc RiskControlRepository) GetAllWithPaginate(request *models.Paginate) (re
 	queryBuilder := db.Model(&responses).
 		Select(
 			`id 'id',
-		 		kode 'kode',
-		 		risk_control 'risk_control',
-		 		deskripsi 'deskripsi',
-		 		status 'status',
-		 		created_at 'created_at',
-		 		updated_at 'updated_at'
+			kode 'kode',
+			risk_control 'risk_control',
+			deskripsi 'deskripsi',
+			status 'status',
+			control_type 'control_type',
+			nature 'nature',
+			key_control 'key_control',
+			owner_lvl 'owner_lvl',
+			owner_group 'owner_group',
+			owner 'owner',
+			document 'document',
+			created_at 'created_at',
+			updated_at 'updated_at'
 	`).Order("created_at ASC")
 
 	// add dynamic where clauses
@@ -81,7 +92,11 @@ func (rc RiskControlRepository) GetAllWithPaginate(request *models.Paginate) (re
 		queryBuilder = queryBuilder.Where("status = 1")
 	} else {
 		queryBuilder = queryBuilder.Where("status = 0")
+	}
 
+	if request.Search != "" {
+		search := "%" + request.Search + "%"
+		queryBuilder = queryBuilder.Where("kode LIKE ? OR risk_control LIKE ?", search, search)
 	}
 	// if request.Status != nil {
 	// 	queryBuilder = queryBuilder.Where("status = ?", request.Status)
@@ -100,12 +115,12 @@ func (rc RiskControlRepository) GetAllWithPaginate(request *models.Paginate) (re
 		totalRows = int64(math.Ceil(float64(totalData) / float64(request.Limit)))
 	}
 
-	return responses, totalRows, totalData, err
+	return responses, totalData, totalRows, err
 }
 
 // GetOne implements RiskControlDefinition
 func (riskControl RiskControlRepository) GetOne(id int64) (responses models.RiskControlResponse, err error) {
-	err = riskControl.db.DB.Select(`id, kode,risk_control, control_type, nature, key_control,deskripsi, status, created_at`).
+	err = riskControl.db.DB.Select(`id, kode,risk_control, control_type, nature, key_control,deskripsi, owner_lvl, owner_group, owner, document, status, created_at`).
 		Where("id = ?", id).Find(&responses).Error
 
 	return responses, err
@@ -124,6 +139,10 @@ func (riskControl RiskControlRepository) Store(request *models.RiskControlReques
 		Deskripsi:   request.Deskripsi,
 		Status:      request.Status,
 		CreatedAt:   &timeNow,
+		OwnerLvl:    request.OwnerLvl,
+		OwnerGroup:  request.OwnerGroup,
+		Owner:       request.Owner,
+		Document:    request.Document,
 	}).Error
 	if err != nil {
 		return false, err
@@ -134,20 +153,7 @@ func (riskControl RiskControlRepository) Store(request *models.RiskControlReques
 
 // Update implements RiskControlDefinition
 func (riskControl RiskControlRepository) Update(request *models.RiskControlRequest) (responses bool, err error) {
-	timeNow := lib.GetTimeNow("timestime")
-
-	err = riskControl.db.DB.Save(&models.RiskControlRequest{
-		ID:          request.ID,
-		Kode:        request.Kode,
-		RiskControl: request.RiskControl,
-		ControlType: request.ControlType,
-		Nature:      request.Nature,
-		KeyControl:  request.KeyControl,
-		Deskripsi:   request.Deskripsi,
-		Status:      request.Status,
-		CreatedAt:   request.CreatedAt,
-		UpdatedAt:   &timeNow,
-	}).Error
+	err = riskControl.db.DB.Save(request).Error
 	if err != nil {
 		return false, err
 	}
@@ -195,14 +201,13 @@ func (riskControl RiskControlRepository) GetKodeRiskControl() (responses []model
 				FROM risk_control rc) as t
 				ORDER BY t.kode_risk_control DESC LIMIT 1`
 
-	riskControl.logger.Zap.Info(query)
 	rows, err := riskControl.dbRaw.DB.Query(query)
-	defer rows.Close()
-
-	riskControl.logger.Zap.Info("rows =>", rows)
 	if err != nil {
 		return responses, err
 	}
+	defer rows.Close()
+
+	riskControl.logger.Zap.Info("rows =>", rows)
 
 	response := models.KodeRiskControl{}
 	for rows.Next() {
@@ -216,7 +221,34 @@ func (riskControl RiskControlRepository) GetKodeRiskControl() (responses []model
 		return responses, err
 	}
 
-	return responses, err
+	return responses, nil
+}
+
+func (riskControl RiskControlRepository) GenLastCode() (string, error) {
+	var last models.RiskControlResponse
+	const prefix = "RC-"
+
+	err := riskControl.db.DB.
+		Select("kode").
+		Order("created_at DESC").
+		First(&last).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return fmt.Sprintf("%s%05d", prefix, 1), nil
+	}
+	if err != nil {
+		return "", err
+	}
+
+	lastNumber := 0
+	if _, err := fmt.Sscanf(last.Kode, prefix+"%d", &lastNumber); err != nil {
+		lastNumber = 0
+	}
+
+	newNumber := lastNumber + 1
+	newCode := fmt.Sprintf("%s%05d", prefix, newNumber)
+
+	return newCode, nil
 }
 
 // SearchRiskControlByIssue implements RiskControlDefinition
@@ -251,4 +283,27 @@ func (rc RiskControlRepository) SearchRiskControlByIssue(request *models.Keyword
 	}
 
 	return responses, totalRows, totalData, nil
+}
+
+// Update data risk control for status only
+func (rc RiskControlRepository) UpdateStatus(id int64, status bool) error {
+	err := rc.db.DB.Model(&models.RiskControl{}).Where("id = ?", id).Update("status = ?", status).Error
+
+	return err
+}
+
+// Store multiple data with batch
+func (rc RiskControlRepository) BulkCreateRiskControl(items []models.RiskControlRequest, tx *gorm.DB) error {
+	if len(items) == 0 {
+		return nil
+	}
+
+	batchSize := 100
+	if len(items) > 1000 {
+		batchSize = 500
+	} else if len(items) > 5000 {
+		batchSize = 1000
+	}
+
+	return tx.CreateInBatches(items, batchSize).Error
 }
