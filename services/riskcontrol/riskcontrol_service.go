@@ -1,10 +1,23 @@
 package riskcontrol
 
 import (
+	"bytes"
+	"encoding/csv"
+	"fmt"
+	"riskmanagement/dto"
 	"riskmanagement/lib"
+	modelsOrganisasi "riskmanagement/models/organisasi"
 	models "riskmanagement/models/riskcontrol"
+	modelsControlAttribute "riskmanagement/models/riskcontrolattribute"
+	repoOrganisasi "riskmanagement/repository/organisasi"
 	repository "riskmanagement/repository/riskcontrol"
+	jwt "riskmanagement/services/auth"
+	"strconv"
+	"strings"
+	"time"
 
+	"github.com/jung-kurt/gofpdf"
+	"github.com/xuri/excelize/v2"
 	"gitlab.com/golang-package-library/logger"
 )
 
@@ -16,21 +29,36 @@ type RiskControlDefinition interface {
 	Update(request *models.RiskControlRequest) (err error)
 	Delete(id int64) (err error)
 	GetKodeRiskControl() (responses []models.KodeRiskControl, err error)
+	GenCode() (string, error)
+	UpdateStatus(id int64) (err error)
+	Preview(data [][]string) (dto.PreviewFileRiskControl, error)
+	Template() ([]byte, string, error)
+	ImportData(pernr string, data [][]string) error
+	Download(pernr, format string) (blob []byte, name string, err error)
 	SearchRiskControlByIssue(request models.KeywordRequest) (response []models.RiskControlResponses, pagination lib.Pagination, err error)
 }
 
 type RiskControlService struct {
 	logger     logger.Logger
 	repository repository.RiskControlDefinition
+	jwtService jwt.JWTAuthService
+	orgRepo    repoOrganisasi.OrganisasiDefinition
+	db         lib.Database
 }
 
 func NewRiskControService(
+	db lib.Database,
 	logger logger.Logger,
 	repository repository.RiskControlDefinition,
+	orgRepo repoOrganisasi.OrganisasiDefinition,
+	jwtService jwt.JWTAuthService,
 ) RiskControlDefinition {
 	return RiskControlService{
+		db:         db,
 		logger:     logger,
 		repository: repository,
+		orgRepo:    orgRepo,
+		jwtService: jwtService,
 	}
 }
 
@@ -45,8 +73,9 @@ func (rc RiskControlService) GetAllWithPaginate(request models.Paginate) (respon
 	request.Offset = offset
 	request.Order = order
 	request.Sort = sort
+	request.Limit = limit
 
-	dataPgs, totalRows, totalData, err := rc.repository.GetAllWithPaginate(&request)
+	dataPgs, totalData, totalRows, err := rc.repository.GetAllWithPaginate(&request)
 	if err != nil {
 		rc.logger.Zap.Error(err)
 		return responses, pagination, err
@@ -57,19 +86,8 @@ func (rc RiskControlService) GetAllWithPaginate(request models.Paginate) (respon
 		return responses, pagination, err
 	}
 
-	for _, response := range dataPgs {
-		responses = append(responses, models.RiskControlResponse{
-			ID:          response.ID,
-			Kode:        response.Kode,
-			RiskControl: response.RiskControl,
-			Deskripsi:   response.Deskripsi,
-			Status:      response.Status,
-			CreatedAt:   response.CreatedAt,
-			UpdatedAt:   response.UpdatedAt,
-		})
-	}
+	responses = dataPgs
 
-	// pagination = lib.SetPaginationResponse(page, limit, totalRows, totalData)
 	pagination = lib.SetPaginationResponse(page, limit, int(totalRows), int(totalData))
 	return responses, pagination, err
 }
@@ -89,7 +107,25 @@ func (riskControl RiskControlService) GetOne(id int64) (responses models.RiskCon
 
 // Store implements RiskControlDefinition
 func (riskControl RiskControlService) Store(request *models.RiskControlRequest) (err error) {
-	status, err := riskControl.repository.Store(request)
+	if request.OwnerGroup != "" && request.Owner != "" {
+		err = riskControl.ValidationOwner(request)
+		if err != nil {
+			riskControl.logger.Zap.Error(err)
+			return fmt.Errorf("owner is invalid: %s", err)
+		}
+	}
+	transform := request.ParseRequest()
+	if transform.Kode == "" {
+		code, err := riskControl.repository.GenLastCode()
+		if err != nil {
+			riskControl.logger.Zap.Error(err)
+			return err
+		}
+
+		transform.Kode = code
+	}
+
+	status, err := riskControl.repository.Store(&transform)
 	if !status || err != nil {
 		return err
 	}
@@ -99,7 +135,16 @@ func (riskControl RiskControlService) Store(request *models.RiskControlRequest) 
 
 // Update implements RiskControlDefinition
 func (riskControl RiskControlService) Update(request *models.RiskControlRequest) (err error) {
-	status, err := riskControl.repository.Update(request)
+	if request.OwnerGroup != "" && request.Owner != "" {
+		err = riskControl.ValidationOwner(request)
+		if err != nil {
+			riskControl.logger.Zap.Error(err)
+			return fmt.Errorf("owner is invalid: %s", err)
+		}
+	}
+
+	transform := request.ParseRequest()
+	status, err := riskControl.repository.Update(&transform)
 	if !status || err != nil {
 		return err
 	}
@@ -158,4 +203,700 @@ func (rc RiskControlService) SearchRiskControlByIssue(request models.KeywordRequ
 
 	pagination = lib.SetPaginationResponse(page, limit, totalRows, totalData)
 	return responses, pagination, err
+}
+
+func (rc RiskControlService) UpdateStatus(id int64) (err error) {
+	var (
+		status bool = true
+	)
+	data, err := rc.repository.GetOne(id)
+	if err != nil {
+		return err
+	}
+
+	if data.Status {
+		status = false
+	}
+
+	err = rc.repository.UpdateStatus(id, status)
+
+	return err
+}
+
+func (rc RiskControlService) ValidationOwner(request *models.RiskControlRequest) error {
+	switch request.OwnerGroup {
+	case "jabatan":
+		return rc.ValidateJabatan(request.Owner)
+	case "departemen":
+		return rc.ValidateDepartemen(request.Owner)
+	default:
+		return fmt.Errorf("invalid owner group")
+	}
+
+}
+
+func (rc RiskControlService) ValidateJabatan(jabatanID string) error {
+	data, err := rc.orgRepo.GetHilfm(modelsOrganisasi.JabatanRequest{
+		Keyword: jabatanID,
+		Limit:   0,
+		Offset:  0,
+	})
+
+	if err != nil {
+		rc.logger.Zap.Error(`Error checking data jabatan`, err)
+		return err
+	}
+
+	if len(data) > 0 {
+		return nil
+	}
+
+	return fmt.Errorf("data jabatan not found")
+}
+
+func (rc RiskControlService) ValidateDepartemen(departemenID string) error {
+	data, err := rc.orgRepo.GetOrgUnit(modelsOrganisasi.DepartmentRequest{
+		Keyword: departemenID,
+		Limit:   0,
+		Offset:  0,
+	})
+
+	if err != nil {
+		rc.logger.Zap.Error(`Error checking data jabatan`, err)
+		return err
+	}
+
+	if len(data) > 0 {
+		return nil
+	}
+
+	return fmt.Errorf("data departemen not found")
+}
+
+func (rc RiskControlService) GenCode() (string, error) {
+	code, err := rc.repository.GenLastCode()
+	if err != nil {
+		rc.logger.Zap.Error(err)
+		return "", err
+	}
+
+	return code, nil
+}
+
+func (rc RiskControlService) Preview(data [][]string) (dto.PreviewFileRiskControl, error) {
+	jabatan, err := rc.orgRepo.GetHilfm(modelsOrganisasi.JabatanRequest{})
+	if err != nil {
+		rc.logger.Zap.Error("Errored to query jabatan: %s", err)
+		return dto.PreviewFileRiskControl{}, err
+	}
+
+	departemen, err := rc.orgRepo.GetOrgUnit(modelsOrganisasi.DepartmentRequest{})
+	if err != nil {
+		rc.logger.Zap.Error("Errored to query departemen: %s", err)
+		return dto.PreviewFileRiskControl{}, err
+	}
+
+	control, err := rc.GetAll()
+	if err != nil {
+		rc.logger.Zap.Error("Errored to query risk control: %s", err)
+		return dto.PreviewFileRiskControl{}, err
+	}
+
+	previewFile := dto.PreviewFileRiskControl{}
+	body := []dto.PreviewRiskControl{}
+
+	for index, row := range data {
+		if index == 0 {
+			if len(row) < 10 {
+				return dto.PreviewFileRiskControl{}, fmt.Errorf("invalid header format risk control")
+			}
+
+			previewFile.Header = [10]string{
+				row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9],
+			}
+			continue
+		}
+
+		var col [10]string
+		validation := ""
+
+		var (
+			exists    bool = false
+			jabExists bool = false
+			depExists bool = false
+		)
+		riskControlCode := row[0]
+
+		for _, c := range control {
+			if strings.EqualFold(c.RiskControl, riskControlCode) {
+				exists = true
+				break
+			}
+		}
+
+		if strings.ToLower(row[6]) == "jabatan" {
+			if row[7] == "" && row[6] == "" {
+				jabExists = true
+			}
+			for _, c := range jabatan {
+				jab := lib.ParseStringToArray(row[7], "-")
+				if strings.EqualFold(c.Hilfm, jab[0]) {
+					jabExists = true
+					break
+				}
+			}
+
+			if !jabExists {
+				validation += fmt.Sprintf("Owner tidak terdaftar: %s; ", row[7])
+			}
+		}
+
+		if strings.ToLower(row[6]) == "departemen" {
+			if row[7] == "" && row[6] == "" {
+				jabExists = true
+			}
+			for _, c := range departemen {
+				jab := lib.ParseStringToArray(row[7], "-")
+				if strings.EqualFold(c.Orgeh, jab[0]) {
+					jabExists = true
+					break
+				}
+			}
+
+			if !depExists {
+				validation += fmt.Sprintf("Owner tidak terdaftar: %s; ", row[7])
+			}
+		}
+
+		if exists {
+			validation += fmt.Sprintf("Nama risk control: %s sudah ada; ", row[0])
+		}
+
+		for i := 0; i < 10; i++ {
+			if i < len(row) {
+				col[i] = row[i]
+			}
+		}
+
+		body = append(body, dto.PreviewRiskControl{
+			PerRow:     col,
+			Validation: validation,
+		})
+	}
+
+	previewFile.Body = body
+
+	return previewFile, nil
+
+}
+
+func (rc RiskControlService) Template() ([]byte, string, error) {
+	f := excelize.NewFile()
+	sheet := "Template"
+
+	f.SetSheetName("Sheet1", sheet)
+
+	sheetIndex, err := f.GetSheetIndex(sheet)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get sheet index: %w", err)
+	}
+	f.SetActiveSheet(sheetIndex)
+
+	// header
+	headers := []string{
+		"Risk Control",
+		"Control Type",
+		"Nature",
+		"Key Control",
+		"Deskripsi",
+		"Control Owner Level",
+		"Owner Group",
+		"Control Owner",
+		"Control Document",
+		"Code Control Attribute",
+		"Control Attribute",
+	}
+
+	// tulis header
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		if err := f.SetCellValue(sheet, cell, h); err != nil {
+			return nil, "", fmt.Errorf("failed to set cell: %w", err)
+		}
+	}
+
+	// optional: set lebar kolom
+	for i := 1; i <= len(headers); i++ {
+		col, _ := excelize.ColumnNumberToName(i)
+		f.SetColWidth(sheet, col, col, 25)
+	}
+
+	// contoh data
+	exampleData := [][]string{
+		{"RC-001", "Operational", "Financial", "Key1", "Contoh deskripsi control", "Head Office", "Jabatan", "code - name", "Doc-001", "abc;def", "<Name1>; <Name2>"},
+		{"RC-002", "Compliance", "Legal", "Key2", "Deskripsi control kedua", "Regional Office", "Departemen", "code - name", "Doc-002", "ghi;jkl", "<Name3>; <Name4>"},
+	}
+
+	// tulis data
+	for rowIndex, row := range exampleData {
+		for colIndex, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(colIndex+1, rowIndex+2) // +2 karena header di baris 1
+			if err := f.SetCellValue(sheet, cell, val); err != nil {
+				return nil, "", fmt.Errorf("failed to set example data: %w", err)
+			}
+		}
+	}
+
+	// simpan ke buffer
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		return nil, "", fmt.Errorf("failed to write excel: %w", err)
+	}
+
+	return buf.Bytes(), "risk_control_template.xlsx", nil
+}
+
+func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
+	timeNow := lib.GetTimeNow("timestime")
+	newRecord := make([]models.RiskControlRequest, 0)
+	attribute := make(map[string][]string)
+
+	jabatan, err := rc.orgRepo.GetHilfm(modelsOrganisasi.JabatanRequest{})
+	if err != nil {
+		rc.logger.Zap.Error("Errored to query jabatan: %s", err)
+		return err
+	}
+
+	departemen, err := rc.orgRepo.GetOrgUnit(modelsOrganisasi.DepartmentRequest{})
+	if err != nil {
+		rc.logger.Zap.Error("Errored to query departemen: %s", err)
+		return err
+	}
+
+	control, err := rc.GetAll()
+	if err != nil {
+		rc.logger.Zap.Error("Errored to query risk control: %s", err)
+		return err
+	}
+
+	genCode, err := rc.repository.GenLastCode()
+	if err != nil {
+		rc.logger.Zap.Error("Errored to query generate code: %s", err)
+		return err
+	}
+
+	rc.logger.Zap.Debug(data)
+	code := ""
+	for i, v := range data {
+		if i == 0 {
+			continue
+		}
+
+		var (
+			exists    bool = false
+			jabExists bool = false
+		)
+
+		parseAttribute := lib.ParseStringToArray(v[9], ";")
+		for _, c := range control {
+			if strings.EqualFold(c.RiskControl, v[0]) {
+				exists = true
+				attribute[c.Kode] = parseAttribute
+				break
+			}
+		}
+
+		if strings.ToLower(v[6]) == "jabatan" {
+			if v[7] == "" && v[6] == "" {
+				jabExists = true
+			}
+			for _, c := range jabatan {
+				if v[7] == "" {
+					jabExists = true
+					continue
+				}
+				jab := lib.ParseStringToArray(v[7], "-")
+				if strings.EqualFold(c.Hilfm, jab[0]) {
+					jabExists = true
+					break
+				}
+			}
+		}
+
+		if strings.ToLower(v[6]) == "departemen" {
+			if v[7] == "" && v[6] == "" {
+				jabExists = true
+			}
+			for _, c := range departemen {
+				if v[7] == "" {
+					jabExists = true
+				}
+				jab := lib.ParseStringToArray(v[7], "-")
+				if strings.EqualFold(c.Orgeh, jab[0]) {
+					jabExists = true
+					break
+				}
+			}
+		}
+
+		if !exists && jabExists {
+			if i == 1 {
+				code = genCode
+			} else {
+				code, err = GenerateRunningCode(code, i)
+				if err != nil {
+					rc.logger.Zap.Error("invalid generate code %s", err)
+					return err
+				}
+			}
+
+			attribute[code] = parseAttribute
+			newRecord = append(newRecord, models.RiskControlRequest{
+				Kode:        code,
+				RiskControl: v[0],
+				ControlType: v[1],
+				Nature:      v[2],
+				KeyControl:  v[3],
+				Deskripsi:   v[4],
+				OwnerLvl:    v[5],
+				OwnerGroup:  v[6],
+				Owner:       v[7],
+				Document:    v[8],
+				CreatedAt:   &timeNow,
+			})
+		}
+
+	}
+
+	rc.logger.Zap.Debug(newRecord)
+
+	tx := rc.db.DB.Begin()
+
+	err = rc.repository.BulkCreateRiskControl(newRecord, tx)
+	if err != nil {
+		tx.Rollback()
+		rc.logger.Zap.Error("cannot create risk control data: %s ", err)
+		return err
+	}
+
+	// err = rc.RequestAttributeStore(pernr, attribute)
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	rc.logger.Zap.Error(err)
+	// 	return err
+	// }
+
+	tx.Commit()
+	return nil
+}
+
+func (rc RiskControlService) RequestAttributeStore(pernr string, data map[string][]string) error {
+	attrReqest := make([]models.RiskControlAttributeRequest, 0)
+	baseUrl, err := lib.GetVarEnv("ArlordsUrl")
+	if err != nil {
+		return fmt.Errorf("errored when got url arlods: %s", err)
+	}
+
+	url := baseUrl + "/control/bulkCreateAttribute"
+
+	authToken := rc.jwtService.CreateArlordsToken(pernr)
+
+	headers := map[string]string{
+		"Authorization": "Bearer " + authToken,
+		"Content-Type":  "application/json",
+		"pernr":         pernr,
+	}
+
+	for i, v := range data {
+		attrReqest = append(attrReqest, models.RiskControlAttributeRequest{
+			ControlID: i,
+			Attribute: v,
+		})
+	}
+
+	var response modelsControlAttribute.HttpResResponse
+
+	requestBody := models.RiskControlAttributeRequestBody{
+		Data: attrReqest,
+	}
+
+	err = lib.MakeRequest("POST", url, headers, requestBody, &response)
+	if err != nil {
+		rc.logger.Zap.Error("Error when request to save mapping cause: %s", err)
+		return err
+	}
+
+	return nil
+}
+
+func (rc RiskControlService) Download(pernr, format string) (blob []byte, name string, err error) {
+	data, err := rc.repository.GetAll()
+	if err != nil {
+		rc.logger.Zap.Error("Errored when try to query: %s", err)
+		return nil, "", err
+	}
+
+	if len(data) == 0 {
+		return nil, "", nil
+	}
+
+	switch format {
+	case "csv":
+		return exportCsv(data)
+	case "xlsx":
+		return exportExcel(data)
+	case "pdf":
+		return exportPDF(data)
+	}
+	panic("unplement")
+}
+
+func OwnerLvl(lvl string) string {
+	list := map[string]string{
+		"head office":     "ho",
+		"regional office": "ro",
+		"branch office":   "bo",
+		"kcp":             "kcp",
+		"unit kerja":      "uk",
+	}
+
+	lvlInfo, ok := list[strings.ToLower(lvl)]
+	if !ok {
+		return fmt.Sprintf("invalid lvl of owner: %s", lvl)
+	}
+
+	return lvlInfo
+}
+
+func GenerateRunningCode(baseCode string, index int) (string, error) {
+	parts := strings.Split(baseCode, "-")
+	if len(parts) != 2 {
+		return "", fmt.Errorf("invalid code format")
+	}
+
+	prefix := parts[0]
+	numberStr := parts[1]
+	number, err := strconv.Atoi(numberStr)
+	if err != nil {
+		return "", err
+	}
+
+	nextNumber := number + index
+	newCode := fmt.Sprintf("%s-%05d", prefix, nextNumber)
+	return newCode, nil
+}
+
+func exportPDF(data []models.RiskControlResponse) (blob []byte, name string, err error) {
+	pdf := gofpdf.New("L", "mm", "A4", "")
+	pdf.SetAutoPageBreak(false, 10)
+	pdf.SetMargins(10, 10, 10) // margin kiri, atas, kanan
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 14)
+	pdf.CellFormat(0, 10, "Risk Control Report", "", 1, "C", false, 0, "")
+
+	headers := []string{"Code", "Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Status", "CreatedAt", "UpdatedAt", "Code Control Attribute", "Name Control Attribute"}
+	colWidths := []float64{
+		20, 30, 20, 20, 10,
+		35, 25, 25, 40, 20,
+		35, 25, 25, 25, 25,
+	}
+
+	printHeader := func() {
+		pdf.SetFillColor(200, 200, 200) // abu-abu header
+		pdf.SetFont("Arial", "B", 10)
+		for i, h := range headers {
+			pdf.CellFormat(colWidths[i], 8, h, "1", 0, "C", true, 0, "")
+		}
+		pdf.Ln(-1)
+		pdf.SetFont("Arial", "", 9)
+	}
+
+	printHeader()
+
+	_, pageHeight := pdf.GetPageSize()
+	marginBottom := 15.0
+
+	getRowHeight := func(row []string) float64 {
+		maxHeight := 0.0
+		lineHeight := 5.0
+		for i, txt := range row {
+			lines := pdf.SplitLines([]byte(txt), colWidths[i])
+			h := float64(len(lines)) * lineHeight
+			if h > maxHeight {
+				maxHeight = h
+			}
+		}
+		return maxHeight
+	}
+
+	for _, v := range data {
+		status := "aktif"
+		if !v.Status {
+			status = "inaktif"
+		}
+		createTime := lib.FormatDatePtr(v.CreatedAt)
+		updateTime := lib.FormatDatePtr(v.UpdatedAt)
+
+		row := []string{
+			v.Kode,
+			v.RiskControl,
+			v.ControlType,
+			v.Nature,
+			v.KeyControl,
+			v.Deskripsi,
+			ReverseOwnerLvl(v.OwnerLvl),
+			v.OwnerGroup,
+			v.Owner,
+			v.Document,
+			status,
+			createTime,
+			updateTime,
+		}
+
+		rowHeight := getRowHeight(row)
+		xStart := pdf.GetX()
+		yStart := pdf.GetY()
+
+		// Check page break
+		if yStart+rowHeight+marginBottom > pageHeight {
+			pdf.AddPage()
+			printHeader()
+			xStart = pdf.GetX()
+			yStart = pdf.GetY()
+		}
+
+		// Print each cell with MultiCell and border
+		for i, txt := range row {
+			x := pdf.GetX()
+			y := pdf.GetY()
+
+			pdf.Rect(x, y, colWidths[i], rowHeight, "D")
+			pdf.MultiCell(colWidths[i], 5, txt, "", "L", false)
+			pdf.SetXY(x+colWidths[i], yStart)
+		}
+		pdf.SetXY(xStart, yStart+rowHeight)
+	}
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to generate PDF: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_control_%s.pdf", time.Now().Format("20060102_150405"))
+
+	return buf.Bytes(), fileName, nil
+}
+
+func exportExcel(data []models.RiskControlResponse) (blob []byte, name string, err error) {
+	f := excelize.NewFile()
+	sheet := "risk-control"
+
+	f.SetSheetName("Sheet1", sheet)
+	headers := []string{"Code", "Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Status", "CreatedAt", "UpdatedAt", "Code Control Attribute", "Name Control Attribute"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		if err := f.SetCellValue(sheet, cell, h); err != nil {
+			return nil, "", fmt.Errorf("failed to set cell: %w", err)
+		}
+	}
+
+	for idx, v := range data {
+		status := "aktif"
+		if !v.Status {
+			status = "inaktif"
+		}
+		createTime := lib.FormatDatePtr(v.CreatedAt)
+		updateTime := lib.FormatDatePtr(v.UpdatedAt)
+
+		f.SetCellValue("risk-control", fmt.Sprintf("A%d", idx+2), v.Kode)
+		f.SetCellValue("risk-control", fmt.Sprintf("B%d", idx+2), v.RiskControl)
+		f.SetCellValue("risk-control", fmt.Sprintf("C%d", idx+2), v.ControlType)
+		f.SetCellValue("risk-control", fmt.Sprintf("D%d", idx+2), v.Nature)
+		f.SetCellValue("risk-control", fmt.Sprintf("E%d", idx+2), v.KeyControl)
+		f.SetCellValue("risk-control", fmt.Sprintf("F%d", idx+2), v.Deskripsi)
+		f.SetCellValue("risk-control", fmt.Sprintf("G%d", idx+2), ReverseOwnerLvl(v.OwnerLvl))
+		f.SetCellValue("risk-control", fmt.Sprintf("H%d", idx+2), v.OwnerGroup)
+		f.SetCellValue("risk-control", fmt.Sprintf("I%d", idx+2), v.Owner)
+		f.SetCellValue("risk-control", fmt.Sprintf("J%d", idx+2), v.Document)
+		f.SetCellValue("risk-control", fmt.Sprintf("K%d", idx+2), status)
+		f.SetCellValue("risk-control", fmt.Sprintf("L%d", idx+2), createTime)
+		f.SetCellValue("risk-control", fmt.Sprintf("M%d", idx+2), updateTime)
+		f.SetCellValue("risk-control", fmt.Sprintf("N%d", idx+2), "")
+		f.SetCellValue("risk-control", fmt.Sprintf("O%d", idx+2), "")
+	}
+
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		return nil, "", fmt.Errorf("failed to write excel file: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_control_%s.xlsx", time.Now().Format("20060102_150405"))
+
+	return buf.Bytes(), fileName, nil
+
+}
+
+func exportCsv(data []models.RiskControlResponse) (blob []byte, name string, err error) {
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
+
+	headers := []string{"Code", "Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Status", "CreatedAt", "UpdatedAt", "Code Control Attribute", "Name Control Attribute"}
+	if err := writer.Write(headers); err != nil {
+		return nil, "", fmt.Errorf("failed to write csv header: %w", err)
+	}
+
+	for _, v := range data {
+		status := "aktif"
+		if !v.Status {
+			status = "inaktif"
+		}
+		createTime := lib.FormatDatePtr(v.CreatedAt)
+		updateTime := lib.FormatDatePtr(v.UpdatedAt)
+		row := []string{
+			v.Kode,
+			v.RiskControl,
+			v.ControlType,
+			v.Nature,
+			v.KeyControl,
+			v.Deskripsi,
+			ReverseOwnerLvl(v.OwnerLvl),
+			v.OwnerGroup,
+			v.Owner,
+			v.Document,
+			status,
+			createTime,
+			updateTime,
+		}
+
+		if err := writer.Write(row); err != nil {
+			return nil, "", fmt.Errorf("failed to write csv row: %w", err)
+		}
+	}
+
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		return nil, "", fmt.Errorf("failed to flush csv data: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_control_%s.csv", time.Now().Format("20060102_150405"))
+	return buf.Bytes(), fileName, nil
+
+}
+
+func ReverseOwnerLvl(lvl string) string {
+	list := map[string]string{
+		"ho":  "head office",
+		"ro":  "regional office",
+		"bo":  "branch office",
+		"kcp": "kcp",
+		"uk":  "unit kerja",
+	}
+
+	lvlInfo, ok := list[strings.ToLower(lvl)]
+	if !ok {
+		return fmt.Sprintf("invalid reverse lvl of owner: %s", lvl)
+	}
+
+	return lvlInfo
 }
