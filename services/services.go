@@ -4,6 +4,7 @@ import (
 	activity "riskmanagement/services/activity"
 	admin_setting "riskmanagement/services/admin_setting"
 	aplikasi "riskmanagement/services/aplikasi"
+	"riskmanagement/services/arlords"
 	audittrail "riskmanagement/services/audittrail"
 	auth "riskmanagement/services/auth"
 	briefing "riskmanagement/services/briefing"
@@ -129,6 +130,7 @@ var Module = fx.Options(
 	fx.Provide(jenisTask.NewJenisTaskService),
 	fx.Provide(pekerja.NewPekerjaService),
 	fx.Provide(menu.NewMenuService),
+	fx.Provide(arlords.NewArlordService),
 
 	// notification global
 	fx.Provide(notificationGlobal.NewNotificationGlobalService),
