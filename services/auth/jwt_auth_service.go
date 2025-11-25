@@ -143,3 +143,20 @@ func (s JWTAuthService) CreateRealisasiToken(pernr string) string {
 
 	return tokenString
 }
+
+func (s JWTAuthService) CreateArlordsToken(pernr string) string {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"pernr":   pernr,
+		"appID":   "v2",
+		"appName": "arlords",
+		"exp":     time.Now().Add(time.Hour * 8).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(s.env.JWTSecret))
+
+	if err != nil {
+		s.logger.Zap.Error("JWT validation failed: ", err)
+	}
+
+	return tokenString
+}
