@@ -26,6 +26,12 @@ func (s RiskControlRoutes) Setup() {
 		api.POST("/update", s.RiskControlController.Update)
 		api.POST("/delete", s.RiskControlController.Delete)
 		api.POST("/getKode", s.RiskControlController.GetKodeRiskControl)
+		api.POST("/preview", s.RiskControlController.PreviewImport)
+		api.POST("/import", s.RiskControlController.ImportData)
+		api.GET("/template", s.RiskControlController.Template)
+		api.GET("/code", s.RiskControlController.GenCode)
+		api.GET("/download/:format", s.RiskControlController.Download)
+		api.PATCH("/status", s.RiskControlController.UpdateStatus)
 		api.POST("/searchRiskControl", s.RiskControlController.SearchRiskIndicatorByIssue)
 	}
 }
