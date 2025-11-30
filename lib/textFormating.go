@@ -18,3 +18,10 @@ func ParseStringToArray(text string, parse string) []string {
 	}
 	return attributes
 }
+
+func SafeFirst(arr []string) string {
+	if arr == nil || len(arr) == 0 {
+		return ""
+	}
+	return arr[0]
+}

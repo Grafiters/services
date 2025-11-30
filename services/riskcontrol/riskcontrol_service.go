@@ -32,7 +32,7 @@ type RiskControlDefinition interface {
 	GetKodeRiskControl() (responses []models.KodeRiskControl, err error)
 	GenCode() (string, error)
 	UpdateStatus(id int64) (err error)
-	Preview(pernr string, data [][]string) (dto.PreviewFileRiskControl, error)
+	Preview(pernr string, data [][]string) (dto.PreviewFileImport[[10]string], error)
 	Template() ([]byte, string, error)
 	ImportData(pernr string, data [][]string) error
 	Download(pernr, format string) (blob []byte, name string, err error)
@@ -287,33 +287,33 @@ func (rc RiskControlService) GenCode() (string, error) {
 	return code, nil
 }
 
-func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.PreviewFileRiskControl, error) {
+func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.PreviewFileImport[[10]string], error) {
 	jabatan, err := rc.orgRepo.GetHilfm(modelsOrganisasi.JabatanRequest{})
 	if err != nil {
 		rc.logger.Zap.Error("Errored to query jabatan: %s", err)
-		return dto.PreviewFileRiskControl{}, err
+		return dto.PreviewFileImport[[10]string]{}, err
 	}
 
 	departemen, err := rc.orgRepo.GetOrgUnit(modelsOrganisasi.DepartmentRequest{})
 	if err != nil {
 		rc.logger.Zap.Error("Errored to query departemen: %s", err)
-		return dto.PreviewFileRiskControl{}, err
+		return dto.PreviewFileImport[[10]string]{}, err
 	}
 
 	control, err := rc.GetAll()
 	if err != nil {
 		rc.logger.Zap.Error("Errored to query risk control: %s", err)
-		return dto.PreviewFileRiskControl{}, err
+		return dto.PreviewFileImport[[10]string]{}, err
 	}
 
-	previewFile := dto.PreviewFileRiskControl{}
-	body := []dto.PreviewRiskControl{}
+	previewFile := dto.PreviewFileImport[[10]string]{}
+	body := []dto.PreviewFile[[10]string]{}
 	cacheControlAttribute := make(map[string]bool)
 
 	for index, row := range data {
 		if index == 0 {
 			if len(row) < 10 {
-				return dto.PreviewFileRiskControl{}, fmt.Errorf("invalid header format risk control")
+				return dto.PreviewFileImport[[10]string]{}, fmt.Errorf("invalid header format risk control")
 			}
 
 			previewFile.Header = [10]string{
@@ -425,7 +425,7 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 			}
 		}
 
-		body = append(body, dto.PreviewRiskControl{
+		body = append(body, dto.PreviewFile[[10]string]{
 			PerRow:     col,
 			Validation: validation,
 		})
@@ -743,8 +743,9 @@ func (rc RiskControlService) Download(pernr, format string) (blob []byte, name s
 		return exportExcel(data)
 	case "pdf":
 		return exportPDF(data)
+	default:
+		return nil, "", fmt.Errorf("Unsupported format export file")
 	}
-	panic("unplement")
 }
 
 func OwnerLvl(lvl string) string {

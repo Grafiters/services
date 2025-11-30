@@ -33,13 +33,13 @@ func GetTimeNow(param string) string {
 	case "day":
 		return fmt.Sprint(currentTime.Day())
 	case "hour":
-		return string(currentTime.Hour())
+		return fmt.Sprint(currentTime.Hour())
 	case "minutes":
-		return string(currentTime.Minute())
+		return fmt.Sprint(currentTime.Minute())
 	case "second":
-		return string(currentTime.Second())
+		return fmt.Sprint(currentTime.Second())
 	case "unixmicro":
-		return string(currentTime.UnixMicro())
+		return fmt.Sprint(currentTime.UnixMicro())
 	default:
 		fmt.Println("masukan parameter")
 		return ""

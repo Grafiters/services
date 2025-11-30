@@ -47,6 +47,11 @@ func (s RiskIssueRoutes) Setup() {
 		api.POST("/getMateriByCode", s.RiskIssueController.GetMateriByCode)
 		api.POST("/getRiskIssueByActivityID", s.RiskIssueController.GetRiskIssueByActivityID)
 
+		api.PATCH("/status", s.RiskIssueController.UpdateStatus)
+		api.GET("/template", s.RiskIssueController.Template)
+		api.POST("/preview", s.RiskIssueController.PreviewData)
+		api.POST("/import", s.RiskIssueController.ImportData)
+
 	}
 }
 

@@ -37,6 +37,7 @@ type RiskIndicatorDefinition interface {
 	// GetTematikData(request *models.TematikDataRequest) (responses models.TematikDataResponse, err error)
 
 	GetMateriIfFinish(request *models.RequestMateriIfFinish) (response []models.RekomendasiMateri, err error)
+	BulkCreateRiskIndicator(items []models.RiskIndicator, tx *gorm.DB) error
 }
 
 type RiskIndicatorRepository struct {
@@ -106,48 +107,89 @@ func (LI RiskIndicatorRepository) GetAll() (responses []models.RiskIndicatorResp
 }
 
 // GetAllWithPaginate implements RiskIndicatorDefinition
-func (LI RiskIndicatorRepository) GetAllWithPaginate(request *models.Paginate) (responses []models.RiskIndicatorResponse, totalData int, totalRows int, err error) {
-	rows, err := LI.db.DB.Raw(`
-		SELECT 
-			ri.id 'id',
-			ri.risk_indicator_code 'risk_indicator_code',
-			ri.risk_indicator 'risk_indicator',
-			ri.activity_id 'activity_id',
-			ri.product_id 'product_id',
-			ri.deskripsi 'deskripsi',
-			ri.satuan 'satuan',
-			ri.sifat 'sifat',
-			ri.sla_verifikasi 'sla_verifikasi',
-			ri.sla_tindak_lanjut 'sla_tindak_lanjut',
-			ri.sumber_data 'sumber_data',
-			ri.sumber_data_text 'sumber_data_text',
-			ri.periode_pemantauan 'periode_pemantauan',
-			ri.owner 'owner',
-			ri.kpi 'kpi',
-			ri.status 'status',
-			ri.created_at 'created_at',
-			ri.updated_at 'updated_at'
-		FROM risk_indicator ri
-		WHERE ri.delete_flag != 1 ORDER BY ri.id ASC LIMIT ? OFFSET ?
-	`, request.Limit, request.Offset).Rows()
+func (LI RiskIndicatorRepository) GetAllWithPaginate(request *models.Paginate) (
+	responses []models.RiskIndicatorResponse,
+	totalPage int,
+	totalRows int,
+	err error,
+) {
 
-	defer rows.Close()
-	var indicator models.RiskIndicatorResponse
+	// ambil whereQuery + args dari fungsi terpisah
+	whereQuery, args := buildRiskIndicatorFilterQuery(request)
 
-	for rows.Next() {
-		LI.db.DB.ScanRows(rows, &indicator)
-		responses = append(responses, indicator)
+	orderField := "ri.id"
+	if request.Order != "" {
+		orderField = "ri." + request.Order
 	}
 
-	paginateQuery := `SELECT 
-						count(*)
-					FROM risk_indicator WHERE delete_flag != 1`
-	err = LI.dbRaw.DB.QueryRow(paginateQuery).Scan(&totalRows)
+	LI.logger.Zap.Debug(request)
+	limit := request.Limit
+	offset := request.Offset
 
+	query := fmt.Sprintf(`
+		SELECT 
+			ri.id,
+			ri.risk_indicator_code,
+			ri.risk_indicator,
+			ri.activity_id,
+			ri.product_id,
+			ri.deskripsi,
+			ri.satuan,
+			ri.sifat,
+			ri.business_cycle_activity,
+			ri.batasan,
+			ri.kondisi,
+			ri.type,
+			ri.sla_verifikasi,
+			ri.sla_tindak_lanjut,
+			ri.sumber_data,
+			ri.sumber_data_text,
+			ri.periode_pemantauan,
+			ri.owner,
+			ri.kpi,
+			ri.status_indikator,
+			ri.data_source_anomaly,
+			ri.status,
+			ri.created_at,
+			ri.updated_at
+		FROM risk_indicator ri
+		%s
+		ORDER BY %s %s
+		LIMIT ? OFFSET ?
+	`, whereQuery, orderField, request.Sort)
+
+	argsWithPagination := append(args, limit, offset)
+
+	rows, err := LI.db.DB.Raw(query, argsWithPagination...).Rows()
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	defer rows.Close()
+
+	LI.logger.Zap.Debug(rows)
+
+	for rows.Next() {
+		var item models.RiskIndicatorResponse
+		LI.db.DB.ScanRows(rows, &item)
+		responses = append(responses, item)
+	}
+
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM risk_indicator ri
+		%s
+	`, whereQuery)
+
+	err = LI.dbRaw.DB.QueryRow(countQuery, args...).Scan(&totalRows)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	// hitung total halaman
 	result := float64(totalRows) / float64(request.Limit)
-	resultFinal := int(math.Ceil(result))
-	return responses, resultFinal, totalRows, err
+	totalPage = int(math.Ceil(result))
 
+	return responses, totalPage, totalRows, nil
 }
 
 // GetOne implements RiskIndicatorDefinition
@@ -557,4 +599,71 @@ func (LI RiskIndicatorRepository) GetMateriIfFinish(request *models.RequestMater
 	err = db.Scan(&response).Error
 
 	return response, err
+}
+
+func (LI RiskIndicatorRepository) BulkCreateRiskIndicator(items []models.RiskIndicator, tx *gorm.DB) error {
+	if len(items) == 0 {
+		return nil
+	}
+
+	batchSize := 100
+	if len(items) > 1000 {
+		batchSize = 500
+	} else if len(items) > 5000 {
+		batchSize = 1000
+	}
+
+	return tx.CreateInBatches(items, batchSize).Error
+}
+
+func buildRiskIndicatorFilterQuery(request *models.Paginate) (string, []interface{}) {
+	var (
+		whereQuery strings.Builder
+		args       []interface{}
+	)
+
+	whereQuery.WriteString(" WHERE ri.delete_flag != 1 ")
+
+	// Search global
+	if request.Search != "" {
+		whereQuery.WriteString(`
+			AND (
+				ri.risk_indicator_code LIKE ? OR
+				ri.risk_indicator LIKE ? OR
+				ri.deskripsi LIKE ? OR
+				ri.owner LIKE ? OR
+				ri.kpi LIKE ?
+			)
+		`)
+		s := "%" + request.Search + "%"
+		args = append(args, s, s, s, s, s)
+	}
+
+	// Filter created_at
+	if request.CreatedAt != "" {
+		whereQuery.WriteString(" AND DATE(ri.created_at) = ? ")
+		args = append(args, request.CreatedAt)
+	}
+
+	// Filter name (risk_indicator)
+	if request.Name != "" {
+		whereQuery.WriteString(" AND ri.risk_indicator LIKE ? ")
+		args = append(args, "%"+request.Name+"%")
+	}
+
+	// Filter status_indikator
+	if request.Status != "" {
+		whereQuery.WriteString(" AND ri.status_indikator = ? ")
+		args = append(args, request.Status)
+	}
+
+	// Active / Inactive
+	if request.Active {
+		whereQuery.WriteString(" AND ri.status = 1 ")
+	}
+	if request.Inactive {
+		whereQuery.WriteString(" AND ri.status = 0 ")
+	}
+
+	return whereQuery.String(), args
 }

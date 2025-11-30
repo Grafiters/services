@@ -1,11 +1,11 @@
 package dto
 
-type PreviewRiskControl struct {
-	PerRow     [10]string `json:"row"`
-	Validation string     `json:"validation"`
+type PreviewFile[T any] struct {
+	PerRow     T      `json:"row"`
+	Validation string `json:"validation"`
 }
 
-type PreviewFileRiskControl struct {
-	Header [10]string           `json:"header"`
-	Body   []PreviewRiskControl `json:"body"`
+type PreviewFileImport[T any] struct {
+	Header T                `json:"header"`
+	Body   []PreviewFile[T] `json:"body"`
 }

@@ -3,6 +3,7 @@ package models
 import "riskmanagement/lib"
 
 type RiskIssueRequest struct {
+	Pernr          string                 `json:"pernr"`
 	ID             int64                  `json:"id"`
 	RiskTypeID     int64                  `json:"risk_type_id"`
 	RiskIssueCode  string                 `json:"risk_issue_code"`

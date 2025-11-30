@@ -36,6 +36,10 @@ type RiskIssueDefinition interface {
 	GetMateriByCode(request models.RiskIssueCode) (responses []models.ListMateriNull, err error)
 	GetRiskIssueByActivityID(id int64) (responses []models.RiskIssueResponseByActivityNull, err error)
 	GetRiskEventName(id int64) (responses models.RiskIssueName, err error)
+
+	GenerateNewCode() (string, error)
+	UpdateStatus(id int64, status bool) error
+	BulkCreateRiskEvent(items []models.RiskIssue, tx *gorm.DB) error
 }
 
 type RiskIssueRepository struct {
@@ -128,42 +132,42 @@ func (riskIssue RiskIssueRepository) GetOne(id int64) (responses models.RiskIssu
 
 	return responses, err
 }
-
-// Store implements RiskIssueDefinition
 func (riskIssue RiskIssueRepository) Store(request *models.RiskIssue, tx *gorm.DB) (responses *models.RiskIssue, err error) {
-	// return request, tx.Save(&request).Error
-	checkRiskCode, err := riskIssue.dbRaw.DB.Query(`SELECT COUNT(*) FROM risk_issue WHERE risk_issue_code = ?`, request.RiskIssueCode)
 
-	RiskIssueCode := ""
+	var RiskIssueCode string
 
-	checkErr(err)
+	// === 1. Jika request code kosong → langsung generate kode baru ===
+	if request.RiskIssueCode == "" {
+		RiskIssueCode, err = riskIssue.GenerateNewCode()
+		if err != nil {
+			return nil, err
+		}
 
-	if checkCount(checkRiskCode) == 0 {
-		RiskIssueCode = request.RiskIssueCode
-		fmt.Println("checkRisk ==>", RiskIssueCode)
 	} else {
-		// fmt.Println("count", checkCount(checkRiskCode))
 
-		// var count int
-		RiskIssueCode = "RE." + lib.GetTimeNow("date2")
-		queryCount := riskIssue.db.DB.Table("risk_issue").
-			Select(`COUNT(*) 'count'`).
-			Where("risk_issue_code LIKE ?", fmt.Sprintf("%s%%", RiskIssueCode))
-
+		// === 2. Jika tidak kosong, cek apakah sudah ada di database ===
 		var count int64
-		queryCount.
-			Count(&count)
+		err = riskIssue.db.DB.
+			Table("risk_issue").
+			Where("risk_issue_code = ?", request.RiskIssueCode).
+			Count(&count).Error
+		if err != nil {
+			return nil, err
+		}
 
-		counter := count
-
-		str := fmt.Sprintf("%04d", counter+1)
-
-		RiskIssueCode += "." + str
-
-		fmt.Println("checkRisk gak nol ==>", RiskIssueCode)
-
+		if count == 0 {
+			// Tidak ada → aman dipakai
+			RiskIssueCode = request.RiskIssueCode
+		} else {
+			// Ada → harus generate baru
+			RiskIssueCode, err = riskIssue.GenerateNewCode()
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
+	// === 3. Persist data ===
 	input := &models.RiskIssue{
 		RiskTypeID:     request.RiskTypeID,
 		RiskIssueCode:  RiskIssueCode,
@@ -177,9 +181,29 @@ func (riskIssue RiskIssueRepository) Store(request *models.RiskIssue, tx *gorm.D
 		CreatedAt:      request.CreatedAt,
 	}
 
-	err = tx.Save(input).Error
-
+	err = tx.Create(input).Error // lebih tepat dari Save untuk insert
 	return input, err
+}
+
+func (riskIssue RiskIssueRepository) GenerateNewCode() (string, error) {
+
+	// Base: RE.20250127
+	baseCode := "RE." + lib.GetTimeNow("date2")
+
+	var count int64
+	err := riskIssue.db.DB.
+		Table("risk_issue").
+		Where("risk_issue_code LIKE ?", baseCode+"%").
+		Count(&count).Error
+
+	if err != nil {
+		return "", err
+	}
+
+	// Generate 4 digit sequence
+	seq := fmt.Sprintf("%04d", count+1)
+
+	return baseCode + "." + seq, nil
 }
 
 // Update implements RiskIssueDefinition
@@ -348,11 +372,11 @@ func (riskIssue RiskIssueRepository) FilterRiskIssue(request *models.FilterRiskI
 		queryBuilder = queryBuilder.Where("risk_issue.kategori_risiko = ?", request.KategoriRisiko)
 	}
 
-	if request.Status == false {
+	if !request.Status {
 		queryBuilder = queryBuilder.Where("risk_issue.status = ?", false)
 	}
 
-	if request.Status == true {
+	if request.Status {
 		queryBuilder = queryBuilder.Where("risk_issue.status = ?", true)
 	}
 
@@ -654,4 +678,26 @@ func (riskIssue RiskIssueRepository) SearchRiskIssueWithoutSub(request *models.R
 	totalPagesProd := int(math.Ceil(float64(totalRowsProd) / float64(request.Limit)))
 
 	return responses, totalPagesProd, totalRowsProd, errProd
+}
+
+// Update data risk control for status only
+func (rc RiskIssueRepository) UpdateStatus(id int64, status bool) error {
+	err := rc.db.DB.Model(&models.RiskIssue{}).Where("id = ?", id).Update("status = ?", status).Error
+
+	return err
+}
+
+func (LI RiskIssueRepository) BulkCreateRiskEvent(items []models.RiskIssue, tx *gorm.DB) error {
+	if len(items) == 0 {
+		return nil
+	}
+
+	batchSize := 100
+	if len(items) > 1000 {
+		batchSize = 500
+	} else if len(items) > 5000 {
+		batchSize = 1000
+	}
+
+	return tx.CreateInBatches(items, batchSize).Error
 }

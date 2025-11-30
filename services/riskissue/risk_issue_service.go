@@ -1,12 +1,28 @@
 package riskissue
 
 import (
+	"bytes"
 	"fmt"
+	"riskmanagement/dto"
 	"riskmanagement/lib"
 	models "riskmanagement/models/riskissue"
+	"riskmanagement/repository/eventtypelv1"
+	"riskmanagement/repository/eventtypelv2"
+	"riskmanagement/repository/eventtypelv3"
+	"riskmanagement/repository/incident"
+	"riskmanagement/repository/penyebabkejadianlv3"
+	"riskmanagement/repository/product"
+	"riskmanagement/repository/riskcontrol"
+	"riskmanagement/repository/riskindicator"
 	riskissue "riskmanagement/repository/riskissue"
+	"riskmanagement/repository/risktype"
+	"riskmanagement/repository/subincident"
+	"riskmanagement/services/arlords"
+	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
 
 	"gitlab.com/golang-package-library/logger"
 )
@@ -43,27 +59,43 @@ type RiskIssueDefinition interface {
 	GetMateriByCode(request models.RiskIssueCode) (responses []models.ListMateri, err error)
 	GetRiskIssueByActivityID(id int64) (responses []models.RiskIssueResponseByActivity, err error)
 	GetRiskEventName(id int64) (name string, err error)
+	UpdateStatus(id int64) error
+	Template() ([]byte, string, error)
+	PreviewData(pernr string, data [][]string) (dto.PreviewFileImport[[27]string], error)
+	ImportData(pernr string, data [][]string) error
 }
 
 type RiskIssueService struct {
-	db            lib.Database
-	dbRaw         lib.Databases
-	logger        logger.Logger
-	riskissueRepo riskissue.RiskIssueDefinition
-	mapAktifitas  riskissue.MapAktifitasDefinition
-	mapEvent      riskissue.MapEventDefinition
-	mapLiniBisnis riskissue.MapLiniBisnisDefinition
-	mapKejadian   riskissue.MapKejadianDefinition
-	mapProduct    riskissue.MapProductDefinition
-	mapProses     riskissue.MapProsesDefinition
-	mapControl    riskissue.MapControlDefinition
-	mapIndicator  riskissue.MapIndicatorDefinition
+	db             lib.Database
+	dbRaw          lib.Databases
+	logger         logger.Logger
+	arlodsService  arlords.ArlordsServiceDefinition
+	riskissueRepo  riskissue.RiskIssueDefinition
+	mapAktifitas   riskissue.MapAktifitasDefinition
+	mapEvent       riskissue.MapEventDefinition
+	mapLiniBisnis  riskissue.MapLiniBisnisDefinition
+	mapKejadian    riskissue.MapKejadianDefinition
+	mapProduct     riskissue.MapProductDefinition
+	mapProses      riskissue.MapProsesDefinition
+	mapControl     riskissue.MapControlDefinition
+	mapIndicator   riskissue.MapIndicatorDefinition
+	eventTypelvl1  eventtypelv1.EventTypeLv1Definition
+	eventTypeLvl2  eventtypelv2.EventTypeLv2Definition
+	eventTypeLvl3  eventtypelv3.EventTypeLv3Definition
+	incident       incident.IncidentDefinition
+	subIncident    subincident.SubIncidentDefinition
+	subsubIncident penyebabkejadianlv3.PenyebabKejadianLv3Definition
+	product        product.ProductDefinition
+	riskType       risktype.RiskTypeDefinition
+	riskControl    riskcontrol.RiskControlDefinition
+	riskIndicator  riskindicator.RiskIndicatorDefinition
 }
 
 func NewRiskIssueService(
 	db lib.Database,
 	dbRaw lib.Databases,
 	logger logger.Logger,
+	arlodsService arlords.ArlordsServiceDefinition,
 	riskissueRepo riskissue.RiskIssueDefinition,
 	mapAktifitas riskissue.MapAktifitasDefinition,
 	mapEvent riskissue.MapEventDefinition,
@@ -73,20 +105,41 @@ func NewRiskIssueService(
 	mapProses riskissue.MapProsesDefinition,
 	mapControl riskissue.MapControlDefinition,
 	mapIndicator riskissue.MapIndicatorDefinition,
+	eventTypelvl1 eventtypelv1.EventTypeLv1Definition,
+	eventTypeLvl2 eventtypelv2.EventTypeLv2Definition,
+	eventTypeLvl3 eventtypelv3.EventTypeLv3Definition,
+	incident incident.IncidentDefinition,
+	subIncident subincident.SubIncidentDefinition,
+	subsubIncident penyebabkejadianlv3.PenyebabKejadianLv3Definition,
+	product product.ProductDefinition,
+	riskType risktype.RiskTypeDefinition,
+	riskControl riskcontrol.RiskControlDefinition,
+	riskIndicator riskindicator.RiskIndicatorDefinition,
 ) RiskIssueDefinition {
 	return RiskIssueService{
-		db:            db,
-		dbRaw:         dbRaw,
-		logger:        logger,
-		riskissueRepo: riskissueRepo,
-		mapAktifitas:  mapAktifitas,
-		mapEvent:      mapEvent,
-		mapLiniBisnis: mapLiniBisnis,
-		mapKejadian:   mapKejadian,
-		mapProduct:    mapProduct,
-		mapProses:     mapProses,
-		mapControl:    mapControl,
-		mapIndicator:  mapIndicator,
+		db:             db,
+		dbRaw:          dbRaw,
+		logger:         logger,
+		arlodsService:  arlodsService,
+		riskissueRepo:  riskissueRepo,
+		mapAktifitas:   mapAktifitas,
+		mapEvent:       mapEvent,
+		mapLiniBisnis:  mapLiniBisnis,
+		mapKejadian:    mapKejadian,
+		mapProduct:     mapProduct,
+		mapProses:      mapProses,
+		mapControl:     mapControl,
+		mapIndicator:   mapIndicator,
+		eventTypelvl1:  eventTypelvl1,
+		eventTypeLvl2:  eventTypeLvl2,
+		eventTypeLvl3:  eventTypeLvl3,
+		incident:       incident,
+		subIncident:    subIncident,
+		subsubIncident: subsubIncident,
+		product:        product,
+		riskType:       riskType,
+		riskControl:    riskControl,
+		riskIndicator:  riskIndicator,
 	}
 }
 
@@ -174,6 +227,10 @@ func (riskIssue RiskIssueService) GetOne(id int64) (responses models.RiskIssueRe
 func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (responses bool, err error) {
 	timeNow := lib.GetTimeNow("timestime")
 
+	product := make([]dto.MappingProductRiskEventRequest, 0)
+	cause := make([]dto.MappingLVLRequest, 0)
+	event := make([]dto.MappingLVLRequest, 0)
+
 	tx := riskIssue.db.DB.Begin()
 
 	reqRiskIssue := &models.RiskIssue{
@@ -213,59 +270,95 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
-	//Input MapEvent
+	// Update MapEvent
 	if len(request.MapEvent) != 0 {
 		for _, value := range request.MapEvent {
-			_, err = riskIssue.mapEvent.Store(&models.MapEvent{
-				IDRiskIssue:  dataRiskIssue.ID,
-				EventTypeLv1: value.EventTypeLv1,
-				EventTypeLv2: value.EventTypeLv2,
-				EventTypeLv3: value.EventTypeLv3,
-			}, tx)
 
+			lvl1 := strings.TrimSpace(value.EventTypeLv1)
+			lvl2 := strings.TrimSpace(value.EventTypeLv2)
+			lvl3 := strings.TrimSpace(value.EventTypeLv3)
+
+			if lvl1 == "" {
+				continue
+			}
+
+			if lvl3 != "" && lvl2 == "" {
+				continue
+			}
+
+			event = append(event, dto.MappingLVLRequest{
+				RiskEventID: strconv.FormatInt(value.ID, 10),
+				Lvl1:        lvl1,
+				Lvl2:        lvl2,
+				Lvl3:        lvl3,
+			})
+
+			updateEvent := &models.MapEvent{
+				ID:           value.ID,
+				IDRiskIssue:  request.ID,
+				EventTypeLv1: lvl1,
+				EventTypeLv2: lvl2,
+				EventTypeLv3: lvl3,
+			}
+
+			_, err = riskIssue.mapEvent.Update(updateEvent, tx)
 			if err != nil {
 				tx.Rollback()
 				riskIssue.logger.Zap.Error(err)
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
-	//Input MapKejadian
+	// Update MapKejadian (Cause)
 	if len(request.MapKejadian) != 0 {
 		for _, value := range request.MapKejadian {
-			_, err = riskIssue.mapKejadian.Store(&models.MapKejadian{
-				IDRiskIssue:         dataRiskIssue.ID,
-				PenyebabKejadianLv1: value.PenyebabKejadianLv1,
-				PenyebabKejadianLv2: value.PenyebabKejadianLv2,
-				PenyebabKejadianLv3: value.PenyebabKejadianLv3,
-			}, tx)
 
+			lvl1 := strings.TrimSpace(value.PenyebabKejadianLv1)
+			lvl2 := strings.TrimSpace(value.PenyebabKejadianLv2)
+			lvl3 := strings.TrimSpace(value.PenyebabKejadianLv3)
+
+			if lvl1 == "" {
+				continue
+			}
+
+			if lvl3 != "" && lvl2 == "" {
+				continue
+			}
+
+			cause = append(cause, dto.MappingLVLRequest{
+				RiskEventID: strconv.FormatInt(value.ID, 10),
+				Lvl1:        lvl1,
+				Lvl2:        lvl2,
+				Lvl3:        lvl3,
+			})
+
+			updateKejadian := &models.MapKejadian{
+				ID:                  value.ID,
+				IDRiskIssue:         request.ID,
+				PenyebabKejadianLv1: lvl1,
+				PenyebabKejadianLv2: lvl2,
+				PenyebabKejadianLv3: lvl3,
+			}
+
+			_, err = riskIssue.mapKejadian.Update(updateKejadian, tx)
 			if err != nil {
 				tx.Rollback()
 				riskIssue.logger.Zap.Error(err)
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
 	//Input MapProduct
 	if len(request.MapProduct) != 0 {
 		for _, value := range request.MapProduct {
+			product = append(product, dto.MappingProductRiskEventRequest{
+				RiskEventID: strconv.FormatInt(dataRiskIssue.ID, 10),
+				ProductID:   strconv.FormatInt(value.Product, 10),
+			})
 			_, err = riskIssue.mapProduct.Store(&models.MapProduct{
 				IDRiskIssue: dataRiskIssue.ID,
 				Product:     value.Product,
@@ -277,10 +370,6 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
 	//input Map Lini Bisnis
@@ -299,10 +388,6 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
 	//input Map aktifitas
@@ -320,9 +405,25 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 				return false, err
 			}
 		}
-	} else {
+	}
+
+	data := make([]dto.MappingRiskEventRequest, 0)
+
+	data = append(data, dto.MappingRiskEventRequest{
+		MappingRiskEvent:        event,
+		MappingProductRiskEvent: product,
+		MappingCauseRiskEvent:   cause,
+	})
+
+	mapping := dto.BulkMappingRiskEventRequest{
+		Data: data,
+	}
+
+	// create mapping on opra service
+	err = riskIssue.arlodsService.CreateMappingEvent(request.Pernr, mapping)
+	if err != nil {
 		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
+		riskIssue.logger.Zap.Error("Error when request to save mapping: %s", err)
 		return false, err
 	}
 
@@ -370,6 +471,10 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 		return false, err
 	}
 
+	product := make([]dto.MappingProductRiskEventRequest, 0)
+	cause := make([]dto.MappingLVLRequest, 0)
+	event := make([]dto.MappingLVLRequest, 0)
+
 	//Update MapProses
 	if len(request.MapProses) != 0 {
 		for _, value := range request.MapProses {
@@ -395,59 +500,93 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 		return false, err
 	}
 
-	//Update MapEvent
+	// Update MapEvent
 	if len(request.MapEvent) != 0 {
 		for _, value := range request.MapEvent {
+
+			lvl1 := strings.TrimSpace(value.EventTypeLv1)
+			lvl2 := strings.TrimSpace(value.EventTypeLv2)
+			lvl3 := strings.TrimSpace(value.EventTypeLv3)
+
+			if lvl1 == "" {
+				continue
+			}
+
+			if lvl3 != "" && lvl2 == "" {
+				continue
+			}
+
+			event = append(event, dto.MappingLVLRequest{
+				RiskEventID: strconv.FormatInt(value.ID, 10),
+				Lvl1:        lvl1,
+				Lvl2:        lvl2,
+				Lvl3:        lvl3,
+			})
+
 			updateEvent := &models.MapEvent{
 				ID:           value.ID,
 				IDRiskIssue:  request.ID,
-				EventTypeLv1: value.EventTypeLv1,
-				EventTypeLv2: value.EventTypeLv2,
-				EventTypeLv3: value.EventTypeLv3,
+				EventTypeLv1: lvl1,
+				EventTypeLv2: lvl2,
+				EventTypeLv3: lvl3,
 			}
 
 			_, err = riskIssue.mapEvent.Update(updateEvent, tx)
-
 			if err != nil {
 				tx.Rollback()
 				riskIssue.logger.Zap.Error(err)
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
-	//Update MapKejadian
+	// Update MapKejadian (Cause)
 	if len(request.MapKejadian) != 0 {
 		for _, value := range request.MapKejadian {
+
+			lvl1 := strings.TrimSpace(value.PenyebabKejadianLv1)
+			lvl2 := strings.TrimSpace(value.PenyebabKejadianLv2)
+			lvl3 := strings.TrimSpace(value.PenyebabKejadianLv3)
+
+			if lvl1 == "" {
+				continue
+			}
+
+			if lvl3 != "" && lvl2 == "" {
+				continue
+			}
+
+			cause = append(cause, dto.MappingLVLRequest{
+				RiskEventID: strconv.FormatInt(value.ID, 10),
+				Lvl1:        lvl1,
+				Lvl2:        lvl2,
+				Lvl3:        lvl3,
+			})
+
 			updateKejadian := &models.MapKejadian{
 				ID:                  value.ID,
 				IDRiskIssue:         request.ID,
-				PenyebabKejadianLv1: value.PenyebabKejadianLv1,
-				PenyebabKejadianLv2: value.PenyebabKejadianLv2,
-				PenyebabKejadianLv3: value.PenyebabKejadianLv3,
+				PenyebabKejadianLv1: lvl1,
+				PenyebabKejadianLv2: lvl2,
+				PenyebabKejadianLv3: lvl3,
 			}
 
 			_, err = riskIssue.mapKejadian.Update(updateKejadian, tx)
-
 			if err != nil {
 				tx.Rollback()
 				riskIssue.logger.Zap.Error(err)
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
 	//Update MapProduct
 	if len(request.MapProduct) != 0 {
 		for _, value := range request.MapProduct {
+			product = append(product, dto.MappingProductRiskEventRequest{
+				RiskEventID: strconv.FormatInt(value.ID, 10),
+				ProductID:   strconv.FormatInt(value.Product, 10),
+			})
 			updateProduct := &models.MapProduct{
 				ID:          value.ID,
 				IDRiskIssue: request.ID,
@@ -514,6 +653,26 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 	} else {
 		tx.Rollback()
 		riskIssue.logger.Zap.Error(err)
+		return false, err
+	}
+
+	data := make([]dto.MappingRiskEventRequest, 0)
+
+	data = append(data, dto.MappingRiskEventRequest{
+		MappingRiskEvent:        event,
+		MappingProductRiskEvent: product,
+		MappingCauseRiskEvent:   cause,
+	})
+
+	mapping := dto.BulkMappingRiskEventRequest{
+		Data: data,
+	}
+
+	// create mapping on opra service
+	err = riskIssue.arlodsService.CreateMappingEvent(request.Pernr, mapping)
+	if err != nil {
+		tx.Rollback()
+		riskIssue.logger.Zap.Error("Error when request to save mapping: %s", err)
 		return false, err
 	}
 
@@ -1010,4 +1169,1102 @@ func (riskIssue RiskIssueService) GetRiskEventName(id int64) (name string, err e
 	name = data.RiskIssue
 
 	return name, err
+}
+
+func (riskIssue RiskIssueService) UpdateStatus(id int64) error {
+	var (
+		status bool = true
+	)
+	data, err := riskIssue.riskissueRepo.GetOne(id)
+	if err != nil {
+		return err
+	}
+
+	if data.Status {
+		status = false
+	}
+
+	err = riskIssue.riskissueRepo.UpdateStatus(id, status)
+
+	return err
+}
+
+func (riskIssue RiskIssueService) Template() ([]byte, string, error) {
+	f := excelize.NewFile()
+	sheet := "Template"
+
+	f.SetSheetName("Sheet1", sheet)
+
+	sheetIndex, err := f.GetSheetIndex(sheet)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get sheet index: %w", err)
+	}
+	f.SetActiveSheet(sheetIndex)
+
+	headers := []string{
+		"Tipe Risiko",
+		"Risk Event",
+		"Deskripsi",
+		"Kategori Risiko",
+		"Map Event - Event Type Lv1",
+		"Map Event - Event Type Lv2",
+		"Map Event - Event Type Lv3",
+		"Map Kejadian - Penyebab Kejadian Lv1",
+		"Map Kejadian - Penyebab Kejadian Lv2",
+		"Map Kejadian - Penyebab Kejadian Lv3",
+		"Map Product - Product",
+		"Likelihood",
+		"Impact",
+		"Code Control",
+		"Risk Control",
+		"Code Indicator",
+		"Risk Indicator",
+		"Code Business Cycle",
+		"Business Cycle",
+		"Code Sub Business Cycle",
+		"Sub Business Cycle",
+		"Code Process",
+		"Process",
+		"Code Sub Process",
+		"Sub Process",
+		"Code Activity",
+		"Activity",
+	}
+
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		if err := f.SetCellValue(sheet, cell, h); err != nil {
+			return nil, "", fmt.Errorf("failed to set cell: %w", err)
+		}
+	}
+
+	// optional: set lebar kolom
+	for i := 1; i <= len(headers); i++ {
+		col, _ := excelize.ColumnNumberToName(i)
+		f.SetColWidth(sheet, col, col, 25)
+	}
+
+	// simpan ke buffer
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		return nil, "", fmt.Errorf("failed to write excel: %w", err)
+	}
+
+	return buf.Bytes(), "risk_event_template.xlsx", nil
+}
+
+func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dto.PreviewFileImport[[27]string], error) {
+	issues, err := riskIssue.riskissueRepo.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query risk issue: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	// Mapping code -> ID
+	riskIssueMap := make(map[string]string)
+	for _, e := range issues {
+		riskIssueMap[e.RiskIssueCode] = strconv.FormatInt(e.ID, 10)
+	}
+
+	riskType, err := riskIssue.riskType.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query risk type: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	riskTypeMap := make(map[string]bool, len(riskType))
+	riskTypeIDMap := make(map[string]int64, len(riskType))
+	for _, a := range riskType {
+		key := strings.ToLower(a.RiskTypeCode)
+		riskTypeMap[key] = true
+		riskTypeIDMap[key] = a.ID
+	}
+
+	eventLv1, err := riskIssue.eventTypelvl1.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query event type lvl 1: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	eventTypeLv1Map := make(map[string]bool, len(eventLv1))
+	eventTypeLv1IDMap := make(map[string]int64, len(eventLv1))
+	for _, a := range eventLv1 {
+		key := strings.ToLower(a.KodeEventType)
+		eventTypeLv1Map[key] = true
+		eventTypeLv1IDMap[key] = a.ID
+	}
+
+	eventLv2, err := riskIssue.eventTypeLvl2.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query event type lvl 2: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	eventTypelv2Map := make(map[string]bool, len(eventLv2))
+	eventTypelv2IDMap := make(map[string]int64, len(eventLv2))
+	eventLv2Parent := make(map[string]string)
+
+	for _, a := range eventLv2 {
+		key := strings.ToLower(a.KodeEventTypeLv2)
+		parent := strings.ToLower(a.IDEventTypeLv1)
+
+		eventTypelv2Map[key] = true
+		eventTypelv2IDMap[key] = a.ID
+		eventLv2Parent[key] = parent
+	}
+
+	eventLv3, err := riskIssue.eventTypeLvl3.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query event type lvl 3: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	eventTypelv3Map := make(map[string]bool, len(eventLv3))
+	eventTypelv3IDMap := make(map[string]int64, len(eventLv3))
+	eventLv3Parent := make(map[string]string)
+
+	for _, a := range eventLv3 {
+		key := strings.ToLower(a.KodeEventTypeLv3)
+		parent := strings.ToLower(a.IDEventTypeLv2)
+
+		eventTypelv3Map[key] = true
+		eventTypelv3IDMap[key] = a.ID
+		eventLv3Parent[key] = parent
+	}
+
+	incident, err := riskIssue.incident.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query incident: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	incidentMap := make(map[string]bool, len(incident))
+	incidentIDMap := make(map[string]int64, len(incident))
+	for _, a := range incident {
+		key := strings.ToLower(a.KodeKejadian)
+		incidentMap[key] = true
+		incidentIDMap[key] = a.ID
+	}
+
+	subIncident, err := riskIssue.subIncident.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query subIncident: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	subIncidentParentMap := make(map[string]string)
+	subIncidentMap := make(map[string]bool)
+	subIncidentIDMap := make(map[string]int64)
+
+	for _, a := range subIncident {
+		key := strings.ToLower(a.KodeSubKejadian)
+		parent := strings.ToLower(a.KodeKejadian)
+
+		subIncidentMap[key] = true
+		subIncidentIDMap[key] = a.ID
+		subIncidentParentMap[key] = parent
+	}
+
+	subsubIncident, err := riskIssue.subsubIncident.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query subSubIncident: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	subsubIncidentMap := make(map[string]bool)
+	subsubIncidentIDMap := make(map[string]int64)
+	subsubIncidentParentMap := make(map[string]string)
+
+	for _, a := range subsubIncident {
+		key := strings.ToLower(a.KodePenyebabKejadianLv3)
+		parent := strings.ToLower(a.KodeSubKejadian)
+
+		subsubIncidentMap[key] = true
+		subsubIncidentIDMap[key] = a.ID
+		subsubIncidentParentMap[key] = parent
+	}
+
+	product, err := riskIssue.product.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query product: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	productMap := make(map[string]bool)
+	productIDMap := make(map[string]int64)
+	for _, a := range product {
+		key := strings.ToLower(a.KodeProduct)
+		productMap[key] = true
+		productIDMap[key] = a.ID
+	}
+
+	control, err := riskIssue.riskControl.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query risk control: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	controlMap := make(map[string]bool)
+	controlIDMap := make(map[string]int64)
+	for _, a := range control {
+		key := strings.ToLower(a.Kode)
+		controlMap[key] = true
+		controlIDMap[key] = a.ID
+	}
+
+	indicator, err := riskIssue.riskIndicator.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query risk indicator: %s", err)
+		return dto.PreviewFileImport[[27]string]{}, err
+	}
+
+	indicatorMap := make(map[string]bool)
+	indicatorIDMap := make(map[string]int64)
+	for _, a := range indicator {
+		key := strings.ToLower(a.RiskIndicatorCode)
+		indicatorMap[key] = true
+		indicatorIDMap[key] = a.ID
+	}
+
+	headers := [27]string{
+		"Tipe Risiko",
+		"Risk Event",
+		"Deskripsi",
+		"Kategori Risiko",
+		"Map Event - Event Type Lv1",
+		"Map Event - Event Type Lv2",
+		"Map Event - Event Type Lv3",
+		"Map Kejadian - Penyebab Kejadian Lv1",
+		"Map Kejadian - Penyebab Kejadian Lv2",
+		"Map Kejadian - Penyebab Kejadian Lv3",
+		"Map Product - Product",
+		"Likelihood",
+		"Impact",
+		"Code Control",
+		"Risk Control",
+		"Code Indicator",
+		"Risk Indicator",
+		"Code Business Cycle",
+		"Business Cycle",
+		"Code Sub Business Cycle",
+		"Sub Business Cycle",
+		"Code Process",
+		"Process",
+		"Code Sub Process",
+		"Sub Process",
+		"Code Activity",
+		"Activity",
+	}
+
+	previewFile := dto.PreviewFileImport[[27]string]{}
+	body := []dto.PreviewFile[[27]string]{}
+
+	cacheBusinessProcess := make(map[string]dto.BusinessProcessNode, 0)
+	eventIDs := make([]string, 0)
+	mapping := make(map[string]dto.MappingEvent, 0)
+
+	for i, row := range data {
+		if i == 0 {
+			continue
+		}
+		riskType := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(row[0], "-")))
+		eventIDs = append(eventIDs, riskType)
+	}
+
+	mappingResp, err := riskIssue.arlodsService.GetAllMappingRiskEvent(pernr, eventIDs)
+	if err != nil {
+		return dto.PreviewFileImport[[27]string]{}, fmt.Errorf("gagal mengambil mapping event: %v", err)
+	}
+
+	// Buat map riskEventID -> DetailMappingEvent
+	mappingByEventID := make(map[string]dto.DetailMappingEvent)
+	for _, item := range mappingResp.Data {
+		mappingByEventID[strings.ToLower(item.RiskEventID)] = item
+	}
+
+	for i, row := range data {
+		validation := ""
+		col := [27]string{}
+		event := dto.MappingEvent{}
+
+		if i == 0 {
+			if len(row) < 27 {
+				return dto.PreviewFileImport[[27]string]{}, fmt.Errorf("invalid header format risk event")
+			}
+
+			for i, v := range headers {
+				if strings.TrimSpace(row[i]) != v {
+					return dto.PreviewFileImport[[27]string]{}, fmt.Errorf("header kolom ke-%d invalid format, diharapkan '%s', diterima '%s'", i+1, v, row[i])
+				}
+			}
+			previewFile.Header = headers
+			continue
+		}
+
+		parse := lib.ParseStringToArray(row[1], "|")
+		riskEventCode := parse[0]
+		if _, ok := riskIssueMap[riskEventCode]; ok {
+			continue
+		}
+
+		// ================================
+		// STEP 1 — PERSIAPAN FIELD BP
+		// ================================
+		businessCycleStr := row[17]
+		subBusinessCycleStr := row[19]
+		processStr := row[21]
+		subProcessStr := row[23]
+		activityStr := row[25]
+
+		activities := lib.ParseStringToArray(activityStr, ";")
+
+		// ================================
+		// STEP 2 — CACHE BUSINESS PROCESS
+		// ================================
+		for _, act := range activities {
+			resp, err := riskIssue.arlodsService.GetHirearcyBusinessProcess(pernr, act)
+			if err != nil {
+				return dto.PreviewFileImport[[27]string]{}, err
+			}
+			if len(resp.Data.List) == 0 {
+				validation += fmt.Sprintf("Activity '%s' tidak ditemukan di hierarchy; ", act)
+				continue
+			}
+			for _, bc := range resp.Data.List {
+				extractBusinessProcessNodes(bc, cacheBusinessProcess)
+			}
+		}
+
+		validation += ValidateBPWithMultiValue(
+			businessCycleStr,
+			subBusinessCycleStr,
+			processStr,
+			subProcessStr,
+			activityStr,
+			cacheBusinessProcess,
+		)
+
+		// ================================
+		// STEP 3 — PARSE FIELD LAINNYA
+		// ================================
+		riskType := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(row[0], "-")))
+		eventLv1 := lib.ParseStringToArray(row[4], ";")
+		eventLv2 := lib.ParseStringToArray(row[5], ";")
+		eventLv3 := lib.ParseStringToArray(row[6], ";")
+		incident := lib.ParseStringToArray(row[7], ";")
+		subIncident := lib.ParseStringToArray(row[8], ";")
+		subsubIncident := lib.ParseStringToArray(row[9], ";")
+		product := lib.ParseStringToArray(row[10], ";")
+
+		if _, ok := riskTypeMap[riskType]; !ok {
+			validation += fmt.Sprintf("Risk Type tidak terdaftar: %s; ", riskType)
+		}
+		eventIDs = append(eventIDs, riskType)
+
+		evnLv1map, evnLv2map, evnLv3map := []string{}, []string{}, []string{}
+		for i := range eventLv1 {
+			lv1 := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(eventLv1[i], "-")))
+			lv2 := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(eventLv2[i], "-")))
+			lv3 := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(eventLv3[i], "-")))
+
+			if !eventTypeLv1Map[lv1] {
+				validation += fmt.Sprintf("Event LV1 tidak terdaftar: %s; ", row[4])
+			} else {
+				evnLv1map = append(evnLv1map, lv1)
+			}
+			if !eventTypelv2Map[lv2] {
+				validation += fmt.Sprintf("Event LV2 tidak terdaftar: %s; ", row[5])
+			} else {
+				evnLv2map = append(evnLv2map, lv2)
+			}
+			if !eventTypelv3Map[lv3] {
+				validation += fmt.Sprintf("Event LV3 tidak terdaftar: %s; ", row[6])
+			} else {
+				evnLv3map = append(evnLv3map, lv3)
+			}
+
+			if eventLv2Parent[lv2] != lv1 {
+				validation += fmt.Sprintf("Event LV2 '%s' tidak terkait LV1 '%s'; ", row[5], row[4])
+			}
+			if eventLv3Parent[lv3] != lv2 {
+				validation += fmt.Sprintf("Event LV3 '%s' tidak terkait LV2 '%s'; ", row[6], row[5])
+			}
+		}
+
+		event.EventLV1 = evnLv1map
+		event.EventLv2 = evnLv2map
+		event.EventLv3 = evnLv3map
+
+		// Incident
+		incLv1Map, incLv2Map, incLv3Map := []string{}, []string{}, []string{}
+		for i := range incident {
+			lv1 := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(incident[i], "-")))
+			lv2 := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(subIncident[i], "-")))
+			lv3 := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(subsubIncident[i], "-")))
+
+			if !incidentMap[lv1] {
+				validation += fmt.Sprintf("Incident LV1 tidak terdaftar: %s; ", row[7])
+			} else {
+				incLv1Map = append(incLv1Map, lv1)
+			}
+			if lv2 != "" {
+				if !incidentMap[lv2] {
+					validation += fmt.Sprintf("Incident LV2 tidak terdaftar: %s; ", row[8])
+				} else {
+					incLv2Map = append(incLv2Map, lv2)
+					if subIncidentParentMap[lv2] != lv1 {
+						validation += fmt.Sprintf("Incident LV2 '%s' tidak terkait LV1 '%s'; ", row[8], row[7])
+					}
+				}
+			}
+			if lv3 != "" {
+				if !incidentMap[lv3] {
+					validation += fmt.Sprintf("Incident LV3 tidak terdaftar: %s; ", row[9])
+				} else {
+					incLv3Map = append(incLv3Map, lv3)
+					if subsubIncidentParentMap[lv3] != lv2 {
+						validation += fmt.Sprintf("Incident LV3 '%s' tidak terkait LV2 '%s'; ", row[9], row[8])
+					}
+				}
+			}
+		}
+		event.Incident = incLv1Map
+		event.SubIncident = incLv2Map
+		event.SubSubIncident = incLv3Map
+
+		// Product
+		productMapped := []string{}
+		for _, p := range product {
+			p = strings.ToLower(strings.TrimSpace(p))
+			if p == "" {
+				continue
+			}
+			if !productMap[p] {
+				validation += fmt.Sprintf("Product tidak terdaftar: %s; ", p)
+			} else {
+				productMapped = append(productMapped, p)
+			}
+		}
+		event.ProductIDs = append(event.ProductIDs, productMapped...)
+
+		// ================================
+		// STEP 4 — VALIDASI TERHADAP MAPPING EXISTING
+		// ================================
+		if mappedEvent, exists := mappingByEventID[riskType]; exists {
+			// MappingEvent
+			for _, m := range mappedEvent.MappingDetail.MappingEvent {
+				for _, v := range evnLv1map {
+					if v == strings.ToLower(m.EventTypeLvl1) {
+						validation += fmt.Sprintf("Event LV1 '%s' sudah termapping; ", v)
+					}
+				}
+				for _, v := range evnLv2map {
+					if v == strings.ToLower(m.EventTypeLvl2) {
+						validation += fmt.Sprintf("Event LV2 '%s' sudah termapping; ", v)
+					}
+				}
+				for _, v := range evnLv3map {
+					if v == strings.ToLower(m.EventTypeLvl3) {
+						validation += fmt.Sprintf("Event LV3 '%s' sudah termapping; ", v)
+					}
+				}
+			}
+			// MappingCause
+			for _, m := range mappedEvent.MappingDetail.MappingCause {
+				for _, v := range incLv1Map {
+					if v == strings.ToLower(m.Incident) {
+						validation += fmt.Sprintf("Incident LV1 '%s' sudah termapping; ", v)
+					}
+				}
+				for _, v := range incLv2Map {
+					if v == strings.ToLower(m.SubIncident) {
+						validation += fmt.Sprintf("Incident LV2 '%s' sudah termapping; ", v)
+					}
+				}
+				for _, v := range incLv3Map {
+					if v == strings.ToLower(m.SubSubIncident) {
+						validation += fmt.Sprintf("Incident LV3 '%s' sudah termapping; ", v)
+					}
+				}
+			}
+			// MappingProduct
+			for _, m := range mappedEvent.MappingDetail.MappingProduct {
+				for _, v := range productMapped {
+					if v == strings.ToLower(m.ProductID) {
+						validation += fmt.Sprintf("Product '%s' sudah termapping; ", v)
+					}
+				}
+			}
+		}
+
+		mapping[riskType] = event
+
+		// ================================
+		// STEP 5 — COPY DATA
+		// ================================
+		for z := range col {
+			if z < len(row) {
+				col[z] = row[z]
+			}
+		}
+
+		body = append(body, dto.PreviewFile[[27]string]{
+			PerRow:     col,
+			Validation: validation,
+		})
+	}
+
+	previewFile.Body = body
+
+	return previewFile, nil
+}
+func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) error {
+	// ================================
+	// STEP 1 — Ambil reference data
+	// ================================
+	issues, err := riskIssue.riskissueRepo.GetAll()
+	if err != nil {
+		return fmt.Errorf("failed get risk event: %v", err)
+	}
+
+	// Mapping code -> ID
+	riskIssueMap := make(map[string]string)
+	for _, e := range issues {
+		riskIssueMap[e.RiskIssueCode] = strconv.FormatInt(e.ID, 10)
+	}
+
+	riskTypes, err := riskIssue.riskType.GetAll()
+	if err != nil {
+		return fmt.Errorf("failed get risk type: %v", err)
+	}
+	riskTypeMap := make(map[string]int64)
+	for _, r := range riskTypes {
+		riskTypeMap[strings.ToLower(r.RiskTypeCode)] = r.ID
+	}
+
+	eventLv1, _ := riskIssue.eventTypelvl1.GetAll()
+	eventLv1Map := make(map[string]int64)
+	for _, e := range eventLv1 {
+		eventLv1Map[strings.ToLower(e.KodeEventType)] = e.ID
+	}
+
+	eventLv2, _ := riskIssue.eventTypeLvl2.GetAll()
+	eventLv2Map := make(map[string]int64)
+	eventLv2Parent := make(map[string]string)
+	for _, e := range eventLv2 {
+		key := strings.ToLower(e.KodeEventTypeLv2)
+		eventLv2Map[key] = e.ID
+		eventLv2Parent[key] = strings.ToLower(e.IDEventTypeLv1)
+	}
+
+	eventLv3, _ := riskIssue.eventTypeLvl3.GetAll()
+	eventLv3Map := make(map[string]int64)
+	eventLv3Parent := make(map[string]string)
+	for _, e := range eventLv3 {
+		key := strings.ToLower(e.KodeEventTypeLv3)
+		eventLv3Map[key] = e.ID
+		eventLv3Parent[key] = strings.ToLower(e.IDEventTypeLv2)
+	}
+
+	incident, _ := riskIssue.incident.GetAll()
+	incidentMap := make(map[string]int64)
+	for _, i := range incident {
+		incidentMap[strings.ToLower(i.KodeKejadian)] = i.ID
+	}
+
+	subIncident, _ := riskIssue.subIncident.GetAll()
+	subIncidentMap := make(map[string]int64)
+	subIncidentParentMap := make(map[string]string)
+	for _, i := range subIncident {
+		key := strings.ToLower(i.KodeSubKejadian)
+		subIncidentMap[key] = i.ID
+		subIncidentParentMap[key] = strings.ToLower(i.KodeKejadian)
+	}
+
+	subsubIncident, _ := riskIssue.subsubIncident.GetAll()
+	subsubIncidentMap := make(map[string]int64)
+	subsubIncidentParentMap := make(map[string]string)
+	for _, i := range subsubIncident {
+		key := strings.ToLower(i.KodePenyebabKejadianLv3)
+		subsubIncidentMap[key] = i.ID
+		subsubIncidentParentMap[key] = strings.ToLower(i.KodeSubKejadian)
+	}
+
+	product, _ := riskIssue.product.GetAll()
+	productMap := make(map[string]int64)
+	for _, p := range product {
+		productMap[strings.ToLower(p.KodeProduct)] = p.ID
+	}
+
+	control, err := riskIssue.riskControl.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query risk control: %s", err)
+		return err
+	}
+	controlMap := make(map[string]bool)
+	controlIDMap := make(map[string]int64)
+	for _, a := range control {
+		key := strings.ToLower(a.Kode)
+		controlMap[key] = true
+		controlIDMap[key] = a.ID
+	}
+
+	indicator, err := riskIssue.riskIndicator.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("errored query risk indicator: %s", err)
+		return err
+	}
+	indicatorMap := make(map[string]bool)
+	indicatorIDMap := make(map[string]int64)
+	for _, a := range indicator {
+		key := strings.ToLower(a.RiskIndicatorCode)
+		indicatorMap[key] = true
+		indicatorIDMap[key] = a.ID
+	}
+
+	// ================================
+	// STEP 2 — Ambil mapping yang sudah ada
+	// ================================
+	eventIDs := []string{}
+	for i, row := range data {
+		if i == 0 {
+			continue
+		}
+		riskType := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(row[0], "-")))
+		eventIDs = append(eventIDs, riskType)
+	}
+
+	mappingResp, err := riskIssue.arlodsService.GetAllMappingRiskEvent(pernr, eventIDs)
+	if err != nil {
+		return fmt.Errorf("failed get existing mapping: %v", err)
+	}
+	mappingByEventID := make(map[string]dto.DetailMappingEvent)
+	for _, item := range mappingResp.Data {
+		mappingByEventID[strings.ToLower(item.RiskEventID)] = item
+	}
+
+	headers := [27]string{
+		"Tipe Risiko",
+		"Risk Event",
+		"Deskripsi",
+		"Kategori Risiko",
+		"Map Event - Event Type Lv1",
+		"Map Event - Event Type Lv2",
+		"Map Event - Event Type Lv3",
+		"Map Kejadian - Penyebab Kejadian Lv1",
+		"Map Kejadian - Penyebab Kejadian Lv2",
+		"Map Kejadian - Penyebab Kejadian Lv3",
+		"Map Product - Product",
+		"Likelihood",
+		"Impact",
+		"Code Control",
+		"Risk Control",
+		"Code Indicator",
+		"Risk Indicator",
+		"Code Business Cycle",
+		"Business Cycle",
+		"Code Sub Business Cycle",
+		"Sub Business Cycle",
+		"Code Process",
+		"Process",
+		"Code Sub Process",
+		"Sub Process",
+		"Code Activity",
+		"Activity",
+	}
+
+	// ================================
+	// STEP 3 — Proses import row
+	// ================================
+	newRiskEvents := []models.RiskIssue{}
+	newMappingRequests := []dto.MappingRiskEventRequest{}
+
+	timeNow := lib.GetTimeNow("timestime")
+	for i, row := range data {
+		if i == 0 {
+			continue
+		}
+
+		riskTypeCode := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(row[0], "-")))
+		riskTypeID := int64(0)
+		if id, ok := riskTypeMap[riskTypeCode]; ok {
+			riskTypeID = id
+		}
+
+		if riskTypeID == 0 {
+			if len(row) < 27 {
+				return fmt.Errorf("invalid header format risk event")
+			}
+
+			for i, v := range headers {
+				if strings.TrimSpace(row[i]) != v {
+					return fmt.Errorf("header kolom ke-%d invalid format, diharapkan '%s', diterima '%s'", i+1, v, row[i])
+				}
+			}
+			continue
+		}
+
+		parse := lib.ParseStringToArray(row[1], "|")
+		riskEventCode := parse[0]
+		if _, ok := riskIssueMap[riskEventCode]; ok {
+			continue
+		}
+
+		// Buat RiskIssue baru
+		newRiskEvents = append(newRiskEvents, models.RiskIssue{
+			RiskTypeID:     riskTypeID,
+			RiskIssueCode:  riskEventCode,
+			RiskIssue:      parse[1],
+			Deskripsi:      row[2],
+			KategoriRisiko: row[3],
+			Status:         true,
+			DeleteFlag:     false,
+			CreatedAt:      &timeNow,
+		})
+
+		// Parsing Event LV1-LV3
+		evnLv1 := lib.ParseStringToArray(row[4], ";")
+		evnLv2 := lib.ParseStringToArray(row[5], ";")
+		evnLv3 := lib.ParseStringToArray(row[6], ";")
+		mappingEvent := []dto.MappingLVLRequest{}
+		for j := range evnLv1 {
+			eventLv3 := strconv.Itoa(int(eventLv3Map[lib.ParseStringToArray(evnLv3[j], " - ")[0]]))
+			if _, ok := eventLv3Map[eventLv3]; !ok {
+				mappingEvent = append(mappingEvent, dto.MappingLVLRequest{
+					RiskEventID: riskEventCode,
+					Lvl1:        strconv.Itoa(int(eventLv1Map[lib.ParseStringToArray(evnLv1[j], " - ")[0]])),
+					Lvl2:        strconv.Itoa(int(eventLv2Map[lib.ParseStringToArray(evnLv2[j], " - ")[0]])),
+					Lvl3:        eventLv3,
+				})
+			}
+		}
+
+		// Parsing Cause/Incident LV1-LV3
+		incLv1 := lib.ParseStringToArray(row[7], ";")
+		incLv2 := lib.ParseStringToArray(row[8], ";")
+		incLv3 := lib.ParseStringToArray(row[9], ";")
+		mappingCause := []dto.MappingLVLRequest{}
+		for j := range incLv1 {
+			lv3 := strconv.Itoa(int(eventLv3Map[lib.ParseStringToArray(incLv3[j], " - ")[0]]))
+			if _, ok := subsubIncidentMap[lv3]; !ok {
+				mappingCause = append(mappingCause, dto.MappingLVLRequest{
+					RiskEventID: riskEventCode,
+					Lvl1:        strconv.Itoa(int(incidentMap[lib.ParseStringToArray(incLv1[j], " - ")[0]])),
+					Lvl2:        strconv.Itoa(int(subIncidentMap[lib.ParseStringToArray(incLv2[j], " - ")[0]])),
+					Lvl3:        strings.ToLower(lv3),
+				})
+			}
+		}
+
+		// Parsing Product
+		prod := lib.ParseStringToArray(row[10], ";")
+		mappingProduct := []dto.MappingProductRiskEventRequest{}
+		for _, p := range prod {
+			if strings.TrimSpace(p) == "" {
+				continue
+			}
+			if _, ok := productMap[p]; !ok {
+				mappingProduct = append(mappingProduct, dto.MappingProductRiskEventRequest{
+					RiskEventID: riskEventCode,
+					ProductID:   strconv.Itoa(int(productMap[p])),
+				})
+			}
+		}
+
+		businessCycleStr := row[17]
+		subBusinessCycleStr := row[19]
+		processStr := row[21]
+		subProcessStr := row[23]
+		activityStr := row[25]
+
+		activities := lib.ParseStringToArray(activityStr, ";")
+
+		// Cache untuk hierarki business process
+		cacheBusinessProcess := make(map[string]dto.BusinessProcessNode)
+
+		// Validasi tiap activity dengan panggilan ke service
+		for _, act := range activities {
+			act = strings.TrimSpace(act)
+			if act == "" {
+				continue
+			}
+
+			resp, err := riskIssue.arlodsService.GetHirearcyBusinessProcess(pernr, act)
+			if err != nil {
+				continue
+			}
+
+			// jika tidak ada node, skip
+			if len(resp.Data.List) == 0 {
+				continue
+			}
+
+			for _, bc := range resp.Data.List {
+				extractBusinessProcessNodes(bc, cacheBusinessProcess)
+			}
+		}
+
+		// Validasi kombinasi multi-value business process
+		validation := ValidateBPWithMultiValue(
+			businessCycleStr,
+			subBusinessCycleStr,
+			processStr,
+			subProcessStr,
+			activityStr,
+			cacheBusinessProcess,
+		)
+
+		// Jika lolos validasi, baru dibuat mapping Business Process
+		mappingBusinessProcess := []dto.MappingRiskEventBusinesProcess{}
+		if validation == "" {
+			for _, act := range activities {
+				act = strings.TrimSpace(act)
+				if act == "" {
+					continue
+				}
+
+				// Ambil node dari cache
+				node, ok := cacheBusinessProcess[strings.ToLower(act)]
+				if !ok {
+					continue // skip jika tidak ada di cache
+				}
+
+				mappingBusinessProcess = append(mappingBusinessProcess, dto.MappingRiskEventBusinesProcess{
+					RiskEventID:      riskEventCode, // dari hasil bulk insert RiskIssue
+					ActivityID:       node.ActivityID,
+					BusinessCycle:    node.BusinessCycleID,
+					SubBusinessCycle: node.SubBusinessCycleID,
+					ProcessID:        node.ProcessID,
+					SubProcessID:     node.SubProcessID,
+				})
+			}
+		}
+
+		// Parsing Control & Indicator
+		controlCodes := lib.ParseStringToArray(row[11], ";")
+		indicatorCodes := lib.ParseStringToArray(row[12], ";")
+		mappingControlIndicator := []dto.RiskEventControlMutateInput{}
+
+		for _, c := range controlCodes {
+			c = strings.ToLower(strings.TrimSpace(c))
+			if c == "" {
+				continue
+			}
+			if id, ok := controlIDMap[c]; ok {
+				mappingControlIndicator = append(mappingControlIndicator, dto.RiskEventControlMutateInput{
+					RiskEventID: riskEventCode,
+					TypeEvent:   "event",
+					RiskID:      []string{strconv.Itoa(int(id))},
+				})
+			}
+		}
+
+		for _, ind := range indicatorCodes {
+			ind = strings.ToLower(strings.TrimSpace(ind))
+			if ind == "" {
+				continue
+			}
+			if id, ok := indicatorIDMap[ind]; ok {
+				mappingControlIndicator = append(mappingControlIndicator, dto.RiskEventControlMutateInput{
+					RiskEventID: riskEventCode,
+					TypeEvent:   "indicator",
+					RiskID:      []string{strconv.Itoa(int(id))},
+				})
+			}
+		}
+
+		// Gabungkan semua mapping
+		newMappingRequests = append(newMappingRequests, dto.MappingRiskEventRequest{
+			MappingRiskEvent:        mappingEvent,
+			MappingCauseRiskEvent:   mappingCause,
+			MappingProductRiskEvent: mappingProduct,
+			MappingBusinessProcess:  mappingBusinessProcess,
+			MappingIndicatorControl: mappingControlIndicator,
+		})
+	}
+
+	tx := riskIssue.db.DB.Begin()
+	// ================================
+	// STEP 4 — Bulk insert RiskIssue
+	// ================================
+	if len(newRiskEvents) > 0 {
+		if err := riskIssue.riskissueRepo.BulkCreateRiskEvent(newRiskEvents, tx); err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed bulk create risk events: %v", err)
+		}
+	}
+
+	issue, err := riskIssue.riskissueRepo.GetAll()
+	if err != nil {
+		return fmt.Errorf("failed get risk event: %v", err)
+	}
+
+	// Mapping code -> ID
+	riskEventMap := make(map[string]string)
+	for _, e := range issue {
+		riskEventMap[e.RiskIssueCode] = strconv.FormatInt(e.ID, 10)
+	}
+
+	// ================================
+	// STEP 5 — Update RiskEventID di semua mapping
+	// ================================
+	for i := range newMappingRequests {
+		// Mapping Event
+		for j := range newMappingRequests[i].MappingRiskEvent {
+			code := newMappingRequests[i].MappingRiskEvent[j].RiskEventID
+			if id, ok := riskEventMap[code]; ok {
+				newMappingRequests[i].MappingRiskEvent[j].RiskEventID = id
+			}
+		}
+		// Mapping Cause
+		for j := range newMappingRequests[i].MappingCauseRiskEvent {
+			code := newMappingRequests[i].MappingCauseRiskEvent[j].RiskEventID
+			if id, ok := riskEventMap[code]; ok {
+				newMappingRequests[i].MappingCauseRiskEvent[j].RiskEventID = id
+			}
+		}
+		// Mapping Product
+		for j := range newMappingRequests[i].MappingProductRiskEvent {
+			code := newMappingRequests[i].MappingProductRiskEvent[j].RiskEventID
+			if id, ok := riskEventMap[code]; ok {
+				newMappingRequests[i].MappingProductRiskEvent[j].RiskEventID = id
+			}
+		}
+		// Mapping Business Process
+		for j := range newMappingRequests[i].MappingBusinessProcess {
+			code := newMappingRequests[i].MappingBusinessProcess[j].RiskEventID
+			if id, ok := riskEventMap[code]; ok {
+				newMappingRequests[i].MappingBusinessProcess[j].RiskEventID = id
+			}
+		}
+		// Mapping Control & Indicator
+		for j := range newMappingRequests[i].MappingIndicatorControl {
+			code := newMappingRequests[i].MappingIndicatorControl[j].RiskEventID
+			if id, ok := riskEventMap[code]; ok {
+				newMappingRequests[i].MappingIndicatorControl[j].RiskEventID = id
+			}
+		}
+	}
+
+	// ================================
+	// STEP 6 — Create Mapping Event
+	// ================================
+	if len(newMappingRequests) > 0 {
+		req := dto.BulkMappingRiskEventRequest{
+			Data: newMappingRequests,
+		}
+		if err := riskIssue.arlodsService.CreateMappingEvent(pernr, req); err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed create mapping event: %v", err)
+		}
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
+func extractBusinessProcessNodes(
+	bc dto.BusinessProcessMap,
+	cache map[string]dto.BusinessProcessNode,
+) {
+
+	// Loop SBC (sub business cycle)
+	for _, sbc := range bc.BusinessProcessMap {
+
+		// Loop Process
+		for _, p := range sbc.BusinessProcessMap {
+
+			// Loop SubProcess
+			for _, sp := range p.BusinessProcessMap {
+
+				// Loop Activity
+				for _, ac := range sp.BusinessProcessMap {
+					// Simpan ke cache (key: activity code lowercase)
+					cache[strings.ToLower(ac.Code)] = dto.BusinessProcessNode{
+						ActivityCode:         ac.Code,
+						ActivityName:         ac.Name,
+						SubProcessCode:       sp.Code,
+						SubProcessName:       sp.Name,
+						ProcessCode:          p.Code,
+						ProcessName:          p.Name,
+						SubBusinessCycleCode: sbc.Code,
+						SubBusinessCycleName: sbc.Name,
+						BusinessCycleCode:    bc.Code,
+						BusinessCycleName:    bc.Name,
+						ActivityID:           ac.ID,
+						SubProcessID:         sp.ID,
+						ProcessID:            p.ID,
+						SubBusinessCycleID:   sbc.ID,
+						BusinessCycleID:      bc.ID,
+					}
+				}
+			}
+		}
+	}
+}
+
+func ValidateBPWithMultiValue(
+	businessCycleStr string,
+	subBusinessCycleStr string,
+	processStr string,
+	subProcessStr string,
+	activityStr string,
+	cache map[string]dto.BusinessProcessNode,
+) string {
+
+	bcs := strings.Split(businessCycleStr, ";")
+	sbcs := strings.Split(subBusinessCycleStr, ";")
+	ps := strings.Split(processStr, ";")
+	sps := strings.Split(subProcessStr, ";")
+	acts := strings.Split(activityStr, ";")
+
+	// --- Cek jumlah harus sama ---
+	n := len(acts)
+	if len(bcs) != n || len(sbcs) != n || len(ps) != n || len(sps) != n {
+		return "Jumlah elemen BP tidak konsisten; "
+	}
+
+	var validation string
+
+	// --- Loop berdasarkan index ---
+	for i := range n {
+
+		act := strings.TrimSpace(acts[i])
+		sp := strings.TrimSpace(sps[i])
+		p := strings.TrimSpace(ps[i])
+		sbc := strings.TrimSpace(sbcs[i])
+		bc := strings.TrimSpace(bcs[i])
+
+		// --- 1. Check Activity ada dalam cache ---
+		node, ok := cache[act]
+		if !ok {
+			validation += fmt.Sprintf("Activity '%s' tidak ditemukan; ", act)
+			continue
+		}
+
+		// --- 2. VALIDASI PARENT SESUAI URUTAN ---
+
+		// SubProcess
+		if node.SubProcessCode != sp {
+			validation += fmt.Sprintf("Sub Process '%s' tidak sesuai untuk Activity '%s'; ", sp, act)
+		}
+
+		// Process
+		if node.ProcessCode != p {
+			validation += fmt.Sprintf("Process '%s' tidak sesuai untuk Activity '%s'; ", p, act)
+		}
+
+		// Sub Business Cycle
+		if node.SubBusinessCycleCode != sbc {
+			validation += fmt.Sprintf("Sub Business Cycle '%s' tidak sesuai untuk Activity '%s'; ", sbc, act)
+		}
+
+		// Business Cycle
+		if node.BusinessCycleCode != bc {
+			validation += fmt.Sprintf("Business Cycle '%s' tidak sesuai untuk Activity '%s'; ", bc, act)
+		}
+	}
+
+	return validation
 }

@@ -4,9 +4,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"path/filepath"
+	"riskmanagement/dto"
 	"riskmanagement/lib"
 	models "riskmanagement/models/riskindicator"
 	services "riskmanagement/services/riskindicator"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/golang-package-library/logger"
@@ -75,7 +79,7 @@ func (riskIndicator RiskIndicatorController) Store(c *gin.Context) {
 
 	if err := c.Bind(&requests); err != nil {
 		riskIndicator.logger.Zap.Error(err)
-		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai :"+err.Error(), requests)
+		lib.ReturnToJson(c, 200, "400", lib.InvalidBody, requests)
 		return
 	}
 
@@ -463,4 +467,171 @@ func (ri RiskIndicatorController) GetMateriIfFinish(c *gin.Context) {
 	}
 
 	lib.ReturnToJson(c, 200, "200", "Inquery Berhasil", document)
+}
+
+func (ri RiskIndicatorController) Template(c *gin.Context) {
+	blob, fileName, err := ri.service.Template()
+	if err != nil {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusInternalServerError, strconv.Itoa(http.StatusInternalServerError), "Generate Template error : "+err.Error(), "")
+		return
+	}
+
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+	c.Data(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", blob)
+}
+
+func (ri RiskIndicatorController) Preview(c *gin.Context) {
+	pernr := c.PostForm("pernr")
+	if pernr == "" {
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, nil)
+		return
+	}
+	file, err := c.FormFile("file")
+	if err != nil {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, nil)
+		return
+	}
+	src, err := lib.ExtractFile(file)
+	if err != nil {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	ext := filepath.Ext(file.Filename)
+	if ext != ".csv" && ext != ".xls" && ext != ".xlsx" {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidFormatFile, nil)
+		return
+	}
+	// Logic Proces
+	var (
+		extract [][]string
+	)
+
+	switch ext {
+	case ".xlsx":
+		extract, err = lib.ParseExcelFile(src)
+		ri.logger.Zap.Debug(extract)
+		if err != nil {
+			ri.logger.Zap.Error("Error parsing file excel: %s", err)
+			lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InternalError, nil)
+			return
+		}
+	case ".csv":
+		extract, err = lib.ParseCSVFile(src)
+		if err != nil {
+			ri.logger.Zap.Error("Error parsing file csv: %s", err)
+			lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InternalError, nil)
+			return
+		}
+	}
+
+	data, err := ri.service.Preview(pernr, extract)
+	if err != nil {
+		ri.logger.Zap.Error("Error validate data: %s ", err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), lib.SuccessGetMessage, data)
+}
+
+func (ri RiskIndicatorController) ImportData(c *gin.Context) {
+	pernr := c.PostForm("pernr")
+	if pernr == "" {
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, nil)
+		return
+	}
+	file, err := c.FormFile("file")
+	if err != nil {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, nil)
+		return
+	}
+	src, err := lib.ExtractFile(file)
+	if err != nil {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	ext := filepath.Ext(file.Filename)
+	if ext != ".csv" && ext != ".xls" && ext != ".xlsx" {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidFormatFile, nil)
+		return
+	}
+	// Logic Proces
+	var (
+		extract [][]string
+	)
+
+	switch ext {
+	case ".xlsx":
+		extract, err = lib.ParseExcelFile(src)
+		ri.logger.Zap.Debug(extract)
+		if err != nil {
+			ri.logger.Zap.Error("Error parsing file excel: %s", err)
+			lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InternalError, nil)
+			return
+		}
+	case ".csv":
+		extract, err = lib.ParseCSVFile(src)
+		if err != nil {
+			ri.logger.Zap.Error("Error parsing file csv: %s", err)
+			lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InternalError, nil)
+			return
+		}
+	}
+
+	err = ri.service.ImportData(pernr, extract)
+	if err != nil {
+		ri.logger.Zap.Error("Error validate data: %s ", err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), "Success Import Data", nil)
+}
+
+func (ri RiskIndicatorController) Download(c *gin.Context) {
+	var pernr dto.PernrRequest
+	if err := c.ShouldBindJSON(&pernr); err != nil {
+		lib.ReturnToJson(c, http.StatusBadRequest, strconv.Itoa(http.StatusBadRequest), "Invalid JSON", nil)
+		return
+	}
+	format := c.Param("format")
+	if format == "" {
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidParam, nil)
+		return
+	}
+
+	fileByte, fileName, err := ri.service.Download(pernr.Pernr, format)
+	if err != nil {
+		ri.logger.Zap.Error("Error generate file: %s", err)
+		lib.ReturnToJson(c, http.StatusInternalServerError, strconv.Itoa(http.StatusInternalServerError), lib.InternalError, nil)
+	}
+
+	// Logic Proces
+	var contentType string
+	switch format {
+	case "csv":
+		contentType = "text/csv"
+	case "xlsx":
+		contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	case "pdf":
+		contentType = "application/pdf"
+	default:
+		contentType = "application/octet-stream"
+	}
+
+	c.Header("Content-Type", contentType)
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Cache-Control", "no-cache")
+
+	c.Data(http.StatusOK, format, fileByte)
 }

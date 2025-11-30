@@ -1,18 +1,29 @@
 package riskindicator
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/csv"
 	"fmt"
 	"os"
+	"riskmanagement/dto"
 	"riskmanagement/lib"
+	modelActiv "riskmanagement/models/activity"
+	modelProduct "riskmanagement/models/product"
 	models "riskmanagement/models/riskindicator"
+	activity "riskmanagement/repository/activity"
+	product "riskmanagement/repository/product"
 	riskindicator "riskmanagement/repository/riskindicator"
+	"strconv"
+	"time"
 
 	fileModel "riskmanagement/models/filemanager"
 	filemanager "riskmanagement/services/filemanager"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/jung-kurt/gofpdf"
+	"github.com/xuri/excelize/v2"
 
 	"gitlab.com/golang-package-library/logger"
 	minio "gitlab.com/golang-package-library/minio"
@@ -43,6 +54,10 @@ type RiskIndicatorDefinition interface {
 	// GetTematikData(request models.TematikDataRequest) (responses models.TematikDataResponse, err error)
 
 	GetMateriIfFinish(request models.RequestMateriIfFinish) (responses []models.RekomendasiMateri, err error)
+	Template() ([]byte, string, error)
+	Preview(pernr string, data [][]string) (dto.PreviewFileImport[[17]string], error)
+	ImportData(pernr string, data [][]string) error
+	Download(pernr string, format string) ([]byte, string, error)
 }
 
 type RiskIndicatorService struct {
@@ -50,6 +65,8 @@ type RiskIndicatorService struct {
 	minio             minio.Minio
 	dbRaw             lib.Databases
 	logger            logger.Logger
+	activityRepo      activity.ActivityDefinition
+	product           product.ProductDefinition
 	riskIndicatorRepo riskindicator.RiskIndicatorDefinition
 	lampiran          riskindicator.LampiranIndicatorDefinition
 	filemanager       filemanager.FileManagerDefinition
@@ -62,6 +79,8 @@ func NewRiskIndicatorService(
 	minio minio.Minio,
 	dbRaw lib.Databases,
 	logger logger.Logger,
+	activityRepo activity.ActivityDefinition,
+	product product.ProductDefinition,
 	riskIndicatorRepo riskindicator.RiskIndicatorDefinition,
 	lampiran riskindicator.LampiranIndicatorDefinition,
 	filemanager filemanager.FileManagerDefinition,
@@ -78,6 +97,8 @@ func NewRiskIndicatorService(
 		filemanager:       filemanager,
 		MapThreshold:      MapThreshold,
 		MapRiskIssue:      MapRiskIssue,
+		activityRepo:      activityRepo,
+		product:           product,
 	}
 }
 
@@ -160,9 +181,13 @@ func (ri RiskIndicatorService) Delete(request *models.UpdateDelete) (response bo
 // GetAllWithPaginate implements RiskIndicatorDefinition
 func (ri RiskIndicatorService) GetAllWithPaginate(request models.Paginate) (responses []models.RiskIndicatorResponse, pagination lib.Pagination, err error) {
 	offset, page, limit, order, sort := lib.SetPaginationParameter(request.Page, request.Limit, request.Order, request.Sort)
+
 	request.Offset = offset
 	request.Order = order
 	request.Sort = sort
+	request.Limit = limit
+
+	ri.logger.Zap.Debug(request)
 
 	dataPgs, totalRows, totalData, err := ri.riskIndicatorRepo.GetAllWithPaginate(&request)
 	if err != nil {
@@ -172,27 +197,34 @@ func (ri RiskIndicatorService) GetAllWithPaginate(request models.Paginate) (resp
 
 	for _, response := range dataPgs {
 		responses = append(responses, models.RiskIndicatorResponse{
-			ID:                response.ID,
-			RiskIndicatorCode: response.RiskIndicatorCode,
-			RiskIndicator:     response.RiskIndicator,
-			ActivityID:        response.ActivityID,
-			ProductID:         response.ProductID,
-			Deskripsi:         response.Deskripsi,
-			Satuan:            response.Satuan,
-			Sifat:             response.Sifat,
-			SLAVerifikasi:     response.SLAVerifikasi,
-			SLATindakLanjut:   response.SLATindakLanjut,
-			SumberData:        response.SumberData,
-			SumberDataText:    response.SumberDataText,
-			PeriodePemantauan: response.PeriodePemantauan,
-			Owner:             response.Owner,
-			KPI:               response.KPI,
-			Status:            response.Status,
-			CreatedAt:         response.CreatedAt,
-			UpdatedAt:         response.UpdatedAt,
+			ID:                    response.ID,
+			RiskIndicatorCode:     response.RiskIndicatorCode,
+			RiskIndicator:         response.RiskIndicator,
+			ActivityID:            response.ActivityID,
+			ProductID:             response.ProductID,
+			Deskripsi:             response.Deskripsi,
+			Satuan:                response.Satuan,
+			Sifat:                 response.Sifat,
+			BusinessCycleActivity: response.BusinessCycleActivity,
+			Batasan:               response.Batasan,
+			Kondisi:               response.Kondisi,
+			Type:                  response.Type,
+			SLAVerifikasi:         response.SLAVerifikasi,
+			SLATindakLanjut:       response.SLATindakLanjut,
+			SumberData:            response.SumberData,
+			SumberDataText:        response.SumberDataText,
+			PeriodePemantauan:     response.PeriodePemantauan,
+			Owner:                 response.Owner,
+			KPI:                   response.KPI,
+			StatusIndikator:       response.StatusIndikator,
+			DataSourceAnomaly:     response.DataSourceAnomaly,
+			Status:                response.Status,
+			CreatedAt:             response.CreatedAt,
+			UpdatedAt:             response.UpdatedAt,
 		})
 	}
 
+	ri.logger.Zap.Debug(responses)
 	pagination = lib.SetPaginationResponse(page, limit, totalRows, totalData)
 	return responses, pagination, err
 }
@@ -270,24 +302,28 @@ func (riskIndicator RiskIndicatorService) Store(request models.RiskIndicatorRequ
 		tx := riskIndicator.db.DB.Begin()
 
 		reqRiskIndicator := &models.RiskIndicator{
-			RiskIndicatorCode: request.RiskIndicatorCode,
-			RiskIndicator:     request.RiskIndicator,
-			ActivityID:        request.ActivityID,
-			ProductID:         request.ProductID,
-			Deskripsi:         request.Deskripsi,
-			Satuan:            request.Satuan,
-			Sifat:             request.Sifat,
-			SLAVerifikasi:     request.SLAVerifikasi,
-			SLATindakLanjut:   request.SLATindakLanjut,
-			SumberData:        request.SumberData,
-			SumberDataText:    request.SumberDataText,
-			PeriodePemantauan: request.PeriodePemantauan,
-			Owner:             request.Owner,
-			KPI:               request.KPI,
-			StatusIndikator:   request.StatusIndikator,
-			DataSourceAnomaly: request.DataSourceAnomaly,
-			Status:            request.Status,
-			CreatedAt:         &timeNow,
+			RiskIndicatorCode:     request.RiskIndicatorCode,
+			RiskIndicator:         request.RiskIndicator,
+			ActivityID:            request.ActivityID,
+			ProductID:             request.ProductID,
+			Deskripsi:             request.Deskripsi,
+			Satuan:                request.Satuan,
+			Sifat:                 request.Sifat,
+			BusinessCycleActivity: request.BusinessCycleActivity,
+			Batasan:               request.Batasan,
+			Kondisi:               request.Kondisi,
+			Type:                  request.Type,
+			SLAVerifikasi:         request.SLAVerifikasi,
+			SLATindakLanjut:       request.SLATindakLanjut,
+			SumberData:            request.SumberData,
+			SumberDataText:        request.SumberDataText,
+			PeriodePemantauan:     request.PeriodePemantauan,
+			Owner:                 request.Owner,
+			KPI:                   request.KPI,
+			StatusIndikator:       request.StatusIndikator,
+			DataSourceAnomaly:     request.DataSourceAnomaly,
+			Status:                request.Status,
+			CreatedAt:             &timeNow,
 		}
 
 		dataRiskIndicator, err := riskIndicator.riskIndicatorRepo.Store(reqRiskIndicator, tx)
@@ -302,7 +338,8 @@ func (riskIndicator RiskIndicatorService) Store(request models.RiskIndicatorRequ
 		bucket := os.Getenv("BUCKET_NAME")
 		if len(request.LampiranIndicator) != 0 {
 			for _, value := range request.LampiranIndicator {
-				if value.JenisFile == "Upload Document" {
+				switch value.JenisFile {
+				case "Upload Document":
 					fmt.Println("upload")
 					UUID := uuid.New()
 
@@ -352,7 +389,7 @@ func (riskIndicator RiskIndicatorService) Store(request models.RiskIndicatorRequ
 						riskIndicator.logger.Zap.Error(err)
 						return false, err
 					}
-				} else if value.JenisFile == "Link Document" {
+				case "Link Document":
 					fmt.Println("link")
 					_, err = riskIndicator.lampiran.Store(&models.LampiranIndicator{
 						ID:            value.ID,
@@ -396,25 +433,28 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 	tx := riskIndicator.db.DB.Begin()
 
 	updateIndicator := &models.RiskIndicator{
-		ID:                requests.ID,
-		RiskIndicatorCode: requests.RiskIndicatorCode,
-		RiskIndicator:     requests.RiskIndicator,
-		ActivityID:        requests.ActivityID,
-		ProductID:         requests.ProductID,
-		Deskripsi:         requests.Deskripsi,
-		Satuan:            requests.Satuan,
-		Sifat:             requests.Sifat,
-		SLAVerifikasi:     requests.SLAVerifikasi,
-		SLATindakLanjut:   requests.SLATindakLanjut,
-		SumberData:        requests.SumberData,
-		SumberDataText:    requests.SumberDataText,
-		PeriodePemantauan: requests.PeriodePemantauan,
-		Owner:             requests.Owner,
-		KPI:               requests.KPI,
-		StatusIndikator:   requests.StatusIndikator,
-		DataSourceAnomaly: requests.DataSourceAnomaly,
-		Status:            requests.Status,
-		UpdatedAt:         &timeNow,
+		RiskIndicatorCode:     requests.RiskIndicatorCode,
+		RiskIndicator:         requests.RiskIndicator,
+		ActivityID:            requests.ActivityID,
+		ProductID:             requests.ProductID,
+		Deskripsi:             requests.Deskripsi,
+		Satuan:                requests.Satuan,
+		Sifat:                 requests.Sifat,
+		BusinessCycleActivity: requests.BusinessCycleActivity,
+		Batasan:               requests.Batasan,
+		Kondisi:               requests.Kondisi,
+		Type:                  requests.Type,
+		SLAVerifikasi:         requests.SLAVerifikasi,
+		SLATindakLanjut:       requests.SLATindakLanjut,
+		SumberData:            requests.SumberData,
+		SumberDataText:        requests.SumberDataText,
+		PeriodePemantauan:     requests.PeriodePemantauan,
+		Owner:                 requests.Owner,
+		KPI:                   requests.KPI,
+		StatusIndikator:       requests.StatusIndikator,
+		DataSourceAnomaly:     requests.DataSourceAnomaly,
+		Status:                requests.Status,
+		UpdatedAt:             &timeNow,
 	}
 
 	include := []string{
@@ -457,7 +497,8 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 		}
 
 		for _, value := range requests.LampiranIndicator {
-			if value.JenisFile == "Upload Document" {
+			switch value.JenisFile {
+			case "Upload Document":
 				fmt.Println("upload")
 				UUID := uuid.New()
 
@@ -529,7 +570,7 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 					}
 				}
 
-			} else if value.JenisFile == "Link Document" {
+			case "Link Document":
 				fmt.Println("link")
 				_, err = riskIndicator.lampiran.Store(&models.LampiranIndicator{
 					ID:            value.ID,
@@ -562,7 +603,8 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 func (riskIndicator RiskIndicatorService) DeleteFilesByID(id int64) (response bool, err error) {
 	dataFiles, err := riskIndicator.lampiran.GetOne(id)
 
-	if dataFiles.JenisFile == "Upload Document" {
+	switch dataFiles.JenisFile {
+	case "Upload Document":
 		fmt.Println("data => ", dataFiles.Path)
 		bucket := os.Getenv("BUCKET_NAME")
 		objectName := dataFiles.Path
@@ -579,7 +621,7 @@ func (riskIndicator RiskIndicatorService) DeleteFilesByID(id int64) (response bo
 		} else {
 			return false, err
 		}
-	} else if dataFiles.JenisFile == "Link Document" {
+	case "Link Document":
 		riskIndicator.lampiran.Delete(dataFiles.ID)
 	}
 
@@ -917,4 +959,714 @@ func (ri RiskIndicatorService) GetMateriIfFinish(request models.RequestMateriIfF
 	document, err := ri.riskIndicatorRepo.GetMateriIfFinish(&request)
 
 	return document, err
+}
+
+func (ri RiskIndicatorService) Template() ([]byte, string, error) {
+	f := excelize.NewFile()
+	sheet := "Template"
+
+	f.SetSheetName("Sheet1", sheet)
+
+	sheetIndex, err := f.GetSheetIndex(sheet)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get sheet index: %w", err)
+	}
+	f.SetActiveSheet(sheetIndex)
+
+	headers := []string{
+		"Data Source Anomaly",
+		"Risk Indicator Code",
+		"Risk Indicator",
+		"Aktivitas",
+		"Produk",
+		"Deskripsi",
+		"satuan",
+		"Periode",
+		"Batasan",
+		"Business Cycle Aktivitas",
+		"SLA Verifikasi",
+		"SLA Tindak Lanjut",
+		"KPI",
+		"Tipe Data Anomali",
+		"Kondisi",
+		"Mapping Set Header",
+		"Mapping Set Key Uker",
+	}
+
+	// tulis header
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		if err := f.SetCellValue(sheet, cell, h); err != nil {
+			return nil, "", fmt.Errorf("failed to set cell: %w", err)
+		}
+	}
+
+	exampleData := [][]string{
+		{
+			"Manual",
+			"RI-001",
+			"Jumlah Transaksi",
+			"Pembayaran",
+			"Produk A",
+			"Indikator untuk jumlah transaksi harian",
+			"Kali",
+			"Bulanan",
+			"Restricted",
+			"Proses Bisnis A",
+			"2",
+			"5",
+			"Meningkatkan efisiensi",
+			"Posisi",
+			"Tampilkan Semua & Verifikasi Terbaru",
+			"",
+			"",
+		},
+		{
+			"Tematik",
+			"RI-002",
+			"Nilai Penyimpangan",
+			"Pengiriman",
+			"Produk B",
+			"Indikator penyimpangan nilai harian",
+			"Persen",
+			"Mingguan",
+			"Restricted",
+			"Proses Bisnis B",
+			"1",
+			"3",
+			"Menurunkan error operasional",
+			"Posisi",
+			"Tampilkan Semua & Verifikasi Terbaru",
+			"Header-X;Header-Y",
+			"Uker-010;Uker-011",
+		},
+	}
+
+	for rowIndex, row := range exampleData {
+		for colIndex, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(colIndex+1, rowIndex+2) // +2 karena header di baris 1
+			if err := f.SetCellValue(sheet, cell, val); err != nil {
+				return nil, "", fmt.Errorf("failed to set example data: %w", err)
+			}
+		}
+	}
+
+	// optional: set lebar kolom
+	for i := 1; i <= len(headers); i++ {
+		col, _ := excelize.ColumnNumberToName(i)
+		f.SetColWidth(sheet, col, col, 25)
+	}
+
+	// contoh data
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		return nil, "", fmt.Errorf("failed to write excel: %w", err)
+	}
+
+	return buf.Bytes(), "risk_indicator_template.xlsx", nil
+}
+
+func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.PreviewFileImport[[17]string], error) {
+	indicator, err := ri.riskIndicatorRepo.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query activity: %s", err)
+		return dto.PreviewFileImport[[17]string]{}, err
+	}
+
+	indicatorMap := make(map[string]bool, len(indicator))
+	for _, a := range indicator {
+		indicatorMap[strings.ToLower(a.RiskIndicatorCode)] = true
+	}
+
+	activityList, err := ri.activityRepo.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query activity: %s", err)
+		return dto.PreviewFileImport[[17]string]{}, err
+	}
+
+	activityMap := make(map[string]modelActiv.ActivityResponse, len(activityList))
+	for _, a := range activityList {
+		activityMap[strings.ToLower(a.Name)] = a
+	}
+
+	productList, err := ri.product.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return dto.PreviewFileImport[[17]string]{}, err
+	}
+
+	productMap := make(map[string]modelProduct.ProductResponse, len(productList))
+	for _, p := range productList {
+		productMap[strings.ToLower(p.Product)] = p
+	}
+
+	headers := []string{
+		"Data Source Anomaly",
+		"Risk Indicator Code",
+		"Risk Indicator",
+		"Aktivitas",
+		"Produk",
+		"Deskripsi",
+		"satuan",
+		"Periode",
+		"Batasan",
+		"Business Cycle Aktivitas",
+		"SLA Verifikasi",
+		"SLA Tindak Lanjut",
+		"KPI",
+		"Tipe Data Anomali",
+		"Kondisi",
+		"Mapping Set Header",
+		"Mapping Set Key Uker",
+	}
+
+	previewFile := dto.PreviewFileImport[[17]string]{}
+	body := []dto.PreviewFile[[17]string]{}
+
+	for index, row := range data {
+		if index == 0 {
+			if len(row) < 17 {
+				return dto.PreviewFileImport[[17]string]{}, fmt.Errorf("invalid header format risk indicator")
+			}
+
+			for i, v := range headers {
+				if strings.TrimSpace(row[i]) != v {
+					return dto.PreviewFileImport[[17]string]{}, fmt.Errorf("header kolom ke-%d invalid format, diharapkan '%s', diterima '%s'", i+1, v, row[i])
+				}
+			}
+
+			previewFile.Header = [17]string{
+				row[0],
+				row[1],
+				row[2],
+				row[3],
+				row[4],
+				row[5],
+				row[6],
+				row[7],
+				row[8],
+				row[9],
+				row[10],
+				row[11],
+				row[12],
+				row[13],
+				row[14],
+				row[15],
+				row[16],
+			}
+
+			continue
+		}
+
+		var (
+			col [17]string
+		)
+
+		validation := ""
+
+		activityName := strings.ToLower(row[3])
+		productName := strings.ToLower(row[4])
+
+		if _, ok := indicatorMap[strings.ToLower(row[1])]; ok {
+			validation += fmt.Sprintf("Code Indicator sudah terdaftar: %s; ", row[0])
+		}
+
+		activityData, activityStat := activityMap[activityName]
+		if !activityStat {
+			validation += fmt.Sprintf("Activity tidak terdaftar: %s; ", activityName)
+		}
+
+		productData, productStat := productMap[productName]
+		if !productStat {
+			validation += fmt.Sprintf("Product tidak terdaftar: %s; ", productName)
+		}
+
+		var productActivityID string
+		if productData.ActivityID != nil {
+			productActivityID = *productData.ActivityID
+		}
+
+		activityIDStr := strconv.FormatInt(activityData.ID, 10)
+
+		if productActivityID != activityIDStr {
+			validation += fmt.Sprintf("Product tidak sesuai dengan Activity: %s; ", row[1])
+		}
+
+		for i := range 17 {
+			if i < len(row) {
+				col[i] = row[i]
+			}
+		}
+
+		body = append(body, dto.PreviewFile[[17]string]{
+			PerRow:     col,
+			Validation: validation,
+		})
+
+	}
+	previewFile.Body = body
+
+	return previewFile, nil
+}
+
+func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
+	indicator, err := ri.riskIndicatorRepo.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query activity: %s", err)
+		return err
+	}
+
+	indicatorMap := make(map[string]bool, len(indicator))
+	for _, a := range indicator {
+		indicatorMap[strings.ToLower(a.RiskIndicatorCode)] = true
+	}
+
+	activityList, err := ri.activityRepo.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query activity: %s", err)
+		return err
+	}
+
+	activityMap := make(map[string]modelActiv.ActivityResponse, len(activityList))
+	for _, a := range activityList {
+		activityMap[strings.ToLower(a.Name)] = a
+	}
+
+	productList, err := ri.product.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return err
+	}
+
+	productMap := make(map[string]modelProduct.ProductResponse, len(productList))
+	for _, p := range productList {
+		productMap[strings.ToLower(p.Product)] = p
+	}
+
+	headers := []string{
+		"Data Source Anomaly",
+		"Risk Indicator Code",
+		"Risk Indicator",
+		"Aktivitas",
+		"Produk",
+		"Deskripsi",
+		"satuan",
+		"Periode",
+		"Batasan",
+		"Business Cycle Aktivitas",
+		"SLA Verifikasi",
+		"SLA Tindak Lanjut",
+		"KPI",
+		"Tipe Data Anomali",
+		"Kondisi",
+		"Mapping Set Header",
+		"Mapping Set Key Uker",
+	}
+
+	newRecord := make([]models.RiskIndicator, 0)
+
+	for index, row := range data {
+		if index == 0 {
+			if len(row) < 17 {
+				return fmt.Errorf("invalid header format risk indicator")
+			}
+
+			for i, v := range headers {
+				if strings.TrimSpace(row[i]) != v {
+					return fmt.Errorf("header kolom ke-%d invalid format, diharapkan '%s', diterima '%s'", i+1, v, row[i])
+				}
+			}
+
+			continue
+
+		}
+
+		var (
+			indicatorExists      bool  = false
+			activityExist        bool  = false
+			productExist         bool  = false
+			validActivityProduct bool  = false
+			currentActivituID    int64 = 0
+			currentProductID     int64 = 0
+		)
+
+		activityName := strings.ToLower(row[3])
+		productName := strings.ToLower(row[4])
+
+		if _, ok := indicatorMap[strings.ToLower(row[0])]; !ok {
+			indicatorExists = true
+		}
+
+		activityData, activityStat := activityMap[activityName]
+		if activityStat {
+			currentActivituID = activityData.ID
+			activityExist = true
+		}
+
+		productData, productStat := productMap[productName]
+		if productStat {
+			currentProductID = productData.ID
+			productExist = true
+		}
+
+		var productActivityID string
+		if productData.ActivityID != nil {
+			productActivityID = *productData.ActivityID
+		}
+
+		activityIDStr := strconv.FormatInt(activityData.ID, 10)
+
+		if productActivityID == activityIDStr {
+			validActivityProduct = true
+		}
+
+		if indicatorExists && activityExist && productExist && validActivityProduct {
+			newRecord = append(newRecord, models.RiskIndicator{
+				RiskIndicatorCode:     row[1],
+				RiskIndicator:         row[2],
+				ActivityID:            currentActivituID,
+				ProductID:             currentProductID,
+				Deskripsi:             row[5],
+				Satuan:                row[6],
+				BusinessCycleActivity: row[9],
+				Batasan:               row[8],
+				Kondisi:               ConditionMap(row[14]),
+				SLAVerifikasi:         lib.ToInt64(row[10]),
+				SLATindakLanjut:       lib.ToInt64(row[11]),
+				PeriodePemantauan:     row[7],
+				KPI:                   row[12],
+				Type:                  row[13],
+				DataSourceAnomaly:     strings.ToLower(row[0]),
+			})
+		}
+	}
+
+	if len(newRecord) > 0 {
+		tx := ri.db.DB.Begin()
+		err := ri.riskIndicatorRepo.BulkCreateRiskIndicator(newRecord, tx)
+		if err != nil {
+			tx.Rollback()
+			ri.logger.Zap.Error("cannot create risk control data: %s ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (ri RiskIndicatorService) Download(pernr string, format string) ([]byte, string, error) {
+	data, err := ri.riskIndicatorRepo.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored when try to query indicator: %s", err)
+		return nil, "", err
+	}
+
+	if len(data) == 0 {
+		return nil, "", nil
+	}
+
+	switch format {
+	case "csv":
+		return exportCSV(data)
+	case "xlsx":
+		return exportExcel(data)
+	case "pdf":
+		return exportPDF(data)
+	default:
+		return nil, "", fmt.Errorf("unsupported format export file")
+	}
+}
+
+func exportPDF(data []models.RiskIndicatorResponse) ([]byte, string, error) {
+	pdf := gofpdf.New("L", "mm", "A4", "")
+	pdf.SetAutoPageBreak(false, 10)
+	pdf.SetMargins(10, 10, 10) // margin kiri, atas, kanan
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 14)
+	pdf.CellFormat(0, 10, "Risk Control Report", "", 1, "C", false, 0, "")
+
+	headers := []string{
+		"Data Source Anomaly",
+		"Risk Indicator Code",
+		"Risk Indicator",
+		"Aktivitas",
+		"Produk",
+		"Deskripsi",
+		"satuan",
+		"Periode",
+		"Batasan",
+		"Business Cycle Aktivitas",
+		"SLA Verifikasi",
+		"SLA Tindak Lanjut",
+		"KPI",
+		"Tipe Data Anomali",
+		"Kondisi",
+		"Created Time",
+		"Updated Time",
+		"Mapping Set Header",
+		"Mapping Set Key Uker",
+	}
+
+	colWidths := []float64{20, 20, 25, 15, 15, 25, 15, 20, 20, 20, 20, 25, 20, 20, 20, 20, 20, 20, 20}
+	printHeader := func() {
+		pdf.SetFillColor(200, 200, 200) // abu-abu header
+		pdf.SetFont("Arial", "B", 10)
+		for i, h := range headers {
+			pdf.CellFormat(colWidths[i], 8, h, "1", 0, "C", true, 0, "")
+		}
+		pdf.Ln(-1)
+		pdf.SetFont("Arial", "", 9)
+	}
+
+	printHeader()
+
+	_, pageHeight := pdf.GetPageSize()
+	marginBottom := 15.0
+
+	getRowHeight := func(row []string) float64 {
+		maxHeight := 0.0
+		lineHeight := 5.0
+		for i, txt := range row {
+			lines := pdf.SplitLines([]byte(txt), colWidths[i])
+			h := float64(len(lines)) * lineHeight
+			if h > maxHeight {
+				maxHeight = h
+			}
+		}
+		return maxHeight
+	}
+
+	for _, d := range data {
+		createTime := lib.FormatDatePtr(d.CreatedAt)
+		updateTime := lib.FormatDatePtr(d.UpdatedAt)
+
+		row := []string{
+			d.DataSourceAnomaly,                  // data_source_anomaly
+			d.RiskIndicatorCode,                  // risk_indicator_code
+			d.RiskIndicator,                      // risk_indicator
+			strconv.Itoa(int(d.ActivityID)),      // aktivitas
+			strconv.Itoa(int(d.ProductID)),       // produk
+			d.Deskripsi,                          // deskripsi
+			d.Satuan,                             // satuan
+			d.PeriodePemantauan,                  // periode_data
+			d.Batasan,                            // Batasan
+			d.BusinessCycleActivity,              // Business Cycle Aktivitas
+			strconv.Itoa(int(d.SLAVerifikasi)),   // sla_verifikasi
+			strconv.Itoa(int(d.SLATindakLanjut)), // sla_tindak_lanjut
+			d.KPI,                                // kpi
+			d.Type,                               // Tipe Data Anomali
+			ReverseCondition(d.Kondisi),          // Kondisi
+			createTime,
+			updateTime,
+			"",
+			"",
+		}
+
+		rowHeight := getRowHeight(row)
+		xStart := pdf.GetX()
+		yStart := pdf.GetY()
+
+		// Check page break
+		if yStart+rowHeight+marginBottom > pageHeight {
+			pdf.AddPage()
+			printHeader()
+			xStart = pdf.GetX()
+			yStart = pdf.GetY()
+		}
+
+		// Print each cell with MultiCell and border
+		for i, txt := range row {
+			x := pdf.GetX()
+			y := pdf.GetY()
+
+			pdf.Rect(x, y, colWidths[i], rowHeight, "D")
+			pdf.MultiCell(colWidths[i], 5, txt, "", "L", false)
+			pdf.SetXY(x+colWidths[i], yStart)
+		}
+		pdf.SetXY(xStart, yStart+rowHeight)
+	}
+
+	var buf bytes.Buffer
+	err := pdf.Output(&buf)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to generate PDF: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_indicator_%s.pdf", time.Now().Format("20060102_150405"))
+
+	return buf.Bytes(), fileName, nil
+}
+
+func exportExcel(data []models.RiskIndicatorResponse) ([]byte, string, error) {
+	f := excelize.NewFile()
+	sheet := "risk-indicator"
+
+	f.SetSheetName("Sheet1", sheet)
+	headers := []string{
+		"Data Source Anomaly",
+		"Risk Indicator Code",
+		"Risk Indicator",
+		"Aktivitas",
+		"Produk",
+		"Deskripsi",
+		"satuan",
+		"Periode",
+		"Batasan",
+		"Business Cycle Aktivitas",
+		"SLA Verifikasi",
+		"SLA Tindak Lanjut",
+		"KPI",
+		"Tipe Data Anomali",
+		"Kondisi",
+		"Created Time",
+		"Updated Time",
+		"Mapping Set Header",
+		"Mapping Set Key Uker",
+	}
+
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		if err := f.SetCellValue(sheet, cell, h); err != nil {
+			return nil, "", fmt.Errorf("failed to set cell: %w", err)
+		}
+	}
+
+	for idx, v := range data {
+		row := idx + 2
+		createTime := lib.FormatDatePtr(v.CreatedAt)
+		updateTime := lib.FormatDatePtr(v.UpdatedAt)
+
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), v.DataSourceAnomaly)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), v.RiskIndicatorCode)
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), v.RiskIndicator)
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), strconv.FormatInt(v.ActivityID, 10))
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), strconv.FormatInt(v.ProductID, 10))
+		f.SetCellValue(sheet, fmt.Sprintf("F%d", row), v.Deskripsi)
+		f.SetCellValue(sheet, fmt.Sprintf("G%d", row), v.Satuan)
+		f.SetCellValue(sheet, fmt.Sprintf("H%d", row), v.PeriodePemantauan)
+		f.SetCellValue(sheet, fmt.Sprintf("I%d", row), v.Batasan)
+		f.SetCellValue(sheet, fmt.Sprintf("J%d", row), v.BusinessCycleActivity)
+		f.SetCellValue(sheet, fmt.Sprintf("K%d", row), strconv.FormatInt(v.SLAVerifikasi, 10))
+		f.SetCellValue(sheet, fmt.Sprintf("L%d", row), strconv.FormatInt(v.SLATindakLanjut, 10))
+		f.SetCellValue(sheet, fmt.Sprintf("M%d", row), v.KPI)
+		f.SetCellValue(sheet, fmt.Sprintf("N%d", row), v.Type)
+		f.SetCellValue(sheet, fmt.Sprintf("O%d", row), v.Kondisi)
+		f.SetCellValue(sheet, fmt.Sprintf("P%d", row), createTime)
+		f.SetCellValue(sheet, fmt.Sprintf("Q%d", row), updateTime)
+		f.SetCellValue(sheet, fmt.Sprintf("R%d", row), "")
+		f.SetCellValue(sheet, fmt.Sprintf("S%d", row), "")
+	}
+
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		return nil, "", fmt.Errorf("failed to write excel file: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_indicator_%s.xlsx", time.Now().Format("20060102_150405"))
+
+	return buf.Bytes(), fileName, nil
+}
+
+func exportCSV(data []models.RiskIndicatorResponse) ([]byte, string, error) {
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
+
+	headers := []string{
+		"Data Source Anomaly",
+		"Risk Indicator Code",
+		"Risk Indicator",
+		"Aktivitas",
+		"Produk",
+		"Deskripsi",
+		"satuan",
+		"Periode",
+		"Batasan",
+		"Business Cycle Aktivitas",
+		"SLA Verifikasi",
+		"SLA Tindak Lanjut",
+		"KPI",
+		"Tipe Data Anomali",
+		"Kondisi",
+		"Created Time",
+		"Updated Time",
+		"Mapping Set Header",
+		"Mapping Set Key Uker",
+	}
+	if err := writer.Write(headers); err != nil {
+		return nil, "", fmt.Errorf("failed to write csv header: %w", err)
+	}
+
+	for _, d := range data {
+		createTime := lib.FormatDatePtr(d.CreatedAt)
+		updateTime := lib.FormatDatePtr(d.UpdatedAt)
+
+		row := []string{
+			d.DataSourceAnomaly,                  // data_source_anomaly
+			d.RiskIndicatorCode,                  // risk_indicator_code
+			d.RiskIndicator,                      // risk_indicator
+			strconv.Itoa(int(d.ActivityID)),      // aktivitas
+			strconv.Itoa(int(d.ProductID)),       // produk
+			d.Deskripsi,                          // deskripsi
+			d.Satuan,                             // satuan
+			d.PeriodePemantauan,                  // periode_data
+			d.Batasan,                            // Batasan
+			d.BusinessCycleActivity,              // Business Cycle Aktivitas
+			strconv.Itoa(int(d.SLAVerifikasi)),   // sla_verifikasi
+			strconv.Itoa(int(d.SLATindakLanjut)), // sla_tindak_lanjut
+			d.KPI,                                // kpi
+			d.Type,                               // Tipe Data Anomali
+			ReverseCondition(d.Kondisi),          // Kondisi
+			createTime,
+			updateTime,
+			"",
+			"",
+		}
+
+		if err := writer.Write(row); err != nil {
+			return nil, "", fmt.Errorf("failed to write csv row: %w", err)
+		}
+	}
+
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		return nil, "", fmt.Errorf("failed to flush csv data: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_indicator_%s.csv", time.Now().Format("20060102_150405"))
+	return buf.Bytes(), fileName, nil
+}
+
+func ConditionMap(text string) string {
+	normalized := strings.ToLower(text)
+	normalized = strings.ReplaceAll(normalized, "&", "dan")
+	normalized = strings.ReplaceAll(normalized, "  ", " ")
+	normalized = strings.TrimSpace(normalized)
+
+	label := map[string]string{
+		"tampilkan semua dan verifikasi semua":     "tampilkanSemuaDanVerifikasiSemua",
+		"tampilkan semua dan verifikasi terbaru":   "tampilkanSemuaDanVerifikasiTerbaru",
+		"tampilkan terbaru dan verifikasi terbaru": "tampilkanTerbaruDanVerifikasiTerbaru",
+	}
+
+	condition, ok := label[normalized]
+	if !ok {
+		return ""
+	}
+
+	return condition
+}
+
+func ReverseCondition(text string) string {
+	label := map[string]string{
+		"tampilkanSemuaDanVerifikasiSemua":     "Tampilkan Semua dan Verifikasi Semua",
+		"tampilkanSemuaDanVerifikasiTerbaru":   "Tampilkan Semua dan Verifikasi Terbaru",
+		"tampilkanTerbaruDanVerifikasiTerbaru": "Tampilkan Terbaru dan Verifikasi Terbaru",
+	}
+
+	condition, ok := label[text]
+	if !ok {
+		return ""
+	}
+
+	return condition
 }

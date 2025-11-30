@@ -59,30 +59,44 @@ func (LI LampiranIndicatorRepository) GetAll() (responses []models.LampiranIndic
 func (LI LampiranIndicatorRepository) GetOne(id int64) (responses models.LampiranIndicatorResponse, err error) {
 	return responses, LI.db.DB.Where("id = ?", id).Find(&responses).Error
 }
-
-// GetOneFileByID implements LampiranIndicatorDefinition
 func (LI LampiranIndicatorRepository) GetOneFileByID(id int64) (responses []models.LampiranIndicatorResponse, err error) {
+	// Jalankan query
 	rows, err := LI.db.DB.Raw(`
-		SELECT
-			files.id 'id',
-			files.id_indicator 'id_indicator',
-			files.nama_lampiran 'nama_lampiran',
-			files.nomor_lampiran 'nomor_lampiran',
-			files.jenis_file 'jenis_file',
-			files.path 'path',
-			files.filename 'filename'
-		FROM risk_indicator_map_files files
-		WHERE files.id_indicator = ?`, id).Rows()
+        SELECT
+            files.id AS id,
+            files.id_indicator AS id_indicator,
+            files.nama_lampiran AS nama_lampiran,
+            files.nomor_lampiran AS nomor_lampiran,
+            files.jenis_file AS jenis_file,
+            files.path AS path,
+            files.filename AS filename
+        FROM risk_indicator_map_files files
+        WHERE files.id_indicator = ?
+    `, id).Rows()
+
+	if err != nil {
+		return nil, err
+	}
 
 	defer rows.Close()
-	var lampiran models.LampiranIndicatorResponse
 
+	// Loop rows
 	for rows.Next() {
-		LI.db.DB.ScanRows(rows, &lampiran)
+		var lampiran models.LampiranIndicatorResponse // declare di dalam loop agar tidak reuse nilai lama
+
+		if err := LI.db.DB.ScanRows(rows, &lampiran); err != nil {
+			return nil, err
+		}
+
 		responses = append(responses, lampiran)
 	}
 
-	return responses, err
+	// Cek jika ada error di rows iteration
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return responses, nil
 }
 
 // Store implements LampiranIndicatorDefinition

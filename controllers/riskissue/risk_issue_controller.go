@@ -3,9 +3,12 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
+	"path/filepath"
 	"riskmanagement/lib"
 	models "riskmanagement/models/riskissue"
 	services "riskmanagement/services/riskissue"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/golang-package-library/logger"
@@ -660,4 +663,151 @@ func (riskIssue RiskIssueController) GetRiskIssueByActivityID(c *gin.Context) {
 	}
 
 	lib.ReturnToJson(c, 200, "200", "Inquery Data Berhasil", data)
+}
+
+func (riskIssue RiskIssueController) UpdateStatus(c *gin.Context) {
+	request := models.RiskIssueRequest{}
+	if err := c.Bind(&request); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	if err := riskIssue.service.UpdateStatus(request.ID); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), "Update data berhasil", nil)
+}
+
+func (riskIssue RiskIssueController) Template(c *gin.Context) {
+	fileBytes, fileName, err := riskIssue.service.Template()
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusInternalServerError, strconv.Itoa(http.StatusInternalServerError), "Generate Template error : "+err.Error(), "")
+		return
+	}
+
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+	c.Data(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileBytes)
+}
+
+func (riskIssue RiskIssueController) PreviewData(c *gin.Context) {
+	pernr := c.PostForm("pernr")
+	if pernr == "" {
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, nil)
+		return
+	}
+	file, err := c.FormFile("file")
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, nil)
+		return
+	}
+	src, err := lib.ExtractFile(file)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	ext := filepath.Ext(file.Filename)
+	if ext != ".csv" && ext != ".xls" && ext != ".xlsx" {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidFormatFile, nil)
+		return
+	}
+	// Logic Proces
+	var (
+		extract [][]string
+	)
+
+	switch ext {
+	case ".xlsx":
+		extract, err = lib.ParseExcelFile(src)
+		riskIssue.logger.Zap.Debug(extract)
+		if err != nil {
+			riskIssue.logger.Zap.Error("Error parsing file excel: %s", err)
+			lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InternalError, nil)
+			return
+		}
+	case ".csv":
+		extract, err = lib.ParseCSVFile(src)
+		if err != nil {
+			riskIssue.logger.Zap.Error("Error parsing file csv: %s", err)
+			lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InternalError, nil)
+			return
+		}
+	}
+
+	data, err := riskIssue.service.PreviewData(pernr, extract)
+	riskIssue.logger.Zap.Debug("============================	")
+	if err != nil {
+		riskIssue.logger.Zap.Error("Error validate data: %s ", err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), lib.SuccessGetMessage, data)
+}
+
+func (riskIssue RiskIssueController) ImportData(c *gin.Context) {
+	pernr := c.PostForm("pernr")
+	if pernr == "" {
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, lib.InvalidBody)
+		return
+	}
+	file, err := c.FormFile("file")
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidBody, nil)
+		return
+	}
+	src, err := lib.ExtractFile(file)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	ext := filepath.Ext(file.Filename)
+	if ext != ".csv" && ext != ".xls" && ext != ".xlsx" {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidFormatFile, nil)
+		return
+	}
+	// Logic Proces
+	var (
+		extract [][]string
+	)
+
+	switch ext {
+	case ".xlsx":
+		extract, err = lib.ParseExcelFile(src)
+		riskIssue.logger.Zap.Debug(extract)
+		if err != nil {
+			riskIssue.logger.Zap.Error("Error parsing file excel: %s", err)
+			lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InternalError, nil)
+			return
+		}
+	case ".csv":
+		extract, err = lib.ParseCSVFile(src)
+		if err != nil {
+			riskIssue.logger.Zap.Error("Error parsing file csv: %s", err)
+			lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InternalError, nil)
+			return
+		}
+	}
+
+	err = riskIssue.service.ImportData(pernr, extract)
+	riskIssue.logger.Zap.Debug("============================	")
+	if err != nil {
+		riskIssue.logger.Zap.Error("Error validate data: %s ", err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), "Success Import Data", nil)
 }

@@ -1,26 +1,30 @@
 package models
 
 type RiskIndicator struct {
-	ID                int64
-	RiskIndicatorCode string
-	RiskIndicator     string
-	ActivityID        int64
-	ProductID         int64
-	Deskripsi         string
-	Satuan            string
-	Sifat             string
-	SLAVerifikasi     int64
-	SLATindakLanjut   int64
-	SumberData        string
-	SumberDataText    string
-	PeriodePemantauan string
-	Owner             string
-	KPI               string
-	StatusIndikator   string
-	DataSourceAnomaly string
-	Status            bool
-	CreatedAt         *string
-	UpdatedAt         *string
+	ID                    int64   `json:"id"`
+	RiskIndicatorCode     string  `json:"risk_indicator_code"`
+	RiskIndicator         string  `json:"risk_indicator"`
+	ActivityID            int64   `json:"activity_id"`
+	ProductID             int64   `json:"product_id"`
+	Deskripsi             string  `json:"deskripsi"`
+	Satuan                string  `json:"satuan"`
+	Sifat                 string  `json:"sifat"`
+	BusinessCycleActivity string  `json:"business_cycle_activity"`
+	Batasan               string  `json:"batasan"`
+	Kondisi               string  `json:"kondisi"`
+	Type                  string  `json:"type"`
+	SLAVerifikasi         int64   `json:"sla_verifikasi"`
+	SLATindakLanjut       int64   `json:"sla_tindak_lanjut"`
+	SumberData            string  `json:"sumber_data"`
+	SumberDataText        string  `json:"sumber_data_text"`
+	PeriodePemantauan     string  `json:"periode_pemantauan"`
+	Owner                 string  `json:"owner"`
+	KPI                   string  `json:"kpi"`
+	StatusIndikator       string  `json:"status_indikator"`
+	DataSourceAnomaly     string  `json:"data_source_anomaly"`
+	Status                bool    `json:"status"`
+	CreatedAt             *string `json:"created_at"`
+	UpdatedAt             *string `json:"updated_at"`
 }
 
 type RiskIndicatorKRID struct {
