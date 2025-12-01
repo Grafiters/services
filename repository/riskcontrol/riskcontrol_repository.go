@@ -287,7 +287,10 @@ func (rc RiskControlRepository) SearchRiskControlByIssue(request *models.Keyword
 
 // Update data risk control for status only
 func (rc RiskControlRepository) UpdateStatus(id int64, status bool) error {
-	err := rc.db.DB.Model(&models.RiskControl{}).Where("id = ?", id).Update("status = ?", status).Error
+	err := rc.db.DB.
+		Table("risk_control"). // pastikan ini sesuai nama table di DB
+		Where("id = ?", id).
+		Update("status", status).Error // GORM syntax: Update(column, value)
 
 	return err
 }
