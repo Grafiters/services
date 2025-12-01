@@ -652,6 +652,11 @@ func buildRiskIndicatorFilterQuery(request *models.Paginate) (string, []interfac
 		args = append(args, request.CreatedAt)
 	}
 
+	if request.Code != "" {
+		whereQuery.WriteString(" AND ri.risk_indicator_code LIKE ? ")
+		args = append(args, "%"+request.Code+"%")
+	}
+
 	// Filter name (risk_indicator)
 	if request.Name != "" {
 		whereQuery.WriteString(" AND ri.risk_indicator LIKE ? ")
@@ -662,6 +667,11 @@ func buildRiskIndicatorFilterQuery(request *models.Paginate) (string, []interfac
 	if request.Status != "" {
 		whereQuery.WriteString(" AND ri.status_indikator = ? ")
 		args = append(args, request.Status)
+	}
+
+	if request.Batasan != "" {
+		whereQuery.WriteString(" AND ri.batasan = ? ")
+		args = append(args, request.Batasan)
 	}
 
 	// Active / Inactive

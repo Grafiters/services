@@ -36,8 +36,10 @@ type RiskIndicatorRequest struct {
 type Paginate struct {
 	Search    string `json:"search"`
 	CreatedAt string `json:"created_at"`
+	Code      string `json:"code"`
 	Name      string `json:"name"`
 	Status    string `json:"status"`
+	Batasan   string `json:"batasan"`
 	Active    bool   `json:"active"`
 	Inactive  bool   `json:"inactive"`
 	Order     string `json:"order"`
@@ -103,6 +105,7 @@ type RiskIndicatorGetOne struct {
 	BusinessCycleActivity string                      `json:"business_cycle_activity"`
 	Batasan               string                      `json:"batasan"`
 	Kondisi               string                      `json:"kondisi"`
+	Type                  string                      `json:"type"`
 	SLAVerifikasi         int64                       `json:"sla_verifikasi"`
 	SLATindakLanjut       int64                       `json:"sla_tindak_lanjut"`
 	SumberData            string                      `json:"sumber_data"`
