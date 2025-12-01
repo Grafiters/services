@@ -456,6 +456,7 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 	tx := riskIndicator.db.DB.Begin()
 
 	updateIndicator := &models.RiskIndicator{
+		ID:                    requests.ID,
 		RiskIndicatorCode:     requests.RiskIndicatorCode,
 		RiskIndicator:         requests.RiskIndicator,
 		ActivityID:            requests.ActivityID,
@@ -488,6 +489,10 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 		"deskripsi",
 		"satuan",
 		"sifat",
+		"business_cycle_activity",
+		"batasan",
+		"kondisi",
+		"type",
 		"sla_verifikasi",
 		"sla_tindak_lanjut",
 		"sumber_data",
@@ -496,6 +501,7 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 		"owner",
 		"kpi",
 		"status_indikator",
+		"data_source_anomaly",
 		"status",
 		"updated_at",
 	}
