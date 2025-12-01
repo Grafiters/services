@@ -682,7 +682,7 @@ func (riskIssue RiskIssueRepository) SearchRiskIssueWithoutSub(request *models.R
 
 // Update data risk control for status only
 func (rc RiskIssueRepository) UpdateStatus(id int64, status bool) error {
-	err := rc.db.DB.Table("risk_issue").Where("id = ?", id).Update("status = ?", status).Error
+	err := rc.db.DB.Table("risk_issue").Where("id = ?", id).Update("status", status).Error
 
 	return err
 }

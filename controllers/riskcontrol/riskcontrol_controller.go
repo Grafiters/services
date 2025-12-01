@@ -130,6 +130,7 @@ func (riskControl RiskControlController) UpdateStatus(c *gin.Context) {
 
 	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), "Update data berhasil", nil)
 }
+
 func (riskControl RiskControlController) Delete(c *gin.Context) {
 	requests := models.RiskControlRequest{}
 

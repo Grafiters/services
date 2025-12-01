@@ -111,6 +111,7 @@ func (riskControl RiskControlService) GetOne(id int64) (responses models.RiskCon
 
 // Store implements RiskControlDefinition
 func (riskControl RiskControlService) Store(request *models.RiskControlRequest) (err error) {
+	timeNow := lib.GetTimeNow("timestime")
 	if request.OwnerGroup != "" && request.Owner != "" {
 		err = riskControl.ValidationOwner(request)
 		if err != nil {
@@ -129,6 +130,8 @@ func (riskControl RiskControlService) Store(request *models.RiskControlRequest) 
 		transform.Kode = code
 	}
 
+	transform.CreatedAt = &timeNow
+
 	status, err := riskControl.repository.Store(&transform)
 	if !status || err != nil {
 		return err
@@ -139,6 +142,7 @@ func (riskControl RiskControlService) Store(request *models.RiskControlRequest) 
 
 // Update implements RiskControlDefinition
 func (riskControl RiskControlService) Update(request *models.RiskControlRequest) (err error) {
+	timeNow := lib.GetTimeNow("timestime")
 	if request.OwnerGroup != "" && request.Owner != "" {
 		err = riskControl.ValidationOwner(request)
 		if err != nil {
@@ -148,6 +152,7 @@ func (riskControl RiskControlService) Update(request *models.RiskControlRequest)
 	}
 
 	transform := request.ParseRequest()
+	transform.UpdatedAt = &timeNow
 	status, err := riskControl.repository.Update(&transform)
 	if !status || err != nil {
 		return err
