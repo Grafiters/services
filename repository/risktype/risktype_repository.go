@@ -29,39 +29,70 @@ type RiskTypeRepository struct {
 
 // GetAllWithPaginate implements RiskTypeDefinition
 func (rt RiskTypeRepository) GetAllWithPaginate(request *models.Paginate) (responses []models.RiskTypeResponse, totalRows int, totalData int, err error) {
-	rows, err := rt.db.DB.Raw(`
-	SELECT
-		rt.id 'id',
-		rt.risk_type_code 'risk_type_code',
-		rt.risk_type 'risk_type',
-		rt.deskripsi 'deskripsi',
-		rt.status 'status',
-		rt.created_at 'created_at',
-		rt.updated_at 'updated_at'
-	FROM risk_type rt  ORDER BY rt.id LIMIT ? OFFSET ?
-	`, request.Limit, request.Offset).Rows()
+
+	// Build search pattern
+	var search string
+	var params []interface{}
+
+	baseQuery := `
+		SELECT
+			rt.id AS id,
+			rt.risk_type_code AS risk_type_code,
+			rt.risk_type AS risk_type,
+			rt.deskripsi AS deskripsi,
+			rt.status AS status,
+			rt.created_at AS created_at,
+			rt.updated_at AS updated_at
+		FROM risk_type rt
+	`
+
+	// Add WHERE if search is provided
+	if request.Search != "" {
+		search = "%" + request.Search + "%"
+		baseQuery += `
+			WHERE rt.risk_type_code LIKE ? 
+			   OR rt.risk_type LIKE ?
+		`
+		params = append(params, search, search)
+	}
+
+	// Add order, limit, offset
+	baseQuery += ` ORDER BY rt.id LIMIT ? OFFSET ?`
+	params = append(params, request.Limit, request.Offset)
+
+	rows, err := rt.db.DB.Raw(baseQuery, params...).Rows()
 	if err != nil {
 		return responses, totalRows, totalData, err
 	}
 	defer rows.Close()
 
-	var linibisnislv1 models.RiskTypeResponse
+	// Scan result
 	for rows.Next() {
-		rt.db.DB.ScanRows(rows, &linibisnislv1)
-		responses = append(responses, linibisnislv1)
+		var rtItem models.RiskTypeResponse
+		rt.db.DB.ScanRows(rows, &rtItem)
+		responses = append(responses, rtItem)
 	}
 
-	paginateQuery := `SELECT COUNT(*) FROM risk_type`
-	err = rt.dbRaw.DB.QueryRow(paginateQuery).Scan(&totalData)
+	// COUNT(*) query with same search condition
+	countQuery := `SELECT COUNT(*) FROM risk_type rt`
+	var countParams []interface{}
+
+	if request.Search != "" {
+		countQuery += ` WHERE rt.risk_type_code LIKE ? OR rt.risk_type LIKE ?`
+		countParams = append(countParams, search, search)
+	}
+
+	err = rt.dbRaw.DB.QueryRow(countQuery, countParams...).Scan(&totalData)
 	if err != nil {
 		return responses, totalRows, totalData, err
 	}
 
+	// Calculate total pages
 	if totalData > 0 {
-		totalRows = int(math.Ceil((float64(totalData)) / float64(request.Limit)))
+		totalRows = int(math.Ceil(float64(totalData) / float64(request.Limit)))
 	}
 
-	return responses, totalRows, totalData, err
+	return responses, totalRows, totalData, nil
 }
 
 // Delete implements RiskTypeDefinition

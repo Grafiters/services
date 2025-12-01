@@ -56,22 +56,35 @@ func (product ProductRepository) GetAll() (responses []models.ProductResponse, e
 
 // GetAll implements ProductDefinition
 func (product ProductRepository) GetAllWithPage(request *models.PageRequest) (responses []models.ProductResponse, totalRows int, totalData int, err error) {
-	var count int64
-	db := product.db.DB.Table("product p").Count(&count).Limit(request.Limit).Offset(request.Offset)
 
+	db := product.db.DB.Table("product p")
+
+	// Search optional
+	if request.Search != "" {
+		search := "%" + request.Search + "%"
+		db = db.Where("p.product LIKE ? OR p.kode_product LIKE ?", search, search)
+	}
+
+	// Count total data after filter
+	var count int64
+	err = db.Count(&count).Error
+	if err != nil {
+		return nil, totalRows, totalData, err
+	}
 	totalData = int(count)
 
+	// Total pages
 	if totalData > 0 {
 		totalRows = int(math.Ceil(float64(totalData) / float64(request.Limit)))
 	}
 
-	err = db.Scan(&responses).Error
+	// Apply pagination
+	err = db.Limit(request.Limit).Offset(request.Offset).Scan(&responses).Error
 	if err != nil {
 		return nil, totalRows, totalData, err
 	}
 
-	return responses, totalRows, totalData, err
-
+	return responses, totalRows, totalData, nil
 }
 
 // GetOne implements ProductDefinition

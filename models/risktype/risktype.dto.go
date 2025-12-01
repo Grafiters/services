@@ -11,6 +11,7 @@ type RiskTypeRequest struct {
 }
 
 type Paginate struct {
+	Search string `json:"search"`
 	Order  string `json:"order"`
 	Sort   string `json:"sort"`
 	Offset int    `json:"offset"`

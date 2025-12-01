@@ -31,6 +31,7 @@ type ProductResponse struct {
 }
 
 type PageRequest struct {
+	Search string `json:"search"`
 	Order  string `json:"order"`
 	Sort   string `json:"sort"`
 	Offset int    `json:"offset"`

@@ -47,6 +47,8 @@ func (incident IncidentService) GetAll() (responses []models.IncidentResponse, e
 // GetAllWithPaginate implements IncidentDefinition
 func (pk1 IncidentService) GetAllWithPaginate(request models.Paginate) (responses []models.IncidentResponses, pagination lib.Pagination, err error) {
 	offset, page, limit, order, sort := lib.SetPaginationParameter(request.Page, request.Limit, request.Order, request.Sort)
+	request.Limit = limit
+	request.Page = page
 	request.Offset = offset
 	request.Order = order
 	request.Sort = sort

@@ -47,33 +47,75 @@ func (incident IncidentRepository) Delete(id int64) (err error) {
 }
 
 // GetAllWithPaginate implements IncidentDefinition
-func (pk1 IncidentRepository) GetAllWithPaginate(request *models.Paginate) (responses []models.IncidentResponses, totalRows int, totalData int, err error) {
-	rows, err := pk1.db.DB.Raw(`
-				SELECT 
-					pkl.id 'id',
-					pkl.kode_kejadian 'kode_kejadian',
-					pkl.penyebab_kejadian 'penyebab_kejadian',
-					pkl.deskripsi 'deskripsi',
-					pkl.status  'status',
-					pkl.created_at 'created_at',
-					pkl.updated_at 'updated_at'
-				FROM penyebab_kejadian_lv1 pkl ORDER BY pkl.id ASC LIMIT ? OFFSET ?`, request.Limit, request.Offset).Rows()
+func (pk1 IncidentRepository) GetAllWithPaginate(request *models.Paginate) (responses []models.IncidentResponses, totalPages int, totalData int, err error) {
 
-	defer rows.Scan()
-	var kejadian models.IncidentResponses
+	var search string
+	var params []interface{}
 
-	for rows.Next() {
-		pk1.db.DB.ScanRows(rows, &kejadian)
-		responses = append(responses, kejadian)
+	baseQuery := `
+		SELECT 
+			pkl.id AS id,
+			pkl.kode_kejadian AS kode_kejadian,
+			pkl.penyebab_kejadian AS penyebab_kejadian,
+			pkl.deskripsi AS deskripsi,
+			pkl.status AS status,
+			pkl.created_at AS created_at,
+			pkl.updated_at AS updated_at
+		FROM penyebab_kejadian_lv1 pkl
+	`
+
+	// --- Search opsional ---
+	if request.Search != "" {
+		search = "%" + request.Search + "%"
+		baseQuery += `
+			WHERE pkl.kode_kejadian LIKE ?
+			   OR pkl.penyebab_kejadian LIKE ?
+			   OR pkl.deskripsi LIKE ?
+		`
+		params = append(params, search, search, search)
 	}
-	paginaiteQuery := `SELECT COUNT(*) FROM penyebab_kejadian_lv1`
-	err = pk1.dbRaw.DB.QueryRow(paginaiteQuery).Scan(&totalRows)
 
-	result := float64(totalRows) / float64(request.Limit)
-	resultFinal := int(math.Ceil(result))
+	// --- Order + Pagination ---
+	baseQuery += ` ORDER BY pkl.id ASC LIMIT ? OFFSET ?`
+	params = append(params, request.Limit, request.Offset)
 
-	return responses, resultFinal, totalRows, err
+	rows, err := pk1.db.DB.Raw(baseQuery, params...).Rows()
+	if err != nil {
+		return responses, totalPages, totalData, err
+	}
+	defer rows.Close()
 
+	// Scan rows
+	for rows.Next() {
+		var item models.IncidentResponses
+		pk1.db.DB.ScanRows(rows, &item)
+		responses = append(responses, item)
+	}
+
+	// --- COUNT(*) Query (harus sama search-nya) ---
+	countQuery := `SELECT COUNT(*) FROM penyebab_kejadian_lv1 pkl`
+	var countParams []interface{}
+
+	if request.Search != "" {
+		countQuery += `
+			WHERE pkl.kode_kejadian LIKE ?
+			   OR pkl.penyebab_kejadian LIKE ?
+			   OR pkl.deskripsi LIKE ?
+		`
+		countParams = append(countParams, search, search, search)
+	}
+
+	err = pk1.dbRaw.DB.QueryRow(countQuery, countParams...).Scan(&totalData)
+	if err != nil {
+		return responses, totalPages, totalData, err
+	}
+
+	// Hitung total halaman
+	if request.Limit > 0 {
+		totalPages = int(math.Ceil(float64(totalData) / float64(request.Limit)))
+	}
+
+	return responses, totalPages, totalData, nil
 }
 
 // GetAll implements IncidentDefinition
