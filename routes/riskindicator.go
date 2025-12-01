@@ -49,7 +49,7 @@ func (s RiskIndicatorRoutes) Setup() {
 		api.POST("/template", s.RiskIndicatorController.Template)
 		api.POST("/preview", s.RiskIndicatorController.Preview)
 		api.POST("/import", s.RiskIndicatorController.ImportData)
-		api.POST("/download/:format", s.RiskIndicatorController.Download)
+		api.POST("/export/:format", s.RiskIndicatorController.Download)
 	}
 }
 
