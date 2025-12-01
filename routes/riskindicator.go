@@ -46,6 +46,7 @@ func (s RiskIndicatorRoutes) Setup() {
 		api.POST("/searchRiskIndicatorTematik", s.RiskIndicatorController.SearchRiskIndicatorTematik)
 		api.POST("/getDataTematik", s.RiskIndicatorController.GetTematikData)
 		api.POST("/getDocumentList", s.RiskIndicatorController.GetMateriIfFinish)
+		api.POST("/status", s.RiskIndicatorController.UpdateStatus)
 		api.POST("/template", s.RiskIndicatorController.Template)
 		api.POST("/preview", s.RiskIndicatorController.Preview)
 		api.POST("/import", s.RiskIndicatorController.ImportData)

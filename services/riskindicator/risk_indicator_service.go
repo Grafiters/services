@@ -58,6 +58,7 @@ type RiskIndicatorDefinition interface {
 	Preview(pernr string, data [][]string) (dto.PreviewFileImport[[17]string], error)
 	ImportData(pernr string, data [][]string) error
 	Download(pernr string, format string) ([]byte, string, error)
+	UpdateStatus(id int64) (err error)
 }
 
 type RiskIndicatorService struct {
@@ -227,6 +228,24 @@ func (ri RiskIndicatorService) GetAllWithPaginate(request models.Paginate) (resp
 	ri.logger.Zap.Debug(responses)
 	pagination = lib.SetPaginationResponse(page, limit, totalRows, totalData)
 	return responses, pagination, err
+}
+
+func (rc RiskIndicatorService) UpdateStatus(id int64) (err error) {
+	var (
+		status bool = true
+	)
+	data, err := rc.riskIndicatorRepo.GetOne(id)
+	if err != nil {
+		return err
+	}
+
+	if data.Status {
+		status = false
+	}
+
+	err = rc.riskIndicatorRepo.UpdateStatus(id, status)
+
+	return err
 }
 
 // GetOne implements RiskIndicatorDefinition

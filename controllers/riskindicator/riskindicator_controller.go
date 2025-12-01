@@ -469,6 +469,23 @@ func (ri RiskIndicatorController) GetMateriIfFinish(c *gin.Context) {
 	lib.ReturnToJson(c, 200, "200", "Inquery Berhasil", document)
 }
 
+func (ri RiskIndicatorController) UpdateStatus(c *gin.Context) {
+	requests := models.RiskIndicatorRequest{}
+	if err := c.Bind(&requests); err != nil {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	if err := ri.service.UpdateStatus(requests.ID); err != nil {
+		ri.logger.Zap.Error(err)
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
+		return
+	}
+
+	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), "Update data berhasil", nil)
+}
+
 func (ri RiskIndicatorController) Template(c *gin.Context) {
 	blob, fileName, err := ri.service.Template()
 	if err != nil {

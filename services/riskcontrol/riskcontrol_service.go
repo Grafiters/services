@@ -603,6 +603,7 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 				Nature:      v[2],
 				KeyControl:  v[3],
 				Deskripsi:   v[4],
+				Status:      true,
 				OwnerLvl:    v[5],
 				OwnerGroup:  v[6],
 				Owner:       v[7],

@@ -38,6 +38,7 @@ type RiskIndicatorDefinition interface {
 
 	GetMateriIfFinish(request *models.RequestMateriIfFinish) (response []models.RekomendasiMateri, err error)
 	BulkCreateRiskIndicator(items []models.RiskIndicator, tx *gorm.DB) error
+	UpdateStatus(id int64, status bool) error
 }
 
 type RiskIndicatorRepository struct {
@@ -599,6 +600,12 @@ func (LI RiskIndicatorRepository) GetMateriIfFinish(request *models.RequestMater
 	err = db.Scan(&response).Error
 
 	return response, err
+}
+
+func (li RiskIndicatorRepository) UpdateStatus(id int64, status bool) error {
+	err := li.db.DB.Model(&models.RiskIndicator{}).Where("id = ?", id).Update("status = ?", status).Error
+
+	return err
 }
 
 func (LI RiskIndicatorRepository) BulkCreateRiskIndicator(items []models.RiskIndicator, tx *gorm.DB) error {
