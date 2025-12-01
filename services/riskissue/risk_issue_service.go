@@ -297,7 +297,7 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 			}
 
 			event = append(event, dto.MappingLVLRequest{
-				RiskEventID: strconv.FormatInt(value.ID, 10),
+				RiskEventID: strconv.FormatInt(dataRiskIssue.ID, 10),
 				Lvl1:        lvl1,
 				Lvl2:        lvl2,
 				Lvl3:        lvl3,
@@ -337,7 +337,7 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 			}
 
 			cause = append(cause, dto.MappingLVLRequest{
-				RiskEventID: strconv.FormatInt(value.ID, 10),
+				RiskEventID: strconv.FormatInt(dataRiskIssue.ID, 10),
 				Lvl1:        lvl1,
 				Lvl2:        lvl2,
 				Lvl3:        lvl3,
@@ -525,7 +525,7 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 			}
 
 			event = append(event, dto.MappingLVLRequest{
-				RiskEventID: strconv.FormatInt(value.ID, 10),
+				RiskEventID: strconv.FormatInt(request.ID, 10),
 				Lvl1:        lvl1,
 				Lvl2:        lvl2,
 				Lvl3:        lvl3,
@@ -565,7 +565,7 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 			}
 
 			cause = append(cause, dto.MappingLVLRequest{
-				RiskEventID: strconv.FormatInt(value.ID, 10),
+				RiskEventID: strconv.FormatInt(request.ID, 10),
 				Lvl1:        lvl1,
 				Lvl2:        lvl2,
 				Lvl3:        lvl3,
@@ -592,7 +592,7 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 	if len(request.MapProduct) != 0 {
 		for _, value := range request.MapProduct {
 			product = append(product, dto.MappingProductRiskEventRequest{
-				RiskEventID: strconv.FormatInt(value.ID, 10),
+				RiskEventID: strconv.FormatInt(request.ID, 10),
 				ProductID:   strconv.FormatInt(value.Product, 10),
 			})
 			updateProduct := &models.MapProduct{
