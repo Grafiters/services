@@ -457,7 +457,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 	}
 
 	include := []string{
-		"id",
 		"risk_type_id",
 		"risk_issue_code",
 		"risk_issue",
