@@ -88,10 +88,12 @@ func (rc RiskControlRepository) GetAllWithPaginate(request *models.Paginate) (re
 		queryBuilder = queryBuilder.Where("risk_control LIKE ?", fmt.Sprintf("%%%s%%", request.RiskControl))
 	}
 
-	if request.Status == "Aktif" {
-		queryBuilder = queryBuilder.Where("status = 1")
-	} else {
-		queryBuilder = queryBuilder.Where("status = 0")
+	if request.Status != "" {
+		if request.Status == "Aktif" {
+			queryBuilder = queryBuilder.Where("status = 1")
+		} else {
+			queryBuilder = queryBuilder.Where("status = 0")
+		}
 	}
 
 	if request.Search != "" {
