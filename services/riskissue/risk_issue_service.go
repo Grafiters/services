@@ -304,8 +304,7 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 			})
 
 			updateEvent := &models.MapEvent{
-				ID:           value.ID,
-				IDRiskIssue:  request.ID,
+				IDRiskIssue:  dataRiskIssue.ID,
 				EventTypeLv1: lvl1,
 				EventTypeLv2: lvl2,
 				EventTypeLv3: lvl3,
@@ -344,8 +343,7 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 			})
 
 			updateKejadian := &models.MapKejadian{
-				ID:                  value.ID,
-				IDRiskIssue:         request.ID,
+				IDRiskIssue:         dataRiskIssue.ID,
 				PenyebabKejadianLv1: lvl1,
 				PenyebabKejadianLv2: lvl2,
 				PenyebabKejadianLv3: lvl3,
