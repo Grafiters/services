@@ -398,7 +398,6 @@ func (riskIndicator RiskIndicatorService) Store(request models.RiskIndicatorRequ
 					}
 
 					_, err = riskIndicator.lampiran.Store(&models.LampiranIndicator{
-						ID:            value.ID,
 						IDIndicator:   reqRiskIndicator.ID,
 						NamaLampiran:  value.NamaLampiran,
 						NomorLampiran: value.NomorLampiran,
@@ -415,7 +414,6 @@ func (riskIndicator RiskIndicatorService) Store(request models.RiskIndicatorRequ
 				case "Link Document":
 					fmt.Println("link")
 					_, err = riskIndicator.lampiran.Store(&models.LampiranIndicator{
-						ID:            value.ID,
 						IDIndicator:   reqRiskIndicator.ID,
 						NamaLampiran:  value.NamaLampiran,
 						NomorLampiran: value.NomorLampiran,
@@ -525,6 +523,8 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 			return false, err
 		}
 
+		riskIndicator.logger.Zap.Debug(requests.LampiranIndicator)
+
 		for _, value := range requests.LampiranIndicator {
 			switch value.JenisFile {
 			case "Upload Document":
@@ -566,7 +566,6 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 					}
 
 					_, err = riskIndicator.lampiran.Store(&models.LampiranIndicator{
-						ID:            value.ID,
 						IDIndicator:   requests.ID,
 						NamaLampiran:  value.NamaLampiran,
 						NomorLampiran: value.NomorLampiran,
@@ -583,7 +582,6 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 				} else {
 					riskIndicator.logger.Zap.Info("======> Old Files")
 					_, err = riskIndicator.lampiran.Store(&models.LampiranIndicator{
-						ID:            value.ID,
 						IDIndicator:   requests.ID,
 						NamaLampiran:  value.NamaLampiran,
 						NomorLampiran: value.NomorLampiran,
@@ -602,7 +600,6 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 			case "Link Document":
 				fmt.Println("link")
 				_, err = riskIndicator.lampiran.Store(&models.LampiranIndicator{
-					ID:            value.ID,
 					IDIndicator:   requests.ID,
 					NamaLampiran:  value.NamaLampiran,
 					NomorLampiran: value.NomorLampiran,
