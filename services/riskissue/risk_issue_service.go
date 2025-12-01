@@ -505,10 +505,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
 	// Update MapEvent
@@ -612,10 +608,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
 	//Update MapLiniBisnis
@@ -637,10 +629,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
 	//MapAktifitas
@@ -661,10 +649,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 				return false, err
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error(err)
-		return false, err
 	}
 
 	data := make([]dto.MappingRiskEventRequest, 0)
