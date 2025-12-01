@@ -2,9 +2,12 @@ package riskissue
 
 import (
 	"bytes"
+	"encoding/csv"
 	"fmt"
 	"riskmanagement/dto"
 	"riskmanagement/lib"
+	modelsControl "riskmanagement/models/riskcontrol"
+	modelsIndicator "riskmanagement/models/riskindicator"
 	models "riskmanagement/models/riskissue"
 	"riskmanagement/repository/eventtypelv1"
 	"riskmanagement/repository/eventtypelv2"
@@ -20,8 +23,10 @@ import (
 	"riskmanagement/services/arlords"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jung-kurt/gofpdf"
 	"github.com/xuri/excelize/v2"
 
 	"gitlab.com/golang-package-library/logger"
@@ -63,6 +68,7 @@ type RiskIssueDefinition interface {
 	Template() ([]byte, string, error)
 	PreviewData(pernr string, data [][]string) (dto.PreviewFileImport[[27]string], error)
 	ImportData(pernr string, data [][]string) error
+	Download(pernr, format string) ([]byte, string, error)
 }
 
 type RiskIssueService struct {
@@ -2162,6 +2168,782 @@ func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) erro
 	tx.Commit()
 
 	return nil
+}
+
+func (riskIssue RiskIssueService) Download(pernr, format string) ([]byte, string, error) {
+	data, err := riskIssue.riskissueRepo.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when try to query risk issue: ", err)
+		return nil, "", err
+	}
+
+	if len(data) == 0 {
+		return nil, "", nil
+	}
+
+	switch format {
+	case "csv":
+		return riskIssue.exportCSV(pernr, data)
+	case "xlsx":
+		return riskIssue.exportExcel(pernr, data)
+	case "pdf":
+		return riskIssue.exportPDF(pernr, data)
+	default:
+		return nil, "", fmt.Errorf("unsupported format export file")
+	}
+}
+
+func (riskIssue RiskIssueService) exportPDF(pernr string, data []models.RiskIssueResponse) ([]byte, string, error) {
+	headers := []string{
+		"Tipe Risiko",
+		"Risk Event",
+		"Deskripsi",
+		"Kategori Risiko",
+		"Map Event - Event Type Lv1",
+		"Map Event - Event Type Lv2",
+		"Map Event - Event Type Lv3",
+		"Map Kejadian - Penyebab Kejadian Lv1",
+		"Map Kejadian - Penyebab Kejadian Lv2",
+		"Map Kejadian - Penyebab Kejadian Lv3",
+		"Map Product - Product",
+		"Likelihood",
+		"Impact",
+		"Status",
+		"Create Time",
+		"Update Time",
+		"Code Control",
+		"Risk Control",
+		"Code Indicator",
+		"Risk Indicator",
+		"Code Business Cycle",
+		"Business Cycle",
+		"Code Sub Business Cycle",
+		"Sub Business Cycle",
+		"Code Process",
+		"Process",
+		"Code Sub Process",
+		"Sub Process",
+		"Code Activity",
+		"Activity",
+	}
+
+	pdf := gofpdf.New("L", "mm", "A4", "")
+	pdf.SetAutoPageBreak(false, 10)
+	pdf.SetMargins(10, 10, 10) // margin kiri, atas, kanan
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 14)
+	pdf.CellFormat(0, 10, "Risk Control Report", "", 1, "C", false, 0, "")
+
+	colWidths := []float64{
+		20, 20, 35, 25, 25,
+		25, 25, 25, 25, 25,
+		25, 25, 25, 25, 25,
+		25, 25, 25, 25, 25,
+		25, 25, 25, 25, 25,
+		25, 25, 25, 25, 25,
+	}
+
+	printHeader := func() {
+		pdf.SetFillColor(200, 200, 200)
+		pdf.SetFont("Arial", "B", 10)
+
+		lineHeight := 5.0
+
+		// Hitung tinggi maksimum header (berdasarkan wrapping)
+		maxHeight := 0.0
+		for i, h := range headers {
+			lines := pdf.SplitLines([]byte(h), colWidths[i])
+			hh := float64(len(lines)) * lineHeight
+			if hh > maxHeight {
+				maxHeight = hh
+			}
+		}
+
+		xStart := pdf.GetX()
+		yStart := pdf.GetY()
+
+		// Cetak setiap header cell
+		for i, h := range headers {
+			x := pdf.GetX()
+			y := pdf.GetY()
+
+			// Gambar border kotak
+			pdf.Rect(x, y, colWidths[i], maxHeight, "DF") // DF = fill + border
+
+			// Cetak text dengan wrapping di tengah vertikal
+			lines := pdf.SplitLines([]byte(h), colWidths[i])
+			textHeight := float64(len(lines)) * lineHeight
+			yOffset := (maxHeight - textHeight) / 2
+
+			pdf.SetXY(x, y+yOffset)
+			pdf.MultiCell(colWidths[i], lineHeight, h, "", "C", false)
+			pdf.SetXY(x+colWidths[i], yStart)
+		}
+
+		pdf.SetXY(xStart, yStart+maxHeight)
+		pdf.SetFont("Arial", "", 9)
+	}
+
+	printHeader()
+	_, pageHeight := pdf.GetPageSize()
+	marginBottom := 15.0
+
+	getRowHeight := func(row []string) float64 {
+		maxHeight := 0.0
+		lineHeight := 5.0
+		for i, txt := range row {
+			lines := pdf.SplitLines([]byte(txt), colWidths[i])
+			h := float64(len(lines)) * lineHeight
+			if h > maxHeight {
+				maxHeight = h
+			}
+		}
+		return maxHeight
+	}
+
+	riskType, err := riskIssue.riskType.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when get mapping risk type: ", err)
+		return nil, "", err
+	}
+
+	riskTypeMap := make(map[int64]string, 0)
+	for _, v := range riskType {
+		riskTypeMap[v.ID] = fmt.Sprintf("%s - %s", v.RiskTypeCode, v.RiskType)
+	}
+
+	control, err := riskIssue.riskControl.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when get mapping event: ", err)
+		return nil, "", err
+	}
+
+	controlMap := make(map[string]modelsControl.RiskControlResponse, 0)
+	for _, c := range control {
+		controlMap[strconv.Itoa(int(c.ID))] = c
+	}
+
+	indicator, err := riskIssue.riskIndicator.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when get mapping indicator: ", err)
+		return nil, "", err
+	}
+
+	indicatorMap := make(map[string]modelsIndicator.RiskIndicatorResponse, 0)
+	for _, c := range indicator {
+		indicatorMap[strconv.Itoa(int(c.ID))] = c
+	}
+
+	eventID := make([]string, 0)
+	for _, v := range data {
+		eventID = append(eventID, strconv.Itoa(int(v.ID)))
+	}
+
+	mapping, err := riskIssue.arlodsService.GetAllMappingRiskEvent(pernr, eventID)
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when get mapping: ", err)
+		return nil, "", err
+	}
+
+	mappingMap := make(map[string]dto.BulkRiskEventDetail, 0)
+	for _, v := range mapping.Data {
+		mappingMap[v.RiskEventID] = v.MappingDetail
+	}
+
+	for _, v := range data {
+		status := "Aktif"
+		if !v.Status {
+			status = "Inactif"
+		}
+		createTime := lib.FormatDatePtr(v.CreatedAt)
+		updateTime := lib.FormatDatePtr(v.UpdatedAt)
+
+		riskType := ""
+		if v, ok := riskTypeMap[v.RiskTypeID]; ok {
+			riskType = v
+		}
+
+		mappingDetail, ok := mappingMap[strconv.Itoa(int(v.ID))]
+
+		var eventTypeLv1, eventTypeLv2, eventTypeLv3 []string
+		if ok && len(mappingDetail.MappingEvent) > 0 {
+			for _, m := range mappingDetail.MappingEvent {
+				eventTypeLv1 = append(eventTypeLv1, m.EventTypeLvl1)
+				eventTypeLv2 = append(eventTypeLv2, m.EventTypeLvl2)
+				eventTypeLv3 = append(eventTypeLv3, m.EventTypeLvl3)
+			}
+		} else {
+			eventTypeLv1 = []string{""}
+			eventTypeLv2 = []string{""}
+			eventTypeLv3 = []string{""}
+		}
+
+		var causeLv1, causeLv2, causeLv3 []string
+		if ok && len(mappingDetail.MappingCause) > 0 {
+			for _, m := range mappingDetail.MappingCause {
+				causeLv1 = append(causeLv1, m.Incident)
+				causeLv2 = append(causeLv2, m.SubIncident)
+				causeLv3 = append(causeLv3, m.SubSubIncident)
+			}
+		} else {
+			causeLv1 = []string{""}
+			causeLv2 = []string{""}
+			causeLv3 = []string{""}
+		}
+
+		var productCodes []string
+		if ok && len(mappingDetail.MappingProduct) > 0 {
+			for _, m := range mappingDetail.MappingProduct {
+				productCodes = append(productCodes, m.ProductID)
+			}
+		} else {
+			productCodes = []string{""}
+		}
+
+		var codeControls, nameControls []string
+		if ok && len(mappingDetail.Controls) > 0 {
+			for _, v := range mappingDetail.Controls {
+				if val, ok := controlMap[v.ID]; ok {
+					codeControls = append(codeControls, val.Kode)
+					nameControls = append(nameControls, val.RiskControl)
+				}
+			}
+		}
+		if len(codeControls) == 0 {
+			codeControls = []string{""}
+			nameControls = []string{""}
+		}
+
+		var codeIndicators, nameIndicators []string
+		if ok && len(mappingDetail.Indicators) > 0 {
+			for _, v := range mappingDetail.Indicators {
+				if val, ok := indicatorMap[v.ID]; ok {
+					codeIndicators = append(codeIndicators, val.RiskIndicatorCode)
+					nameIndicators = append(nameIndicators, val.RiskIndicator)
+				}
+			}
+		}
+		if len(codeIndicators) == 0 {
+			codeIndicators = []string{""}
+			nameIndicators = []string{""}
+		}
+
+		likelihood := ""
+		impact := ""
+		if v.Likelihood != nil {
+			likelihood = *v.Likelihood
+		}
+		if v.Impact != nil {
+			impact = *v.Impact
+		}
+
+		row := []string{
+			riskType,
+			fmt.Sprintf("%s - %s", v.RiskIssueCode, v.RiskIssue),
+			v.Deskripsi,
+			v.KategoriRisiko,
+			strings.Join(eventTypeLv1, ";"),
+			strings.Join(eventTypeLv2, ";"),
+			strings.Join(eventTypeLv3, ";"),
+			strings.Join(causeLv1, ";"),
+			strings.Join(causeLv2, ";"),
+			strings.Join(causeLv3, ";"),
+			strings.Join(productCodes, ";"),
+			likelihood,
+			impact,
+			status,
+			createTime,
+			updateTime,
+			strings.Join(codeControls, ";"),
+			strings.Join(nameControls, ";"),
+			strings.Join(codeIndicators, ";"),
+			strings.Join(nameIndicators, ";"),
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+		}
+
+		rowHeight := getRowHeight(row)
+		xStart := pdf.GetX()
+		yStart := pdf.GetY()
+
+		// Check page break
+		if yStart+rowHeight+marginBottom > pageHeight {
+			pdf.AddPage()
+			printHeader()
+			xStart = pdf.GetX()
+			yStart = pdf.GetY()
+		}
+
+		// Print each cell with MultiCell and border
+		for i, txt := range row {
+			x := pdf.GetX()
+			y := pdf.GetY()
+
+			pdf.Rect(x, y, colWidths[i], rowHeight, "D")
+			pdf.MultiCell(colWidths[i], 5, txt, "", "L", false)
+			pdf.SetXY(x+colWidths[i], yStart)
+		}
+		pdf.SetXY(xStart, yStart+rowHeight)
+	}
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to generate PDF: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_event_%s.pdf", time.Now().Format("20060102_150405"))
+
+	return buf.Bytes(), fileName, nil
+}
+
+func (riskIssue RiskIssueService) exportExcel(pernr string, data []models.RiskIssueResponse) ([]byte, string, error) {
+	headers := []string{
+		"Tipe Risiko",
+		"Risk Event",
+		"Deskripsi",
+		"Kategori Risiko",
+		"Map Event - Event Type Lv1",
+		"Map Event - Event Type Lv2",
+		"Map Event - Event Type Lv3",
+		"Map Kejadian - Penyebab Kejadian Lv1",
+		"Map Kejadian - Penyebab Kejadian Lv2",
+		"Map Kejadian - Penyebab Kejadian Lv3",
+		"Map Product - Product",
+		"Likelihood",
+		"Impact",
+		"Status",
+		"Create Time",
+		"Update Time",
+		"Code Control",
+		"Risk Control",
+		"Code Indicator",
+		"Risk Indicator",
+		"Code Business Cycle",
+		"Business Cycle",
+		"Code Sub Business Cycle",
+		"Sub Business Cycle",
+		"Code Process",
+		"Process",
+		"Code Sub Process",
+		"Sub Process",
+		"Code Activity",
+		"Activity",
+	}
+	f := excelize.NewFile()
+	sheet := "risk-issue"
+
+	f.SetSheetName("Sheet1", sheet)
+
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		if err := f.SetCellValue(sheet, cell, h); err != nil {
+			return nil, "", fmt.Errorf("failed to set cell: %w", err)
+		}
+	}
+
+	riskType, err := riskIssue.riskType.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when get mapping risk type: ", err)
+		return nil, "", err
+	}
+
+	riskTypeMap := make(map[int64]string, 0)
+	for _, v := range riskType {
+		riskTypeMap[v.ID] = fmt.Sprintf("%s - %s", v.RiskTypeCode, v.RiskType)
+	}
+
+	control, err := riskIssue.riskControl.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when get mapping event: ", err)
+		return nil, "", err
+	}
+
+	controlMap := make(map[string]modelsControl.RiskControlResponse, 0)
+	for _, c := range control {
+		controlMap[strconv.Itoa(int(c.ID))] = c
+	}
+
+	indicator, err := riskIssue.riskIndicator.GetAll()
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when get mapping indicator: ", err)
+		return nil, "", err
+	}
+
+	indicatorMap := make(map[string]modelsIndicator.RiskIndicatorResponse, 0)
+	for _, c := range indicator {
+		indicatorMap[strconv.Itoa(int(c.ID))] = c
+	}
+
+	eventID := make([]string, 0)
+	for _, v := range data {
+		eventID = append(eventID, strconv.Itoa(int(v.ID)))
+	}
+
+	mapping, err := riskIssue.arlodsService.GetAllMappingRiskEvent(pernr, eventID)
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when get mapping: ", err)
+		return nil, "", err
+	}
+
+	mappingMap := make(map[string]dto.BulkRiskEventDetail, 0)
+	for _, v := range mapping.Data {
+		mappingMap[v.RiskEventID] = v.MappingDetail
+	}
+
+	for idx, v := range data {
+		status := "Aktif"
+		if !v.Status {
+			status = "Inactif"
+		}
+		createTime := lib.FormatDatePtr(v.CreatedAt)
+		updateTime := lib.FormatDatePtr(v.UpdatedAt)
+
+		riskType := ""
+		if v, ok := riskTypeMap[v.RiskTypeID]; ok {
+			riskType = v
+		}
+
+		mappingDetail, ok := mappingMap[strconv.Itoa(int(v.ID))]
+
+		var eventTypeLv1, eventTypeLv2, eventTypeLv3 []string
+		if ok && len(mappingDetail.MappingEvent) > 0 {
+			for _, m := range mappingDetail.MappingEvent {
+				eventTypeLv1 = append(eventTypeLv1, m.EventTypeLvl1)
+				eventTypeLv2 = append(eventTypeLv2, m.EventTypeLvl2)
+				eventTypeLv3 = append(eventTypeLv3, m.EventTypeLvl3)
+			}
+		} else {
+			eventTypeLv1 = []string{""}
+			eventTypeLv2 = []string{""}
+			eventTypeLv3 = []string{""}
+		}
+
+		var causeLv1, causeLv2, causeLv3 []string
+		if ok && len(mappingDetail.MappingCause) > 0 {
+			for _, m := range mappingDetail.MappingCause {
+				causeLv1 = append(causeLv1, m.Incident)
+				causeLv2 = append(causeLv2, m.SubIncident)
+				causeLv3 = append(causeLv3, m.SubSubIncident)
+			}
+		} else {
+			causeLv1 = []string{""}
+			causeLv2 = []string{""}
+			causeLv3 = []string{""}
+		}
+
+		var productCodes []string
+		if ok && len(mappingDetail.MappingProduct) > 0 {
+			for _, m := range mappingDetail.MappingProduct {
+				productCodes = append(productCodes, m.ProductID)
+			}
+		} else {
+			productCodes = []string{""}
+		}
+
+		var codeControls, nameControls []string
+		if ok && len(mappingDetail.Controls) > 0 {
+			for _, v := range mappingDetail.Controls {
+				if val, ok := controlMap[v.ID]; ok {
+					codeControls = append(codeControls, val.Kode)
+					nameControls = append(nameControls, val.RiskControl)
+				}
+			}
+		}
+		if len(codeControls) == 0 {
+			codeControls = []string{""}
+			nameControls = []string{""}
+		}
+
+		var codeIndicators, nameIndicators []string
+		if ok && len(mappingDetail.Indicators) > 0 {
+			for _, v := range mappingDetail.Indicators {
+				if val, ok := indicatorMap[v.ID]; ok {
+					codeIndicators = append(codeIndicators, val.RiskIndicatorCode)
+					nameIndicators = append(nameIndicators, val.RiskIndicator)
+				}
+			}
+		}
+		if len(codeIndicators) == 0 {
+			codeIndicators = []string{""}
+			nameIndicators = []string{""}
+		}
+
+		likelihood := ""
+		impact := ""
+		if v.Likelihood != nil {
+			likelihood = *v.Likelihood
+		}
+		if v.Impact != nil {
+			impact = *v.Impact
+		}
+
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", idx+2), riskType)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", idx+2), fmt.Sprintf("%s - %s", v.RiskIssueCode, v.RiskIssue))
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", idx+2), v.Deskripsi)
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", idx+2), v.KategoriRisiko)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", idx+2), strings.Join(eventTypeLv1, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("F%d", idx+2), strings.Join(eventTypeLv2, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("G%d", idx+2), strings.Join(eventTypeLv3, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("H%d", idx+2), strings.Join(causeLv1, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("I%d", idx+2), strings.Join(causeLv2, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("J%d", idx+2), strings.Join(causeLv3, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("K%d", idx+2), strings.Join(productCodes, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("L%d", idx+2), likelihood)
+		f.SetCellValue(sheet, fmt.Sprintf("M%d", idx+2), impact)
+		f.SetCellValue(sheet, fmt.Sprintf("N%d", idx+2), status)
+		f.SetCellValue(sheet, fmt.Sprintf("O%d", idx+2), createTime)
+		f.SetCellValue(sheet, fmt.Sprintf("P%d", idx+2), updateTime)
+		f.SetCellValue(sheet, fmt.Sprintf("Q%d", idx+2), strings.Join(codeControls, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("R%d", idx+2), strings.Join(nameControls, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("S%d", idx+2), strings.Join(codeIndicators, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("T%d", idx+2), strings.Join(nameIndicators, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("U%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("V%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("W%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("X%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("Y%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("Z%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("AA%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("AB%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("AC%d", idx+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("AD%d", idx+2), "")
+	}
+
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		return nil, "", fmt.Errorf("failed to write excel file: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_event_%s.xlsx", time.Now().Format("20060102_150405"))
+
+	return buf.Bytes(), fileName, nil
+}
+
+func (riskissue RiskIssueService) exportCSV(pernr string, data []models.RiskIssueResponse) ([]byte, string, error) {
+	headers := []string{
+		"Tipe Risiko",
+		"Risk Event",
+		"Deskripsi",
+		"Kategori Risiko",
+		"Map Event - Event Type Lv1",
+		"Map Event - Event Type Lv2",
+		"Map Event - Event Type Lv3",
+		"Map Kejadian - Penyebab Kejadian Lv1",
+		"Map Kejadian - Penyebab Kejadian Lv2",
+		"Map Kejadian - Penyebab Kejadian Lv3",
+		"Map Product - Product",
+		"Likelihood",
+		"Impact",
+		"Create Time",
+		"Update Time",
+		"Code Control",
+		"Risk Control",
+		"Code Indicator",
+		"Risk Indicator",
+		"Code Business Cycle",
+		"Business Cycle",
+		"Code Sub Business Cycle",
+		"Sub Business Cycle",
+		"Code Process",
+		"Process",
+		"Code Sub Process",
+		"Sub Process",
+		"Code Activity",
+		"Activity",
+	}
+
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
+
+	riskType, err := riskissue.riskType.GetAll()
+	if err != nil {
+		riskissue.logger.Zap.Error("Errored when get mapping risk type: ", err)
+		return nil, "", err
+	}
+
+	riskTypeMap := make(map[int64]string, 0)
+	for _, v := range riskType {
+		riskTypeMap[v.ID] = fmt.Sprintf("%s - %s", v.RiskTypeCode, v.RiskType)
+	}
+
+	control, err := riskissue.riskControl.GetAll()
+	if err != nil {
+		riskissue.logger.Zap.Error("Errored when get mapping event: ", err)
+		return nil, "", err
+	}
+
+	controlMap := make(map[string]modelsControl.RiskControlResponse, 0)
+	for _, c := range control {
+		controlMap[strconv.Itoa(int(c.ID))] = c
+	}
+
+	indicator, err := riskissue.riskIndicator.GetAll()
+	if err != nil {
+		riskissue.logger.Zap.Error("Errored when get mapping indicator: ", err)
+		return nil, "", err
+	}
+
+	indicatorMap := make(map[string]modelsIndicator.RiskIndicatorResponse, 0)
+	for _, c := range indicator {
+		indicatorMap[strconv.Itoa(int(c.ID))] = c
+	}
+
+	if err := writer.Write(headers); err != nil {
+		return nil, "", fmt.Errorf("failed to write csv header: %w", err)
+	}
+
+	eventID := make([]string, 0)
+	for _, v := range data {
+		eventID = append(eventID, strconv.Itoa(int(v.ID)))
+	}
+
+	mapping, err := riskissue.arlodsService.GetAllMappingRiskEvent(pernr, eventID)
+	if err != nil {
+		riskissue.logger.Zap.Error("Errored when get mapping: ", err)
+		return nil, "", err
+	}
+
+	mappingMap := make(map[string]dto.BulkRiskEventDetail, 0)
+	for _, v := range mapping.Data {
+		mappingMap[v.RiskEventID] = v.MappingDetail
+	}
+
+	for _, d := range data {
+		createTime := lib.FormatDatePtr(d.CreatedAt)
+		updateTime := lib.FormatDatePtr(d.UpdatedAt)
+
+		riskType := ""
+		if v, ok := riskTypeMap[d.RiskTypeID]; ok {
+			riskType = v
+		}
+
+		mappingDetail, ok := mappingMap[strconv.Itoa(int(d.ID))]
+
+		var eventTypeLv1, eventTypeLv2, eventTypeLv3 []string
+		if ok && len(mappingDetail.MappingEvent) > 0 {
+			for _, m := range mappingDetail.MappingEvent {
+				eventTypeLv1 = append(eventTypeLv1, m.EventTypeLvl1)
+				eventTypeLv2 = append(eventTypeLv2, m.EventTypeLvl2)
+				eventTypeLv3 = append(eventTypeLv3, m.EventTypeLvl3)
+			}
+		} else {
+			eventTypeLv1 = []string{""}
+			eventTypeLv2 = []string{""}
+			eventTypeLv3 = []string{""}
+		}
+
+		var causeLv1, causeLv2, causeLv3 []string
+		if ok && len(mappingDetail.MappingCause) > 0 {
+			for _, m := range mappingDetail.MappingCause {
+				causeLv1 = append(causeLv1, m.Incident)
+				causeLv2 = append(causeLv2, m.SubIncident)
+				causeLv3 = append(causeLv3, m.SubSubIncident)
+			}
+		} else {
+			causeLv1 = []string{""}
+			causeLv2 = []string{""}
+			causeLv3 = []string{""}
+		}
+
+		var productCodes []string
+		if ok && len(mappingDetail.MappingProduct) > 0 {
+			for _, m := range mappingDetail.MappingProduct {
+				productCodes = append(productCodes, m.ProductID)
+			}
+		} else {
+			productCodes = []string{""}
+		}
+
+		var codeControls, nameControls []string
+		if ok && len(mappingDetail.Controls) > 0 {
+			for _, v := range mappingDetail.Controls {
+				if val, ok := controlMap[v.ID]; ok {
+					codeControls = append(codeControls, val.Kode)
+					nameControls = append(nameControls, val.RiskControl)
+				}
+			}
+		}
+		if len(codeControls) == 0 {
+			codeControls = []string{""}
+			nameControls = []string{""}
+		}
+
+		var codeIndicators, nameIndicators []string
+		if ok && len(mappingDetail.Indicators) > 0 {
+			for _, v := range mappingDetail.Indicators {
+				if val, ok := indicatorMap[v.ID]; ok {
+					codeIndicators = append(codeIndicators, val.RiskIndicatorCode)
+					nameIndicators = append(nameIndicators, val.RiskIndicator)
+				}
+			}
+		}
+		if len(codeIndicators) == 0 {
+			codeIndicators = []string{""}
+			nameIndicators = []string{""}
+		}
+
+		likelihood := ""
+		impact := ""
+		if d.Likelihood != nil {
+			likelihood = *d.Likelihood
+		}
+		if d.Impact != nil {
+			impact = *d.Impact
+		}
+
+		row := []string{
+			riskType,
+			fmt.Sprintf("%s - %s", d.RiskIssueCode, d.RiskIssue),
+			d.Deskripsi,
+			d.KategoriRisiko,
+			strings.Join(eventTypeLv1, ";"),
+			strings.Join(eventTypeLv2, ";"),
+			strings.Join(eventTypeLv3, ";"),
+			strings.Join(causeLv1, ";"),
+			strings.Join(causeLv2, ";"),
+			strings.Join(causeLv3, ";"),
+			strings.Join(productCodes, ";"),
+			likelihood,
+			impact,
+			createTime,
+			updateTime,
+			strings.Join(codeControls, ";"),
+			strings.Join(nameControls, ";"),
+			strings.Join(codeIndicators, ";"),
+			strings.Join(nameIndicators, ";"),
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+		}
+
+		if err := writer.Write(row); err != nil {
+			return nil, "", fmt.Errorf("failed to write csv row: %w", err)
+		}
+	}
+
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		return nil, "", fmt.Errorf("failed to flush csv data: %w", err)
+	}
+
+	fileName := fmt.Sprintf("risk_issue_%s.csv", time.Now().Format("20060102_150405"))
+	return buf.Bytes(), fileName, nil
 }
 
 func extractBusinessProcessNodes(

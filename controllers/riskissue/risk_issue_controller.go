@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"riskmanagement/dto"
 	"riskmanagement/lib"
 	models "riskmanagement/models/riskissue"
 	services "riskmanagement/services/riskissue"
@@ -810,4 +811,45 @@ func (riskIssue RiskIssueController) ImportData(c *gin.Context) {
 	}
 
 	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), "Success Import Data", nil)
+}
+
+func (riskIssue RiskIssueController) Download(c *gin.Context) {
+	var pernr dto.PernrRequest
+	if err := c.ShouldBindJSON(&pernr); err != nil {
+		lib.ReturnToJson(c, http.StatusBadRequest, strconv.Itoa(http.StatusBadRequest), "Invalid JSON", nil)
+		return
+	}
+	format := c.Param("format")
+	if format == "" {
+		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), lib.InvalidParam, nil)
+		return
+	}
+
+	fileByte, fileName, err := riskIssue.service.Download(pernr.Pernr, format)
+	if err != nil {
+		riskIssue.logger.Zap.Error("Error generate file: %s", err)
+		lib.ReturnToJson(c, http.StatusInternalServerError, strconv.Itoa(http.StatusInternalServerError), lib.InternalError, nil)
+	}
+
+	riskIssue.logger.Zap.Debug(fileByte)
+	riskIssue.logger.Zap.Debug(fileName)
+	// Logic Proces
+	var contentType string
+	switch format {
+	case "csv":
+		contentType = "text/csv"
+	case "xlsx":
+		contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	case "pdf":
+		contentType = "application/pdf"
+	default:
+		contentType = "application/octet-stream"
+	}
+
+	c.Header("Content-Type", contentType)
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Cache-Control", "no-cache")
+
+	c.Data(http.StatusOK, format, fileByte)
 }

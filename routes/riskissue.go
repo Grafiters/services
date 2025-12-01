@@ -51,6 +51,7 @@ func (s RiskIssueRoutes) Setup() {
 		api.GET("/template", s.RiskIssueController.Template)
 		api.POST("/preview", s.RiskIssueController.PreviewData)
 		api.POST("/import", s.RiskIssueController.ImportData)
+		api.GET("/download/:format", s.RiskIssueController.Download)
 
 	}
 }
