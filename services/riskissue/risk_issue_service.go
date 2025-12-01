@@ -441,12 +441,18 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (status bool, err error) {
 	timeNow := lib.GetTimeNow("timestime")
 
+	exists, err := riskIssue.riskissueRepo.GetOne(request.ID)
+	if err != nil {
+		riskIssue.logger.Zap.Error("Error when query existing issue: %s", err)
+		return false, err
+	}
+
 	tx := riskIssue.db.DB.Begin()
 
 	updateRiskIssue := &models.RiskIssueUpdate{
 		ID:             request.ID,
 		RiskTypeID:     request.RiskTypeID,
-		RiskIssueCode:  request.RiskIssueCode,
+		RiskIssueCode:  exists.RiskIssueCode,
 		RiskIssue:      request.RiskIssue,
 		Deskripsi:      request.Deskripsi,
 		KategoriRisiko: request.KategoriRisiko,
