@@ -48,10 +48,10 @@ func (s RiskIssueRoutes) Setup() {
 		api.POST("/getRiskIssueByActivityID", s.RiskIssueController.GetRiskIssueByActivityID)
 
 		api.PATCH("/status", s.RiskIssueController.UpdateStatus)
-		api.GET("/template", s.RiskIssueController.Template)
+		api.POST("/template", s.RiskIssueController.Template)
 		api.POST("/preview", s.RiskIssueController.PreviewData)
 		api.POST("/import", s.RiskIssueController.ImportData)
-		api.GET("/download/:format", s.RiskIssueController.Download)
+		api.POST("/download/:format", s.RiskIssueController.Download)
 
 	}
 }
