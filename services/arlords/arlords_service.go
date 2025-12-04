@@ -52,7 +52,7 @@ func (as ArlordService) GetControlAttribute(pernr string, code []string) (respon
 		"pernr":         pernr,
 	}
 
-	u, _ := url.Parse(baseUrl + "/control-attribute")
+	u, _ := url.Parse(baseUrl + "/control-attribute/")
 
 	q := u.Query()
 	for _, c := range query.CodeIDs {
