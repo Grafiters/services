@@ -25,11 +25,19 @@ type RiskIssueRequest struct {
 }
 
 type Paginate struct {
-	Order  string `json:"order"`
-	Sort   string `json:"sort"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
-	Page   int    `json:"page"`
+	Search         string   `json:"search"`
+	RiskTypeID     int64    `json:"risk_type_id"`
+	RiskIssueCode  string   `json:"risk_issue_code"`
+	RiskIssue      string   `json:"risk_issue"`
+	Status         []string `json:"status"`
+	KategoriRisiko string   `json:"kategori_risiko"`
+	CreatedAt      *string  `json:"created_at"`
+	UpdatedAt      *string  `json:"updated_at"`
+	Order          string   `json:"order"`
+	Sort           string   `json:"sort"`
+	Offset         int      `json:"offset"`
+	Limit          int      `json:"limit"`
+	Page           int      `json:"page"`
 }
 
 type RiskIssueResponse struct {

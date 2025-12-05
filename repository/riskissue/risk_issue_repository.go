@@ -5,6 +5,7 @@ import (
 	"math"
 	"riskmanagement/lib"
 	models "riskmanagement/models/riskissue"
+	"strings"
 	"time"
 
 	"gitlab.com/golang-package-library/logger"
@@ -75,45 +76,128 @@ func (riskIssue RiskIssueRepository) WithTrx(trxHandle *gorm.DB) RiskIssueReposi
 
 // GetAllWithPaginate implements RiskIssueDefinition
 func (RI RiskIssueRepository) GetAllWithPaginate(request *models.Paginate) (responses []models.RiskIssueResponse, totalData int, totalRows int, err error) {
-	rows, err := RI.db.DB.Raw(`
-	SELECT	
-		ri.id 'id',
-		ri.risk_type_id 'risk_type_id',
-		ri.risk_issue_code 'risk_issue_code',
-		ri.risk_issue 'risk_issue',
-		ri.deskripsi 'deskripsi',
-		ri.kategori_risiko 'kategori_risiko',
-		ri.status 'status',
-		ri.likelihood 'likelihood',
-		ri.impact 'impact',
-		ri.delete_flag 'deleted_flag',
-		ri.created_at 'created_at',
-		ri.updated_at 'updated_at'
-	FROM risk_issue ri
-	WHERE ri.delete_flag != 1 ORDER BY ri.id ASC LIMIT ? OFFSET ?
-	`, request.Limit, request.Offset).Rows()
+	baseQuery := `
+		SELECT 
+			ri.id,
+			ri.risk_type_id,
+			ri.risk_issue_code,
+			ri.risk_issue,
+			ri.deskripsi,
+			ri.kategori_risiko,
+			ri.status,
+			ri.likelihood,
+			ri.impact,
+			ri.delete_flag,
+			ri.created_at,
+			ri.updated_at
+		FROM risk_issue ri
+		WHERE ri.delete_flag != 1
+	`
+
+	countQuery := `
+		SELECT count(*)
+		FROM risk_issue ri
+		WHERE ri.delete_flag != 1
+	`
+
+	var whereParams []interface{}
+	var whereClause string
+
+	// Dynamic Filtering
+	if request.Search != "" {
+		whereClause += " AND (ri.risk_issue LIKE ? OR ri.risk_issue_code LIKE ? OR ri.deskripsi LIKE ?) "
+		searchVal := "%" + request.Search + "%"
+		whereParams = append(whereParams, searchVal, searchVal, searchVal)
+	}
+
+	if request.RiskTypeID != 0 {
+		whereClause += " AND ri.risk_type_id = ? "
+		whereParams = append(whereParams, request.RiskTypeID)
+	}
+
+	if request.RiskIssueCode != "" {
+		whereClause += " AND ri.risk_issue_code LIKE ? "
+		whereParams = append(whereParams, "%"+request.RiskIssueCode+"%")
+	}
+
+	if request.RiskIssue != "" {
+		whereClause += " AND ri.risk_issue LIKE ? "
+		whereParams = append(whereParams, "%"+request.RiskIssue+"%")
+	}
+
+	if len(request.Status) > 0 {
+		var mappedStatus []int
+
+		for _, s := range request.Status {
+			switch strings.ToLower(s) {
+			case "active", "aktif", "true", "1":
+				mappedStatus = append(mappedStatus, 1)
+			case "inactive", "nonaktif", "false", "0":
+				mappedStatus = append(mappedStatus, 0)
+			}
+		}
+
+		if len(mappedStatus) > 0 {
+			whereClause += " AND ri.status IN (?) "
+			whereParams = append(whereParams, mappedStatus)
+		}
+	}
+
+	if request.KategoriRisiko != "" {
+		whereClause += " AND ri.kategori_risiko = ? "
+		whereParams = append(whereParams, request.KategoriRisiko)
+	}
+
+	if request.CreatedAt != nil {
+		whereClause += " AND DATE(ri.created_at) = DATE(?) "
+		whereParams = append(whereParams, *request.CreatedAt)
+	}
+
+	if request.UpdatedAt != nil {
+		whereClause += " AND DATE(ri.updated_at) = DATE(?) "
+		whereParams = append(whereParams, *request.UpdatedAt)
+	}
+
+	// Append WHERE clause
+	finalQuery := baseQuery + whereClause
+	finalCountQuery := countQuery + whereClause
+
+	// Sorting
+	orderBy := "ri.id"
+	if request.Order != "" {
+		orderBy = request.Order
+	}
+	sortDirection := "ASC"
+	if strings.ToUpper(request.Sort) == "DESC" {
+		sortDirection = "DESC"
+	}
+
+	finalQuery += " ORDER BY " + orderBy + " " + sortDirection
+	finalQuery += " LIMIT ? OFFSET ?"
+
+	whereParams = append(whereParams, request.Limit, request.Offset)
+
+	// Execute main query
+	rows, err := RI.db.DB.Raw(finalQuery, whereParams...).Rows()
 	if err != nil {
 		return responses, totalRows, totalData, err
 	}
-
 	defer rows.Close()
-	var issue models.RiskIssueResponse
 
 	for rows.Next() {
+		var issue models.RiskIssueResponse
 		RI.db.DB.ScanRows(rows, &issue)
 		responses = append(responses, issue)
 	}
 
-	paginateQuery := `SELECT 
-						count(*)
-					FROM risk_issue WHERE delete_flag != 1`
-	err = RI.dbRaw.DB.QueryRow(paginateQuery).Scan(&totalData)
+	// Count query
+	err = RI.dbRaw.DB.QueryRow(finalCountQuery, whereParams[:len(whereParams)-2]...).Scan(&totalData)
 	if err != nil {
 		return responses, totalRows, totalData, err
 	}
 
 	totalRows = int(math.Ceil(float64(totalData) / float64(request.Limit)))
-	return responses, totalRows, totalData, err
+	return responses, totalRows, totalData, nil
 }
 
 // GetAll implements RiskIssueDefinition
