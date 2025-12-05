@@ -245,6 +245,16 @@ type KeyRiskRequest struct {
 	Keyword string `json:"keyword"`
 }
 
+type KeyRiskBySourceRequest struct {
+	Order   string `json:"order"`
+	Sort    string `json:"sort"`
+	Offset  int    `json:"offset"`
+	Limit   int    `json:"limit"`
+	Page    int    `json:"page"`
+	Keyword string `json:"keyword"`
+	Source  string `json:"source"`
+}
+
 type RiskIndicatorKRIDRequest struct {
 	ID                   int64  `json:"id"`
 	KodeKeyRiskIndicator int64  `json:"kode_key_risk_indicator"`
@@ -253,6 +263,12 @@ type RiskIndicatorKRIDRequest struct {
 	Produk               string `json:"produk"`
 	JenisIndicator       string `json:"jenis_indicator"`
 	IndikasiRisiko       string `json:"indikasi_risiko"`
+}
+
+type RiskIndicatorBySourceResponses struct {
+	ID                int64  `json:"id"`
+	RiskIndicatorCode string `json:"risk_indicator_code"`
+	RiskIndicator     string `json:"risk_indicator"`
 }
 
 type RiskIndicatorKRIDResponses struct {

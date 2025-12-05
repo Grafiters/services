@@ -23,6 +23,7 @@ type RiskIndicatorDefinition interface {
 	Delete(request *models.UpdateDelete, include []string, tx *gorm.DB) (response bool, err error)
 	SearchRiskIndicatorByIssue(request *models.SearchRequest) (responses []models.RiskIndicatorResponse, totalRows int, totalData int, err error)
 	GetRekomendasiMateri(id int64) (responses []models.RekomendasiMateriNull, err error)
+	SearchRiskIndicatorBySource(req models.KeyRiskBySourceRequest) (res []models.RiskIndicator, totalData int, err error)
 	SearchRiskIndicatorKRID(requests *models.KeyRiskRequest) (responses []models.RiskIndicatorKRIDResponseNull, totalRows int, toatalData int, err error)
 	StoreRiskIndicatorKRID(request *models.RiskIndicatorKRID, tx *gorm.DB) (response *models.RiskIndicatorKRID, err error)
 	GetKode() (response []models.KodeResponseNull, err error)
@@ -289,6 +290,23 @@ func (LI RiskIndicatorRepository) GetRekomendasiMateri(id int64) (responses []mo
 	}
 
 	return responses, err
+}
+
+func (repo RiskIndicatorRepository) SearchRiskIndicatorBySource(req models.KeyRiskBySourceRequest) (res []models.RiskIndicator, totalData int, err error) {
+	db := repo.db.DB.Table("risk_indicator")
+
+	db = db.Select(`id, risk_indicator_code, risk_indicator`).Where("sumber_data = ?", req.Source)
+	keyword := `%` + req.Keyword + `%`
+	if req.Keyword != "" {
+		db = db.Where("CONCAT(risk_indicator_code, risk_indicator) LIKE ?", keyword)
+	}
+	var count int64
+	db.Count(&count)
+	totalData = int(count)
+
+	db = db.Limit(req.Limit).Offset(req.Offset)
+	err = db.Find(&res).Error
+	return res, totalData, err
 }
 
 // SearchRiskIndicatorKRID implements RiskIndicatorDefinition

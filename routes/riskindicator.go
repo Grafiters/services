@@ -32,6 +32,7 @@ func (s RiskIndicatorRoutes) Setup() {
 		api.POST("/deleteFileByID", s.RiskIndicatorController.DeleteFilesByID)
 		api.POST("/searchRiskIndicatorByIssue", s.RiskIndicatorController.SearchRiskIndicatorByIssue)
 		api.POST("/getRekomendasiMateri", s.RiskIndicatorController.GetRekomendasiMateri)
+		api.POST("/searchRiskIndicatorBySource", s.RiskIndicatorController.SearchRiskIndicatorBySource)
 		api.POST("/searchRiskIndicatorKRID", s.RiskIndicatorController.SearchRiskIndicatorKRID)
 		api.POST("/getKode", s.RiskIndicatorController.GetKode)
 		api.POST("/filterRiskIndicator", s.RiskIndicatorController.FilterRiskIndicator)
