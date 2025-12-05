@@ -1499,7 +1499,7 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 		parse := lib.ParseStringToArray(row[1], "|")
 		riskEventCode := parse[0]
 		if _, ok := riskIssueMap[riskEventCode]; ok {
-			continue
+			validation += fmt.Sprintf("Risk Event Sudah terdaftar: %s", row[1])
 		}
 
 		// ================================
@@ -1512,7 +1512,6 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 		activityStr := row[25]
 
 		activities := lib.ParseStringToArray(activityStr, ";")
-
 		// ================================
 		// STEP 2 — CACHE BUSINESS PROCESS
 		// ================================
@@ -1529,7 +1528,6 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 				extractBusinessProcessNodes(bc, cacheBusinessProcess)
 			}
 		}
-
 		validation += ValidateBPWithMultiValue(
 			businessCycleStr,
 			subBusinessCycleStr,
@@ -1649,16 +1647,25 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 			// MappingEvent
 			for _, m := range mappedEvent.MappingDetail.MappingEvent {
 				for _, v := range evnLv1map {
+					if v == "" {
+						continue
+					}
 					if v == strings.ToLower(m.EventTypeLvl1) {
 						validation += fmt.Sprintf("Event LV1 '%s' sudah termapping; ", v)
 					}
 				}
 				for _, v := range evnLv2map {
+					if v == "" {
+						continue
+					}
 					if v == strings.ToLower(m.EventTypeLvl2) {
 						validation += fmt.Sprintf("Event LV2 '%s' sudah termapping; ", v)
 					}
 				}
 				for _, v := range evnLv3map {
+					if v == "" {
+						continue
+					}
 					if v == strings.ToLower(m.EventTypeLvl3) {
 						validation += fmt.Sprintf("Event LV3 '%s' sudah termapping; ", v)
 					}
@@ -1667,16 +1674,25 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 			// MappingCause
 			for _, m := range mappedEvent.MappingDetail.MappingCause {
 				for _, v := range incLv1Map {
+					if v == "" {
+						continue
+					}
 					if v == strings.ToLower(m.Incident) {
 						validation += fmt.Sprintf("Incident LV1 '%s' sudah termapping; ", v)
 					}
 				}
 				for _, v := range incLv2Map {
+					if v == "" {
+						continue
+					}
 					if v == strings.ToLower(m.SubIncident) {
 						validation += fmt.Sprintf("Incident LV2 '%s' sudah termapping; ", v)
 					}
 				}
 				for _, v := range incLv3Map {
+					if v == "" {
+						continue
+					}
 					if v == strings.ToLower(m.SubSubIncident) {
 						validation += fmt.Sprintf("Incident LV3 '%s' sudah termapping; ", v)
 					}
@@ -1685,6 +1701,9 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 			// MappingProduct
 			for _, m := range mappedEvent.MappingDetail.MappingProduct {
 				for _, v := range productMapped {
+					if v == "" {
+						continue
+					}
 					if v == strings.ToLower(m.ProductID) {
 						validation += fmt.Sprintf("Product '%s' sudah termapping; ", v)
 					}
@@ -1697,6 +1716,7 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 		// ================================
 		// STEP 5 — COPY DATA
 		// ================================
+		riskIssue.logger.Zap.Debug(row)
 		for z := range col {
 			if z < len(row) {
 				col[z] = row[z]
