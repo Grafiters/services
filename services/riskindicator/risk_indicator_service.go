@@ -39,6 +39,7 @@ type RiskIndicatorDefinition interface {
 	DeleteFilesByID(id int64) (response bool, err error)
 	SearchRiskIndicatorByIssue(request models.SearchRequest) (responses []models.RiskIndicatorResponsesFinal, pagination lib.Pagination, err error)
 	GetRekomendasiMateri(id int64) (responses []models.RekomendasiMateri, err error)
+	SearchRiskIndicatorBySource(request models.KeyRiskBySourceRequest) (responses []models.RiskIndicatorBySourceResponses, pagination lib.Pagination, err error)
 	SearchRiskIndicatorKRID(request models.KeyRiskRequest) (responses []models.RiskIndicatorKRIDResponses, pagination lib.Pagination, err error)
 	Delete(request *models.UpdateDelete) (response bool, err error)
 	GetKode() (response []models.KodeResponse, err error)
@@ -698,6 +699,29 @@ func (LI RiskIndicatorService) GetRekomendasiMateri(id int64) (responses []model
 	}
 
 	return responses, err
+}
+
+func (LI RiskIndicatorService) SearchRiskIndicatorBySource(request models.KeyRiskBySourceRequest) (responses []models.RiskIndicatorBySourceResponses, pagination lib.Pagination, err error) {
+	offset, page, limit, order, sort := lib.SetPaginationParameter(request.Page, request.Limit, request.Order, request.Sort)
+	request.Offset = offset
+	request.Order = order
+	request.Sort = sort
+	request.Limit = limit
+	dataIndicator, totalData, err := LI.riskIndicatorRepo.SearchRiskIndicatorBySource(request)
+	if err != nil {
+		LI.logger.Zap.Error(err)
+		return responses, pagination, err
+	}
+
+	for _, response := range dataIndicator {
+		responses = append(responses, models.RiskIndicatorBySourceResponses{
+			ID:                response.ID,
+			RiskIndicatorCode: response.RiskIndicatorCode,
+			RiskIndicator:     response.RiskIndicator,
+		})
+	}
+	pagination = lib.SetPaginationResponse(page, limit, totalData, totalData)
+	return responses, pagination, err
 }
 
 // SearchRiskIndicatorKRID implements RiskIndicatorDefinition

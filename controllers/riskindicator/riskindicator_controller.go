@@ -266,6 +266,23 @@ func (riskIndicator RiskIndicatorController) GetRekomendasiMateri(c *gin.Context
 	lib.ReturnToJson(c, 200, "200", "Inquery Data Berhasil", data)
 }
 
+func (riskIndicator RiskIndicatorController) SearchRiskIndicatorBySource(c *gin.Context) {
+	request := models.KeyRiskBySourceRequest{}
+	if err := c.Bind(&request); err != nil {
+		riskIndicator.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+	ri, pagination, err := riskIndicator.service.SearchRiskIndicatorBySource(request)
+	if err != nil {
+		riskIndicator.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+		return
+	}
+	lib.ReturnToJsonWithPaginate(c, 200, "200", "Inquery Data Berhasil", ri, pagination)
+
+}
+
 func (riskIndicator RiskIndicatorController) SearchRiskIndicatorKRID(c *gin.Context) {
 	requests := models.KeyRiskRequest{}
 
