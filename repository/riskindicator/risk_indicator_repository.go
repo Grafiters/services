@@ -295,7 +295,7 @@ func (LI RiskIndicatorRepository) GetRekomendasiMateri(id int64) (responses []mo
 func (repo RiskIndicatorRepository) SearchRiskIndicatorBySource(req models.KeyRiskBySourceRequest) (res []models.RiskIndicator, totalData int, err error) {
 	db := repo.db.DB.Table("risk_indicator")
 
-	db = db.Select(`id, risk_indicator_code, risk_indicator`).Where("sumber_data = ?", req.Source)
+	db = db.Select(`id, risk_indicator_code, risk_indicator`).Where("data_source_anomaly = ?", req.Source)
 	keyword := `%` + req.Keyword + `%`
 	if req.Keyword != "" {
 		db = db.Where("CONCAT(risk_indicator_code, risk_indicator) LIKE ?", keyword)

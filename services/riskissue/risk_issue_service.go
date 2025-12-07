@@ -53,6 +53,7 @@ type RiskIssueDefinition interface {
 	GetKode() (responses []models.KodeRespon, err error)
 	MappingRiskControl(request models.MappingControlRequest) (responses bool, err error)
 	GetMappingControlbyID(id int64) (responses models.RiskIssueResponseGetOne, err error)
+	ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error)
 	SearchRiskIssue(requests models.KeywordRequest) (responses []models.RiskIssueResponses, pagination lib.Pagination, err error)
 	SearchRiskIssueWithoutSub(request models.RiskIssueWithoutSub) (responses []models.RiskIssueResponses, pagination lib.Pagination, err error)
 	MappingRiskIndicator(request models.MappingIndicatorRequest) (responses bool, err error)
@@ -876,6 +877,16 @@ func (riskIssue RiskIssueService) GetMappingControlbyID(id int64) (responses mod
 
 	return responses, err
 
+}
+
+func (riskIssue RiskIssueService) ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error) {
+	dataRiskIssue, err := riskIssue.riskissueRepo.ListRiskIssue(request)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		return responses, err
+	}
+
+	return dataRiskIssue, err
 }
 
 // SearchRiskIssue implements RiskIssueDefinition

@@ -360,6 +360,24 @@ func (riskIssue RiskIssueController) DeleteMapControl(c *gin.Context) {
 	lib.ReturnToJson(c, 200, "200", "Delete data berhasil", true)
 }
 
+func (riskIssue RiskIssueController) ListRiskIssue(c *gin.Context) {
+	requests := models.ListRiskIssueRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+	data, err := riskIssue.service.ListRiskIssue(requests)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
+}
+
 func (riskIssue RiskIssueController) SearchRiskIssue(c *gin.Context) {
 	requests := models.KeywordRequest{}
 

@@ -101,6 +101,10 @@ type KodeRespon struct {
 	Kode         string `json:"kode"`
 }
 
+type ListRiskIssueRequest struct {
+	ID []int `json:"id"`
+}
+
 type KeywordRequest struct {
 	Order         string `json:"order"`
 	Sort          string `json:"sort"`
@@ -121,6 +125,12 @@ type RiskIssueWithoutSub struct {
 	Keyword    string `json:"keyword"`
 	ActivityID int    `json:"activity_id"`
 	ProductID  int    `json:"product_id"`
+}
+
+type ListRiskIssueResponse struct {
+	ID            int64  `json:"id"`
+	RiskIssueCode string `json:"risk_issue_code"`
+	RiskIssue     string `json:"risk_issue"`
 }
 
 type RiskIssueResponses struct {
