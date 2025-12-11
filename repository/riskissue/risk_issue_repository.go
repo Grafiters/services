@@ -28,6 +28,7 @@ type RiskIssueDefinition interface {
 	DeleteMapIndicator(id int64, tx *gorm.DB) (err error)
 	Delete(request *models.RiskIssueDeleteRequest, include []string, tx *gorm.DB) (response bool, err error)
 	GetKode() (responses []models.KodeResponsNull, err error)
+	ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error)
 	SearchRiskIssue(request *models.KeywordRequest) (responses []models.RiskIssueResponses, totalRows int, totalData int, err error)
 	SearchRiskIssueWithoutSub(request *models.RiskIssueWithoutSub) (responses []models.RiskIssueResponses, totalRows int, totalData int, err error)
 	FilterRiskIssue(request *models.FilterRiskIssueRequest) (responses []models.RiskIssueFilterResponses, totalRows int, totalData int, err error)
@@ -378,6 +379,16 @@ func (riskIssue RiskIssueRepository) GetKode() (responses []models.KodeResponsNu
 	}
 
 	return responses, err
+}
+
+func (riskIssue RiskIssueRepository) ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error) {
+	db := riskIssue.db.DB
+	query := db.Table("risk_issue").
+		Select(`id, risk_issue_code, risk_issue`).
+		Where(`id IN ? AND delete_flag = 0`, request.ID)
+	err = query.Find(&responses).Error
+	return responses, err
+
 }
 
 // SearchRiskIssue implements RiskIssueDefinition
