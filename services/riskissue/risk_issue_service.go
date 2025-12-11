@@ -235,10 +235,6 @@ func (riskIssue RiskIssueService) GetOne(id int64) (responses models.RiskIssueRe
 func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (responses bool, err error) {
 	timeNow := lib.GetTimeNow("timestime")
 
-	product := make([]dto.MappingProductRiskEventRequest, 0)
-	cause := make([]dto.MappingLVLRequest, 0)
-	event := make([]dto.MappingLVLRequest, 0)
-
 	tx := riskIssue.db.DB.Begin()
 
 	reqRiskIssue := &models.RiskIssue{
@@ -296,13 +292,6 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 				continue
 			}
 
-			event = append(event, dto.MappingLVLRequest{
-				RiskEventID: strconv.FormatInt(dataRiskIssue.ID, 10),
-				Lvl1:        lvl1,
-				Lvl2:        lvl2,
-				Lvl3:        lvl3,
-			})
-
 			updateEvent := &models.MapEvent{
 				IDRiskIssue:  dataRiskIssue.ID,
 				EventTypeLv1: lvl1,
@@ -334,14 +323,6 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 			if lvl3 != "" && lvl2 == "" {
 				continue
 			}
-
-			cause = append(cause, dto.MappingLVLRequest{
-				RiskEventID: strconv.FormatInt(dataRiskIssue.ID, 10),
-				Lvl1:        lvl1,
-				Lvl2:        lvl2,
-				Lvl3:        lvl3,
-			})
-
 			updateKejadian := &models.MapKejadian{
 				IDRiskIssue:         dataRiskIssue.ID,
 				PenyebabKejadianLv1: lvl1,
@@ -361,10 +342,6 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 	//Input MapProduct
 	if len(request.MapProduct) != 0 {
 		for _, value := range request.MapProduct {
-			product = append(product, dto.MappingProductRiskEventRequest{
-				RiskEventID: strconv.FormatInt(dataRiskIssue.ID, 10),
-				ProductID:   strconv.FormatInt(value.Product, 10),
-			})
 			_, err = riskIssue.mapProduct.Store(&models.MapProduct{
 				IDRiskIssue: dataRiskIssue.ID,
 				Product:     value.Product,
@@ -411,26 +388,6 @@ func (riskIssue RiskIssueService) Store(request models.RiskIssueRequest) (respon
 				return false, err
 			}
 		}
-	}
-
-	data := make([]dto.MappingRiskEventRequest, 0)
-
-	data = append(data, dto.MappingRiskEventRequest{
-		MappingRiskEvent:        event,
-		MappingProductRiskEvent: product,
-		MappingCauseRiskEvent:   cause,
-	})
-
-	mapping := dto.BulkMappingRiskEventRequest{
-		Data: data,
-	}
-
-	// create mapping on opra service
-	err = riskIssue.arlodsService.CreateMappingEvent(request.Pernr, mapping)
-	if err != nil {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error("Error when request to save mapping: %s", err)
-		return false, err
 	}
 
 	tx.Commit()
@@ -482,10 +439,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 		return false, err
 	}
 
-	product := make([]dto.MappingProductRiskEventRequest, 0)
-	cause := make([]dto.MappingLVLRequest, 0)
-	event := make([]dto.MappingLVLRequest, 0)
-
 	//Update MapProses
 	if len(request.MapProses) != 0 {
 		for _, value := range request.MapProses {
@@ -523,13 +476,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 				continue
 			}
 
-			event = append(event, dto.MappingLVLRequest{
-				RiskEventID: strconv.FormatInt(request.ID, 10),
-				Lvl1:        lvl1,
-				Lvl2:        lvl2,
-				Lvl3:        lvl3,
-			})
-
 			updateEvent := &models.MapEvent{
 				ID:           value.ID,
 				IDRiskIssue:  request.ID,
@@ -563,13 +509,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 				continue
 			}
 
-			cause = append(cause, dto.MappingLVLRequest{
-				RiskEventID: strconv.FormatInt(request.ID, 10),
-				Lvl1:        lvl1,
-				Lvl2:        lvl2,
-				Lvl3:        lvl3,
-			})
-
 			updateKejadian := &models.MapKejadian{
 				ID:                  value.ID,
 				IDRiskIssue:         request.ID,
@@ -590,10 +529,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 	//Update MapProduct
 	if len(request.MapProduct) != 0 {
 		for _, value := range request.MapProduct {
-			product = append(product, dto.MappingProductRiskEventRequest{
-				RiskEventID: strconv.FormatInt(request.ID, 10),
-				ProductID:   strconv.FormatInt(value.Product, 10),
-			})
 			updateProduct := &models.MapProduct{
 				ID:          value.ID,
 				IDRiskIssue: request.ID,
@@ -649,26 +584,6 @@ func (riskIssue RiskIssueService) Update(request *models.RiskIssueRequest) (stat
 				return false, err
 			}
 		}
-	}
-
-	data := make([]dto.MappingRiskEventRequest, 0)
-
-	data = append(data, dto.MappingRiskEventRequest{
-		MappingRiskEvent:        event,
-		MappingProductRiskEvent: product,
-		MappingCauseRiskEvent:   cause,
-	})
-
-	mapping := dto.BulkMappingRiskEventRequest{
-		Data: data,
-	}
-
-	// create mapping on opra service
-	err = riskIssue.arlodsService.CreateMappingEvent(request.Pernr, mapping)
-	if err != nil {
-		tx.Rollback()
-		riskIssue.logger.Zap.Error("Error when request to save mapping: %s", err)
-		return false, err
 	}
 
 	tx.Commit()
