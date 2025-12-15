@@ -31,7 +31,7 @@ type RiskControlDefinition interface {
 	Delete(id int64) (err error)
 	GetKodeRiskControl() (responses []models.KodeRiskControl, err error)
 	GenCode() (string, error)
-	UpdateStatus(id int64) (err error)
+	UpdateStatus(id int64) (stats bool, err error)
 	Preview(pernr string, data [][]string) (dto.PreviewFileImport[[10]string], error)
 	Template() ([]byte, string, error)
 	ImportData(pernr string, data [][]string) error
@@ -224,13 +224,13 @@ func (rc RiskControlService) SearchRiskControlByIssue(request models.KeywordRequ
 	return responses, pagination, err
 }
 
-func (rc RiskControlService) UpdateStatus(id int64) (err error) {
+func (rc RiskControlService) UpdateStatus(id int64) (stats bool, err error) {
 	var (
 		status bool = true
 	)
 	data, err := rc.repository.GetOne(id)
 	if err != nil {
-		return err
+		return status, err
 	}
 
 	if data.Status {
@@ -239,7 +239,7 @@ func (rc RiskControlService) UpdateStatus(id int64) (err error) {
 
 	err = rc.repository.UpdateStatus(id, status)
 
-	return err
+	return status, err
 }
 
 func (rc RiskControlService) ValidationOwner(request *models.RiskControlRequest) error {

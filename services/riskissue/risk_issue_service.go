@@ -65,7 +65,7 @@ type RiskIssueDefinition interface {
 	GetMateriByCode(request models.RiskIssueCode) (responses []models.ListMateri, err error)
 	GetRiskIssueByActivityID(id int64) (responses []models.RiskIssueResponseByActivity, err error)
 	GetRiskEventName(id int64) (name string, err error)
-	UpdateStatus(id int64) error
+	UpdateStatus(id int64) (bool, error)
 	Template() ([]byte, string, error)
 	PreviewData(pernr string, data [][]string) (dto.PreviewFileImport[[27]string], error)
 	ImportData(pernr string, data [][]string) error
@@ -1092,13 +1092,13 @@ func (riskIssue RiskIssueService) GetRiskEventName(id int64) (name string, err e
 	return name, err
 }
 
-func (riskIssue RiskIssueService) UpdateStatus(id int64) error {
+func (riskIssue RiskIssueService) UpdateStatus(id int64) (bool, error) {
 	var (
 		status bool = true
 	)
 	data, err := riskIssue.riskissueRepo.GetOne(id)
 	if err != nil {
-		return err
+		return status, err
 	}
 
 	if data.Status {
@@ -1107,7 +1107,7 @@ func (riskIssue RiskIssueService) UpdateStatus(id int64) error {
 
 	err = riskIssue.riskissueRepo.UpdateStatus(id, status)
 
-	return err
+	return status, err
 }
 
 func (riskIssue RiskIssueService) Template() ([]byte, string, error) {
