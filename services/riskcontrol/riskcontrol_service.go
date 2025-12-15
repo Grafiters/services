@@ -130,6 +130,7 @@ func (riskControl RiskControlService) Store(request *models.RiskControlRequest) 
 		transform.Kode = code
 	}
 
+	transform.Status = true
 	transform.CreatedAt = &timeNow
 
 	status, err := riskControl.repository.Store(&transform)
@@ -151,7 +152,16 @@ func (riskControl RiskControlService) Update(request *models.RiskControlRequest)
 		}
 	}
 
+	exists, err := riskControl.repository.GetOne(request.ID)
+	if err != nil {
+		riskControl.logger.Zap.Error(err)
+		return err
+	}
+
 	transform := request.ParseRequest()
+
+	transform.Status = exists.Status
+	transform.CreatedAt = exists.CreatedAt
 	transform.UpdatedAt = &timeNow
 	status, err := riskControl.repository.Update(&transform)
 	if !status || err != nil {

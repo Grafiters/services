@@ -346,7 +346,7 @@ func (riskIndicator RiskIndicatorService) Store(request models.RiskIndicatorRequ
 			KPI:                   request.KPI,
 			StatusIndikator:       request.StatusIndikator,
 			DataSourceAnomaly:     request.DataSourceAnomaly,
-			Status:                request.Status,
+			Status:                true,
 			CreatedAt:             &timeNow,
 		}
 
@@ -429,16 +429,9 @@ func (riskIndicator RiskIndicatorService) Store(request models.RiskIndicatorRequ
 					}
 				}
 			}
-		} else {
-			if err != nil {
-				tx.Rollback()
-				riskIndicator.logger.Zap.Error(err)
-				return false, err
-			}
 		}
 
 		tx.Commit()
-
 		return true, err
 
 	}
@@ -453,6 +446,11 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 	timeNow := lib.GetTimeNow("timestime")
 
 	tx := riskIndicator.db.DB.Begin()
+
+	exists, err := riskIndicator.riskIndicatorRepo.GetOne(requests.ID)
+	if err != nil {
+		return false, err
+	}
 
 	updateIndicator := &models.RiskIndicator{
 		ID:                    requests.ID,
@@ -476,7 +474,7 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 		KPI:                   requests.KPI,
 		StatusIndikator:       requests.StatusIndikator,
 		DataSourceAnomaly:     requests.DataSourceAnomaly,
-		Status:                requests.Status,
+		Status:                exists.Status,
 		UpdatedAt:             &timeNow,
 	}
 
@@ -616,10 +614,6 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 				}
 			}
 		}
-	} else {
-		tx.Rollback()
-		riskIndicator.logger.Zap.Error(err)
-		return false, err
 	}
 
 	tx.Commit()
