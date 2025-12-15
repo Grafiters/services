@@ -494,13 +494,21 @@ func (ri RiskIndicatorController) UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	if err := ri.service.UpdateStatus(requests.ID); err != nil {
+	status, err := ri.service.UpdateStatus(requests.ID)
+	if err != nil {
 		ri.logger.Zap.Error(err)
 		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
 		return
 	}
 
-	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), "Update data berhasil", nil)
+	statusLabel := "Active"
+	if status {
+		statusLabel = "Inactive"
+	}
+
+	msg := fmt.Sprintf("Risk Indicator %s", statusLabel)
+
+	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), msg, nil)
 }
 
 func (ri RiskIndicatorController) Template(c *gin.Context) {

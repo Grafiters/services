@@ -122,13 +122,21 @@ func (riskControl RiskControlController) UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	if err := riskControl.service.UpdateStatus(requests.ID); err != nil {
+	status, err := riskControl.service.UpdateStatus(requests.ID)
+	if err != nil {
 		riskControl.logger.Zap.Error(err)
 		lib.ReturnToJson(c, http.StatusUnprocessableEntity, strconv.Itoa(http.StatusUnprocessableEntity), err.Error(), nil)
 		return
 	}
 
-	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), "Update data berhasil", nil)
+	statusLabel := "Active"
+	if status {
+		statusLabel = "Inactive"
+	}
+
+	msg := fmt.Sprintf("Risk Control %s", statusLabel)
+
+	lib.ReturnToJson(c, http.StatusOK, strconv.Itoa(http.StatusOK), msg, nil)
 }
 
 func (riskControl RiskControlController) Delete(c *gin.Context) {
