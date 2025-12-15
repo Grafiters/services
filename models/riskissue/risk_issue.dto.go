@@ -102,18 +102,17 @@ type KodeRespon struct {
 }
 
 type ListRiskIssueRequest struct {
-	ID []int `json:"id"`
+	IndicatorID int `json:"indicator_id"`
 }
 
 type KeywordRequest struct {
-	Order         string `json:"order"`
-	Sort          string `json:"sort"`
-	Offset        int    `json:"offset"`
-	Limit         int    `json:"limit"`
-	Page          int    `json:"page"`
-	Keyword       string `json:"keyword"`
-	Aktivitas     string `json:"aktivitas"`
-	SubActivityID string `json:"sub_activity_id"`
+	Order     string `json:"order"`
+	Sort      string `json:"sort"`
+	Offset    int    `json:"offset"`
+	Limit     int    `json:"limit"`
+	Page      int    `json:"page"`
+	Keyword   string `json:"keyword"`
+	Aktivitas string `json:"aktivitas"`
 }
 
 type RiskIssueWithoutSub struct {
@@ -238,6 +237,9 @@ type ListMateriNull struct {
 
 type RiskIssueName struct {
 	RiskIssue string `json:"risk_issue"`
+}
+type RiskIssueIDsRequest struct {
+	RiskIssueIDs []int64 `json:"risk_issue_ids"`
 }
 
 /*

@@ -70,6 +70,7 @@ type RiskIssueDefinition interface {
 	PreviewData(pernr string, data [][]string) (dto.PreviewFileImport[[27]string], error)
 	ImportData(pernr string, data [][]string) error
 	Download(pernr, format string) ([]byte, string, error)
+	GetRiskCategories(id []int64) ([]string, error)
 }
 
 type RiskIssueService struct {
@@ -795,7 +796,7 @@ func (riskIssue RiskIssueService) GetMappingControlbyID(id int64) (responses mod
 }
 
 func (riskIssue RiskIssueService) ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error) {
-	dataRiskIssue, err := riskIssue.riskissueRepo.ListRiskIssue(request)
+	dataRiskIssue, err := riskIssue.riskissueRepo.RiskIssueByIndicator(request)
 	if err != nil {
 		riskIssue.logger.Zap.Error(err)
 		return responses, err
@@ -2984,4 +2985,14 @@ func ValidateBPWithMultiValue(
 	}
 
 	return validation
+}
+
+func (riskIssue RiskIssueService) GetRiskCategories(id []int64) ([]string, error) {
+	data, err := riskIssue.riskissueRepo.GetRiskCategories(id)
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when try to query risk categories: ", err)
+		return nil, err
+	}
+
+	return data, nil
 }
