@@ -78,7 +78,7 @@ func (rc RiskControlRepository) GetAllWithPaginate(request *models.Paginate) (re
 			document 'document',
 			created_at 'created_at',
 			updated_at 'updated_at'
-	`).Order("created_at ASC")
+	`).Order("created_at DESC")
 
 	// add dynamic where clauses
 	if request.Kode != "" {
