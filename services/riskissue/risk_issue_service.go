@@ -73,6 +73,7 @@ type RiskIssueDefinition interface {
 	Download(pernr, format string) ([]byte, string, error)
 	GetMappingControlPaginate(id int64, filter modelsControl.Paginate) (response []models.MapControlResponseFinal, paginate lib.Pagination, err error)
 	GetMapIndicatorWithPaginate(id int, filter modelsIndicator.Paginate) (response []models.MapIndicatorResponseFinal, pagination lib.Pagination, err error)
+	GetRiskCategories(id []int64) ([]string, error)
 }
 
 type RiskIssueService struct {
@@ -867,7 +868,7 @@ func (riskIssue RiskIssueService) GetMappingControlPaginate(id int64, filter mod
 }
 
 func (riskIssue RiskIssueService) ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error) {
-	dataRiskIssue, err := riskIssue.riskissueRepo.ListRiskIssue(request)
+	dataRiskIssue, err := riskIssue.riskissueRepo.RiskIssueByIndicator(request)
 	if err != nil {
 		riskIssue.logger.Zap.Error(err)
 		return responses, err
@@ -3110,4 +3111,14 @@ func ValidateBPWithMultiValue(
 	}
 
 	return validation
+}
+
+func (riskIssue RiskIssueService) GetRiskCategories(id []int64) ([]string, error) {
+	data, err := riskIssue.riskissueRepo.GetRiskCategories(id)
+	if err != nil {
+		riskIssue.logger.Zap.Error("Errored when try to query risk categories: ", err)
+		return nil, err
+	}
+
+	return data, nil
 }

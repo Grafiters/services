@@ -37,6 +37,7 @@ func (s RiskIssueRoutes) Setup() {
 		api.POST("/:id/getControlWithPaginate", s.RiskIssueController.GetMappingControlWithPaginate)
 		api.POST("/:id/getIndicatorWithPaginate", s.RiskIssueController.GetMappingIndicatorWithPaginate)
 		api.POST("/ListRiskIssue", s.RiskIssueController.ListRiskIssue)
+		api.POST("/getByIndicator", s.RiskIssueController.ListRiskIssue)
 		api.POST("/searchRiskIssue", s.RiskIssueController.SearchRiskIssue)
 		api.POST("/searchRiskIssueWithoutSub", s.RiskIssueController.SearchRiskIssueWithoutSub)
 		// api.GET("/getLastID/:id", s.RiskIssueController.GetLastID)
@@ -55,6 +56,7 @@ func (s RiskIssueRoutes) Setup() {
 		api.POST("/preview", s.RiskIssueController.PreviewData)
 		api.POST("/import", s.RiskIssueController.ImportData)
 		api.POST("/download/:format", s.RiskIssueController.Download)
+		api.POST("/getRiskCategory", s.RiskIssueController.GetRiskCategories)
 
 	}
 }

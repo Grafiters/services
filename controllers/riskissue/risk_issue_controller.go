@@ -969,3 +969,22 @@ func (riskIssue RiskIssueController) Download(c *gin.Context) {
 
 	c.Data(http.StatusOK, format, fileByte)
 }
+
+func (riskIssue RiskIssueController) GetRiskCategories(c *gin.Context) {
+	requests := models.RiskIssueIDsRequest{}
+
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, err := riskIssue.service.GetRiskCategories(requests.RiskIssueIDs)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", err.Error())
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
+}

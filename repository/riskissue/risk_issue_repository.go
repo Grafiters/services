@@ -28,7 +28,7 @@ type RiskIssueDefinition interface {
 	DeleteMapIndicator(id int64, tx *gorm.DB) (err error)
 	Delete(request *models.RiskIssueDeleteRequest, include []string, tx *gorm.DB) (response bool, err error)
 	GetKode() (responses []models.KodeResponsNull, err error)
-	ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error)
+	RiskIssueByIndicator(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error)
 	SearchRiskIssue(request *models.KeywordRequest) (responses []models.RiskIssueResponses, totalRows int, totalData int, err error)
 	SearchRiskIssueWithoutSub(request *models.RiskIssueWithoutSub) (responses []models.RiskIssueResponses, totalRows int, totalData int, err error)
 	FilterRiskIssue(request *models.FilterRiskIssueRequest) (responses []models.RiskIssueFilterResponses, totalRows int, totalData int, err error)
@@ -42,6 +42,7 @@ type RiskIssueDefinition interface {
 	GenerateNewCode() (string, error)
 	UpdateStatus(id int64, status bool) error
 	BulkCreateRiskEvent(items []models.RiskIssue, tx *gorm.DB) error
+	GetRiskCategories(riskIssueID []int64) (responses []string, err error)
 }
 
 type RiskIssueRepository struct {
@@ -381,11 +382,12 @@ func (riskIssue RiskIssueRepository) GetKode() (responses []models.KodeResponsNu
 	return responses, err
 }
 
-func (riskIssue RiskIssueRepository) ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error) {
+func (riskIssue RiskIssueRepository) RiskIssueByIndicator(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error) {
 	db := riskIssue.db.DB
-	query := db.Table("risk_issue").
-		Select(`id, risk_issue_code, risk_issue`).
-		Where(`id IN ? AND delete_flag = 0`, request.ID)
+	query := db.Table("risk_issue_map_indicator rimi").
+		Joins(`LEFT JOIN risk_issue ri ON rimi.id_risk_issue = ri.id`).
+		Select(`ri.id, ri.risk_issue_code, ri.risk_issue`).
+		Where(`rimi.id_indicator = ? AND is_checked = 1`, request.IndicatorID)
 	err = query.Find(&responses).Error
 	return responses, err
 
@@ -795,4 +797,13 @@ func (LI RiskIssueRepository) BulkCreateRiskEvent(items []models.RiskIssue, tx *
 	}
 
 	return tx.CreateInBatches(items, batchSize).Error
+}
+
+func (LI RiskIssueRepository) GetRiskCategories(riskIssueID []int64) (responses []string, err error) {
+	LI.db.DB.Table("risk_issue").
+		Select("DISTINCT kategori_risiko").
+		Where("id IN ?", riskIssueID).
+		Pluck("kategori_risiko", &responses)
+
+	return responses, err
 }
