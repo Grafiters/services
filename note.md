@@ -100,3 +100,15 @@ Changes not staged for commit:
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
         note.md
+
+UPDATE
+
+- controller/riskcontrol
+- controller/riskindicator
+- controller/riskissue
+- service/riskissue
+- service/riskcontrol
+- service/riskindicator
+- repository/riskissue
+- repository/riskcontrol
+- route/riskissue
