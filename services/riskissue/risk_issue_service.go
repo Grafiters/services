@@ -3,6 +3,7 @@ package riskissue
 import (
 	"bytes"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"riskmanagement/dto"
 	"riskmanagement/lib"
@@ -738,32 +739,79 @@ func (riskIssue RiskIssueService) GetKode() (responses []models.KodeRespon, err 
 }
 
 // MappingRiskControl implements RiskIssueDefinition
-func (riskIssue RiskIssueService) MappingRiskControl(request models.MappingControlRequest) (responses bool, err error) {
+func (riskIssue RiskIssueService) MappingRiskControl(
+	request models.MappingControlRequest,
+) (bool, error) {
+
 	tx := riskIssue.db.DB.Begin()
-
-	if len(request.MapControl) != 0 {
-		for _, value := range request.MapControl {
-			_, err = riskIssue.mapControl.Store(&models.MapControl{
-				ID:          value.ID,
-				IDRiskIssue: request.ID,
-				IDControl:   value.IDControl,
-				IsChecked:   value.IsChecked,
-			}, tx)
-
-			if err != nil {
-				tx.Rollback()
-				riskIssue.logger.Zap.Error(err)
-				return false, err
-			}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
 		}
-	} else {
+	}()
+
+	// ================= VALIDASI REQUEST =================
+	if len(request.MapControl) == 0 {
+		err := errors.New("map_control is empty")
+		riskIssue.logger.Zap.Error(err)
+		tx.Rollback()
+		return false, err
+	}
+
+	// ================= GET EXISTING MAPPING =================
+	dataControl, err := riskIssue.mapControl.GetOneDataByID(request.ID)
+	if err != nil {
+		tx.Rollback()
+		riskIssue.logger.Zap.Error(err)
+		return false, err
+	}
+
+	// ================= BUILD LOOKUP MAP =================
+	// key format: riskIssueID_controlID
+	existingMap := make(map[string]struct{})
+	for _, v := range dataControl {
+		key := fmt.Sprintf("%d_%d", v.IDRiskIssue, v.IDControl)
+		existingMap[key] = struct{}{}
+	}
+
+	var insertedCount int
+
+	// ================= INSERT ONLY NEW DATA =================
+	for _, value := range request.MapControl {
+
+		key := fmt.Sprintf("%d_%d", request.ID, value.IDControl)
+
+		// skip jika sudah ada
+		if _, exists := existingMap[key]; exists {
+			continue
+		}
+
+		_, err = riskIssue.mapControl.Store(&models.MapControl{
+			ID:          value.ID,
+			IDRiskIssue: request.ID,
+			IDControl:   value.IDControl,
+			IsChecked:   value.IsChecked,
+		}, tx)
+
+		if err != nil {
+			tx.Rollback()
+			riskIssue.logger.Zap.Error(err)
+			return false, err
+		}
+
+		insertedCount++
+	}
+
+	// ================= VALIDASI DATA BARU =================
+	if insertedCount == 0 {
+		err := errors.New("no new control mapping inserted, all controls already mapped")
 		tx.Rollback()
 		riskIssue.logger.Zap.Error(err)
 		return false, err
 	}
 
 	tx.Commit()
-	return true, err
+	return true, nil
 }
 
 // GetMappingControlbyID implements RiskIssueDefinition
@@ -900,7 +948,30 @@ func (riskIssue RiskIssueService) MappingRiskIndicator(request models.MappingInd
 	tx := riskIssue.db.DB.Begin()
 
 	if len(request.MapIndicator) != 0 {
+		existingData, err := riskIssue.mapIndicator.GetOneDataByID(request.ID)
+		if err != nil {
+			tx.Rollback()
+			riskIssue.logger.Zap.Error(err)
+			return false, err
+		}
+
+		existingMap := make(map[string]struct{})
+		for _, v := range existingData {
+			key := fmt.Sprintf("%d_%d", v.IDRiskIssue, v.IDIndicator)
+			existingMap[key] = struct{}{}
+		}
+
+		var insertedCount int
+
 		for _, value := range request.MapIndicator {
+
+			key := fmt.Sprintf("%d_%d", request.ID, value.IDIndicator)
+
+			// skip jika sudah ada
+			if _, exists := existingMap[key]; exists {
+				continue
+			}
+
 			_, err = riskIssue.mapIndicator.Store(&models.MapIndicator{
 				ID:          value.ID,
 				IDRiskIssue: request.ID,
@@ -913,6 +984,15 @@ func (riskIssue RiskIssueService) MappingRiskIndicator(request models.MappingInd
 				riskIssue.logger.Zap.Error(err)
 				return false, err
 			}
+
+			insertedCount++
+		}
+
+		if insertedCount == 0 {
+			err := errors.New("no new mapping inserted, all indicators already mapped")
+			tx.Rollback()
+			riskIssue.logger.Zap.Error(err)
+			return false, err
 		}
 	} else {
 		tx.Rollback()
