@@ -71,6 +71,8 @@ type RiskIssueDefinition interface {
 	PreviewData(pernr string, data [][]string) (dto.PreviewFileImport[[27]string], error)
 	ImportData(pernr string, data [][]string) error
 	Download(pernr, format string) ([]byte, string, error)
+	GetMappingControlPaginate(id int64, filter modelsControl.Paginate) (response []models.MapControlResponseFinal, paginate lib.Pagination, err error)
+	GetMapIndicatorWithPaginate(id int, filter modelsIndicator.Paginate) (response []models.MapIndicatorResponseFinal, pagination lib.Pagination, err error)
 }
 
 type RiskIssueService struct {
@@ -842,6 +844,28 @@ func (riskIssue RiskIssueService) GetMappingControlbyID(id int64) (responses mod
 
 }
 
+func (riskIssue RiskIssueService) GetMappingControlPaginate(id int64, filter modelsControl.Paginate) (response []models.MapControlResponseFinal, paginate lib.Pagination, err error) {
+	offset, page, limit, order, sort := lib.SetPaginationParameter(filter.Page, filter.Limit, filter.Order, filter.Sort)
+	filter.Limit = limit
+	filter.Page = page
+	filter.Offset = offset
+	filter.Order = order
+	filter.Sort = sort
+
+	if filter.Order == "" {
+		filter.Order = "id"
+	}
+
+	data, total, err := riskIssue.mapControl.GetWithPagination(int(id), filter)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		return response, paginate, err
+	}
+
+	paginate = lib.SetPaginationResponse(filter.Page, filter.Limit, total, total)
+	return data, paginate, nil
+}
+
 func (riskIssue RiskIssueService) ListRiskIssue(request models.ListRiskIssueRequest) (responses []models.ListRiskIssueResponse, err error) {
 	dataRiskIssue, err := riskIssue.riskissueRepo.ListRiskIssue(request)
 	if err != nil {
@@ -910,6 +934,28 @@ func (riskIssue RiskIssueService) SearchRiskIssueWithoutSub(request models.RiskI
 	pagination = lib.SetPaginationResponse(page, limit, totalRows, totalData)
 	return responses, pagination, err
 
+}
+
+func (riskIssue RiskIssueService) GetMapIndicatorWithPaginate(id int, filter modelsIndicator.Paginate) (response []models.MapIndicatorResponseFinal, pagination lib.Pagination, err error) {
+	offset, page, limit, order, sort := lib.SetPaginationParameter(filter.Page, filter.Limit, filter.Order, filter.Sort)
+	filter.Limit = limit
+	filter.Page = page
+	filter.Offset = offset
+	filter.Order = order
+	filter.Sort = sort
+
+	if filter.Order == "" {
+		filter.Order = "id"
+	}
+
+	data, total, err := riskIssue.mapIndicator.GetWithPaginate(id, filter)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		return response, pagination, err
+	}
+
+	pagination = lib.SetPaginationResponse(filter.Page, filter.Limit, total, total)
+	return data, pagination, nil
 }
 
 // GetMappingIndicatorbyID implements RiskIssueDefinition

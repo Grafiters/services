@@ -2,8 +2,11 @@ package riskissue
 
 import (
 	"database/sql"
+	"fmt"
 	"riskmanagement/lib"
+	riskControlModels "riskmanagement/models/riskcontrol"
 	models "riskmanagement/models/riskissue"
+	"strings"
 	"time"
 
 	"gitlab.com/golang-package-library/logger"
@@ -19,6 +22,7 @@ type MapControlDefinition interface {
 	GetOneDataByID(id int64) (responses []models.MapControlResponseFinal, err error)
 	DeleteDataByID(id int64, tx *gorm.DB) (err error)
 	WithTrx(trxHandle *gorm.DB) MapControlRepository
+	GetWithPagination(id int, filter riskControlModels.Paginate) (responses []models.MapControlResponseFinal, total int, err error)
 }
 
 type MapControlRepository struct {
@@ -53,6 +57,85 @@ func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (mp MapControlRepository) GetWithPagination(id int, filter riskControlModels.Paginate) (responses []models.MapControlResponseFinal, total int, err error) {
+	where := ` WHERE mc.id_risk_issue = ? `
+	args := []interface{}{id}
+
+	// ================= FILTER =================
+	if filter.Search != "" {
+		where += `
+		AND (
+			rc.kode LIKE ?
+			OR rc.risk_control LIKE ?
+		)
+		`
+		search := "%" + filter.Search + "%"
+		args = append(args, search, search)
+	}
+
+	if filter.Kode != "" {
+		where += ` AND rc.kode LIKE ? `
+		args = append(args, "%"+filter.Kode+"%")
+	}
+
+	if filter.RiskControl != "" {
+		where += ` AND rc.risk_control LIKE ? `
+		args = append(args, "%"+filter.RiskControl+"%")
+	}
+
+	if filter.Status != "" {
+		switch strings.ToLower(filter.Status) {
+		case "active":
+			where += ` AND mc.is_checked = true `
+		case "inactive":
+			where += ` AND mc.is_checked = false `
+		}
+	}
+
+	// ================= COUNT QUERY =================
+	countQuery := `
+	SELECT COUNT(1)
+	FROM risk_issue_map_control mc
+	JOIN risk_control rc ON rc.id = mc.id_control
+	` + where
+
+	if err = mp.db.DB.Raw(countQuery, args...).Scan(&total).Error; err != nil {
+		return responses, 0, err
+	}
+
+	// ================= DATA QUERY =================
+	dataQuery := `
+		SELECT
+			mc.id AS id,
+			mc.id_risk_issue AS id_risk_issue,
+			mc.id_control AS id_control,
+			rc.kode AS kode,
+			rc.risk_control AS risk_control,
+			mc.is_checked AS is_checked
+		FROM risk_issue_map_control mc
+		JOIN risk_control rc ON rc.id = mc.id_control
+		` + where +
+		fmt.Sprintf(" ORDER BY %s %s LIMIT ? OFFSET ? ", filter.Order, filter.Sort)
+
+	dataArgs := append(args, filter.Limit, filter.Offset)
+
+	rows, err := mp.db.DB.Raw(dataQuery, dataArgs...).Rows()
+	if err != nil {
+		return responses, 0, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var data models.MapControlResponseFinal
+		if err := mp.db.DB.ScanRows(rows, &data); err != nil {
+			return responses, 0, err
+		}
+		responses = append(responses, data)
+	}
+
+	return responses, total, nil
 }
 
 // Delete implements MapControlDefinition

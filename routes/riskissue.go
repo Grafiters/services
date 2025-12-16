@@ -34,6 +34,8 @@ func (s RiskIssueRoutes) Setup() {
 		api.POST("/getKode", s.RiskIssueController.GetKode)
 		api.POST("/mappingControl", s.RiskIssueController.MappingRiskControl)
 		api.POST("/getControlByID", s.RiskIssueController.GetMappingControlbyID)
+		api.POST("/:id/getControlWithPaginate", s.RiskIssueController.GetMappingControlWithPaginate)
+		api.POST("/:id/getIndicatorWithPaginate", s.RiskIssueController.GetMappingIndicatorWithPaginate)
 		api.POST("/ListRiskIssue", s.RiskIssueController.ListRiskIssue)
 		api.POST("/searchRiskIssue", s.RiskIssueController.SearchRiskIssue)
 		api.POST("/searchRiskIssueWithoutSub", s.RiskIssueController.SearchRiskIssueWithoutSub)
