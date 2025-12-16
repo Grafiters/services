@@ -1,7 +1,9 @@
 package riskissue
 
 import (
+	"fmt"
 	"riskmanagement/lib"
+	modelsIndicator "riskmanagement/models/riskindicator"
 	models "riskmanagement/models/riskissue"
 	"time"
 
@@ -18,6 +20,7 @@ type MapIndicatorDefinition interface {
 	GetOneDataByID(id int64) (responses []models.MapIndicatorResponseFinal, err error)
 	DeleteDataByID(id int64, tx *gorm.DB) (err error)
 	WithTrx(trxHandle *gorm.DB) MapIndicatorRepository
+	GetWithPaginate(id int, filter modelsIndicator.Paginate) (responses []models.MapIndicatorResponseFinal, total int, err error)
 }
 
 type MapIndicatorRepository struct {
@@ -38,6 +41,94 @@ func NewMapIndicatorRepository(
 		logger:  logger,
 		timeout: time.Second * 100,
 	}
+}
+
+func (mp MapIndicatorRepository) GetWithPaginate(id int, filter modelsIndicator.Paginate) (responses []models.MapIndicatorResponseFinal, total int, err error) {
+	where := ` WHERE mi.id_risk_issue = ? `
+	args := []interface{}{id}
+
+	// ================= FILTER =================
+	if filter.Search != "" {
+		where += `
+		AND (
+			ri.risk_indicator_code LIKE ?
+			OR ri.risk_indicator LIKE ?
+		)
+		`
+		search := "%" + filter.Search + "%"
+		args = append(args, search, search)
+	}
+
+	if filter.Code != "" {
+		where += ` AND ri.risk_indicator_code LIKE ? `
+		args = append(args, "%"+filter.Code+"%")
+	}
+
+	if filter.Name != "" {
+		where += ` AND ri.risk_indicator LIKE ? `
+		args = append(args, "%"+filter.Name+"%")
+	}
+
+	if filter.CreatedAt != "" {
+		where += ` AND DATE(mi.created_at) = ? `
+		args = append(args, filter.CreatedAt)
+	}
+
+	if filter.Batasan != "" {
+		where += ` AND ri.batasan LIKE ? `
+		args = append(args, "%"+filter.Batasan+"%")
+	}
+
+	// ================= STATUS FILTER =================
+	if filter.Active && !filter.Inactive {
+		where += ` AND mi.is_checked = true `
+	}
+	if filter.Inactive && !filter.Active {
+		where += ` AND mi.is_checked = false `
+	}
+
+	// ================= COUNT QUERY =================
+	countQuery := `
+	SELECT COUNT(1)
+	FROM risk_issue_map_indicator mi
+	JOIN risk_indicator ri ON ri.id = mi.id_indicator
+	` + where
+
+	if err = mp.db.DB.Raw(countQuery, args...).Scan(&total).Error; err != nil {
+		return responses, 0, err
+	}
+
+	// ================= DATA QUERY =================
+	dataQuery := `
+	SELECT
+		mi.id AS id,
+		mi.id_risk_issue AS id_risk_issue,
+		mi.id_indicator AS id_indicator,
+		ri.risk_indicator_code AS kode,
+		ri.risk_indicator AS risk_indicator,
+		mi.is_checked AS is_checked
+	FROM risk_issue_map_indicator mi
+	JOIN risk_indicator ri ON ri.id = mi.id_indicator
+	` + where +
+		fmt.Sprintf(" ORDER BY %s %s LIMIT ? OFFSET ? ", filter.Order, filter.Sort)
+
+	dataArgs := append(args, filter.Limit, filter.Offset)
+
+	rows, err := mp.db.DB.Raw(dataQuery, dataArgs...).Rows()
+	if err != nil {
+		return responses, 0, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var data models.MapIndicatorResponseFinal
+		if err := mp.db.DB.ScanRows(rows, &data); err != nil {
+			return responses, 0, err
+		}
+		responses = append(responses, data)
+	}
+
+	return responses, total, nil
 }
 
 // Delete implements MapIndicatorDefinition

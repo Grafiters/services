@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"riskmanagement/dto"
 	"riskmanagement/lib"
+	modelControl "riskmanagement/models/riskcontrol"
+	modelIndicator "riskmanagement/models/riskindicator"
 	models "riskmanagement/models/riskissue"
 	services "riskmanagement/services/riskissue"
 	"strconv"
@@ -316,6 +318,50 @@ func (riskIssue RiskIssueController) MappingRiskControl(c *gin.Context) {
 	lib.ReturnToJson(c, 200, "200", "Mapping data berhasil", true)
 }
 
+func (riskIssue RiskIssueController) GetMappingControlWithPaginate(c *gin.Context) {
+	ids := c.Param("id")
+	if ids == "" {
+		lib.ReturnToJson(c, 200, "400", "ID is required on path params", "")
+		return
+	}
+
+	id, err := strconv.Atoi(ids)
+	if err != nil || id <= 0 {
+		lib.ReturnToJson(
+			c,
+			http.StatusBadRequest,
+			"400",
+			"id must be a valid number",
+			nil,
+		)
+		return
+	}
+
+	requests := modelControl.Paginate{}
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, paginate, err := riskIssue.service.GetMappingControlPaginate(int64(id), requests)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+	}
+
+	if paginate.Total == 0 {
+		lib.ReturnToJson(c, 200, "404", "Data Kosong", nil)
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+		return
+	}
+
+	lib.ReturnToJsonWithPaginate(c, 200, "200", "Inquery data berhasil", data, paginate)
+}
+
 func (riskIssue RiskIssueController) GetMappingControlbyID(c *gin.Context) {
 	requests := models.RiskIssueRequest{}
 
@@ -477,6 +523,50 @@ func (riskIssue RiskIssueController) GetMappingIndicatorbyID(c *gin.Context) {
 	}
 
 	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
+}
+
+func (riskIssue RiskIssueController) GetMappingIndicatorWithPaginate(c *gin.Context) {
+	ids := c.Param("id")
+	if ids == "" {
+		lib.ReturnToJson(c, 200, "400", "ID is required on path params", "")
+		return
+	}
+
+	id, err := strconv.Atoi(ids)
+	if err != nil || id <= 0 {
+		lib.ReturnToJson(
+			c,
+			http.StatusBadRequest,
+			"400",
+			"id must be a valid number",
+			nil,
+		)
+		return
+	}
+
+	requests := modelIndicator.Paginate{}
+	if err := c.Bind(&requests); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, paginate, err := riskIssue.service.GetMapIndicatorWithPaginate(id, requests)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+	}
+
+	if paginate.Total == 0 {
+		lib.ReturnToJson(c, 200, "404", "Data Kosong", nil)
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		lib.ReturnToJson(c, 200, "500", "Internal Error", "")
+		return
+	}
+
+	lib.ReturnToJsonWithPaginate(c, 200, "200", "Inquery data berhasil", data, paginate)
 }
 
 func (riskIssue RiskIssueController) DeleteMapIndicator(c *gin.Context) {
