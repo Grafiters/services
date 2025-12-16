@@ -2184,18 +2184,122 @@ func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) erro
 				newMappingRequests[i].MappingRiskEvent[j].RiskEventID = id
 			}
 		}
+		for j, v := range newMappingRequests[i].MappingRiskEvent {
+			code := newMappingRequests[i].MappingRiskEvent[j].RiskEventID
+			if id, ok := riskEventMap[code]; ok {
+				i64, err := strconv.ParseInt(id, 10, 64)
+				if err != nil {
+				}
+				updateEvent := &models.MapEvent{
+					IDRiskIssue:  i64,
+					EventTypeLv1: v.Lvl1,
+					EventTypeLv2: v.Lvl2,
+					EventTypeLv3: v.Lvl3,
+				}
+
+				_, err = riskIssue.mapEvent.Update(updateEvent, tx)
+				if err != nil {
+					tx.Rollback()
+					riskIssue.logger.Zap.Error(err)
+					return err
+				}
+			}
+		}
 		// Mapping Cause
-		for j := range newMappingRequests[i].MappingCauseRiskEvent {
+		for j, v := range newMappingRequests[i].MappingCauseRiskEvent {
 			code := newMappingRequests[i].MappingCauseRiskEvent[j].RiskEventID
 			if id, ok := riskEventMap[code]; ok {
-				newMappingRequests[i].MappingCauseRiskEvent[j].RiskEventID = id
+				i64, err := strconv.ParseInt(id, 10, 64)
+				if err != nil {
+				}
+				updateKejadian := &models.MapKejadian{
+					IDRiskIssue:         i64,
+					PenyebabKejadianLv1: v.Lvl1,
+					PenyebabKejadianLv2: v.Lvl2,
+					PenyebabKejadianLv3: v.Lvl3,
+				}
+
+				_, err = riskIssue.mapKejadian.Update(updateKejadian, tx)
+				if err != nil {
+					tx.Rollback()
+					riskIssue.logger.Zap.Error(err)
+					return err
+				}
 			}
 		}
 		// Mapping Product
-		for j := range newMappingRequests[i].MappingProductRiskEvent {
+		for j, v := range newMappingRequests[i].MappingProductRiskEvent {
 			code := newMappingRequests[i].MappingProductRiskEvent[j].RiskEventID
 			if id, ok := riskEventMap[code]; ok {
+				i64, err := strconv.ParseInt(id, 10, 64)
+				if err != nil {
+				}
+				pi64, err := strconv.ParseInt(v.ProductID, 10, 64)
+				if err != nil {
+				}
+				_, err = riskIssue.mapProduct.Store(&models.MapProduct{
+					IDRiskIssue: i64,
+					Product:     pi64,
+				}, tx)
+
+				if err != nil {
+					tx.Rollback()
+					riskIssue.logger.Zap.Error(err)
+					return err
+				}
 				newMappingRequests[i].MappingProductRiskEvent[j].RiskEventID = id
+			}
+		}
+
+		for j, v := range newMappingRequests[i].MappingIndicatorControl {
+			code := newMappingRequests[i].MappingIndicatorControl[j].RiskEventID
+			if id, ok := riskEventMap[code]; ok {
+				i64, err := strconv.ParseInt(id, 10, 64)
+				if err != nil {
+				}
+
+				if v.TypeEvent == "control" {
+					for _, val := range v.RiskID {
+						contrlID, err := strconv.ParseInt(val, 10, 64)
+						if err != nil {
+						}
+						req := &models.MapControl{
+							IDRiskIssue: i64,
+							IDControl:   contrlID,
+							IsChecked:   false,
+						}
+
+						_, err = riskIssue.mapControl.Store(req, tx)
+						if err != nil {
+							tx.Rollback()
+							riskIssue.logger.Zap.Error(err)
+							return err
+						}
+					}
+
+				}
+
+				if v.TypeEvent == "indicator" {
+					for _, val := range v.RiskID {
+						contrlID, err := strconv.ParseInt(val, 10, 64)
+						if err != nil {
+						}
+						req := &models.MapIndicator{
+							IDRiskIssue: i64,
+							IDIndicator: contrlID,
+							IsChecked:   false,
+						}
+
+						_, err = riskIssue.mapIndicator.Store(req, tx)
+						if err != nil {
+							tx.Rollback()
+							riskIssue.logger.Zap.Error(err)
+							return err
+						}
+					}
+
+				}
+
 			}
 		}
 		// Mapping Business Process
@@ -2203,13 +2307,6 @@ func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) erro
 			code := newMappingRequests[i].MappingBusinessProcess[j].RiskEventID
 			if id, ok := riskEventMap[code]; ok {
 				newMappingRequests[i].MappingBusinessProcess[j].RiskEventID = id
-			}
-		}
-		// Mapping Control & Indicator
-		for j := range newMappingRequests[i].MappingIndicatorControl {
-			code := newMappingRequests[i].MappingIndicatorControl[j].RiskEventID
-			if id, ok := riskEventMap[code]; ok {
-				newMappingRequests[i].MappingIndicatorControl[j].RiskEventID = id
 			}
 		}
 	}
