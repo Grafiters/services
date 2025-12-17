@@ -93,7 +93,7 @@ func (riskIndicator RiskIndicatorController) Store(c *gin.Context) {
 	// fmt.Println("status ===>", status)
 
 	if !status {
-		// riskIndicator.logger.Zap.Error(err)
+		riskIndicator.logger.Zap.Error(err)
 		lib.ReturnToJson(c, 200, "400", "Kode '"+requests.RiskIndicatorCode+"' sudah ada, silahkan masukkan kode lain ", false)
 		return
 	}

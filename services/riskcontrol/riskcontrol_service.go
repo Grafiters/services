@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
+	"regexp"
 	"riskmanagement/dto"
 	"riskmanagement/lib"
 	modelsOrganisasi "riskmanagement/models/organisasi"
@@ -11,6 +12,7 @@ import (
 	modelsControlAttribute "riskmanagement/models/riskcontrolattribute"
 	repoOrganisasi "riskmanagement/repository/organisasi"
 	repository "riskmanagement/repository/riskcontrol"
+	repoIssue "riskmanagement/repository/riskissue"
 	"riskmanagement/services/arlords"
 	jwt "riskmanagement/services/auth"
 	"strconv"
@@ -45,6 +47,7 @@ type RiskControlService struct {
 	jwtService    jwt.JWTAuthService
 	arlodsService arlords.ArlordsServiceDefinition
 	orgRepo       repoOrganisasi.OrganisasiDefinition
+	repoIssue     repoIssue.MapControlDefinition
 	db            lib.Database
 }
 
@@ -54,6 +57,7 @@ func NewRiskControService(
 	arlodsService arlords.ArlordsServiceDefinition,
 	repository repository.RiskControlDefinition,
 	orgRepo repoOrganisasi.OrganisasiDefinition,
+	repoIssue repoIssue.MapControlDefinition,
 	jwtService jwt.JWTAuthService,
 ) RiskControlDefinition {
 	return RiskControlService{
@@ -62,12 +66,30 @@ func NewRiskControService(
 		arlodsService: arlodsService,
 		repository:    repository,
 		orgRepo:       orgRepo,
+		repoIssue:     repoIssue,
 		jwtService:    jwtService,
 	}
 }
 
 // Delete implements RiskControlDefinition
 func (riskControl RiskControlService) Delete(id int64) (err error) {
+	maps, _, err := riskControl.repoIssue.GetWithPagination(int(id), models.Paginate{
+		Order:  "ID",
+		Sort:   "DESC",
+		Offset: 1,
+		Limit:  10,
+		Page:   0,
+	})
+
+	if err != nil {
+		riskControl.logger.Zap.Error(err)
+		return err
+	}
+
+	if len(maps) > 0 {
+		return fmt.Errorf("data risk control masih sudah termapping ke risk event dan tidak bisa dihapus")
+	}
+
 	return riskControl.repository.Delete(id)
 }
 
@@ -358,6 +380,11 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 			if row[7] == "" && row[6] == "" {
 				jabExists = true
 			}
+
+			if IsValidCodeName(row[7]) {
+				validation += fmt.Sprintf("Owner invalid format, format must be <code> - <name>: %s; ", row[7])
+			}
+
 			for _, c := range jabatan {
 				jab := lib.ParseStringToArray(row[7], "-")
 				if strings.EqualFold(c.Hilfm, jab[0]) {
@@ -375,6 +402,11 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 			if row[7] == "" && row[6] == "" {
 				jabExists = true
 			}
+
+			if IsValidCodeName(row[7]) {
+				validation += fmt.Sprintf("Owner invalid format, format must be <code> - <name>: %s; ", row[7])
+			}
+
 			for _, c := range departemen {
 				jab := lib.ParseStringToArray(row[7], "-")
 				if strings.EqualFold(c.Orgeh, jab[0]) {
@@ -571,6 +603,10 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 			if v[7] == "" && v[6] == "" {
 				jabExists = true
 			}
+
+			if IsValidCodeName(v[7]) {
+				continue
+			}
 			for _, c := range jabatan {
 				if v[7] == "" {
 					jabExists = true
@@ -587,6 +623,9 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 		if strings.ToLower(v[6]) == "departemen" {
 			if v[7] == "" && v[6] == "" {
 				jabExists = true
+			}
+			if IsValidCodeName(v[7]) {
+				continue
 			}
 			for _, c := range departemen {
 				if v[7] == "" {
@@ -754,13 +793,13 @@ func (rc RiskControlService) Download(pernr, format string) (blob []byte, name s
 
 	switch format {
 	case "csv":
-		return exportCsv(data)
+		return rc.exportCsv(pernr, data)
 	case "xlsx":
-		return exportExcel(data)
+		return rc.exportExcel(pernr, data)
 	case "pdf":
-		return exportPDF(data)
+		return rc.exportPDF(pernr, data)
 	default:
-		return nil, "", fmt.Errorf("Unsupported format export file")
+		return nil, "", fmt.Errorf("unsupported format export file")
 	}
 }
 
@@ -799,7 +838,7 @@ func GenerateRunningCode(baseCode string, index int) (string, error) {
 	return newCode, nil
 }
 
-func exportPDF(data []models.RiskControlResponse) (blob []byte, name string, err error) {
+func (rc RiskControlService) exportPDF(pernr string, data []models.RiskControlResponse) (blob []byte, name string, err error) {
 	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.SetAutoPageBreak(false, 10)
 	pdf.SetMargins(10, 10, 10) // margin kiri, atas, kanan
@@ -807,20 +846,51 @@ func exportPDF(data []models.RiskControlResponse) (blob []byte, name string, err
 	pdf.SetFont("Arial", "B", 14)
 	pdf.CellFormat(0, 10, "Risk Control Report", "", 1, "C", false, 0, "")
 
-	headers := []string{"Code", "Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Status", "CreatedAt", "UpdatedAt", "Code Control Attribute", "Name Control Attribute"}
+	headers := []string{"Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Code Control Attribute", "Name Control Attribute"}
 	colWidths := []float64{
-		20, 30, 20, 20, 10,
-		35, 25, 25, 40, 20,
-		35, 25, 25, 25, 25,
+		35, 20, 20, 10,
+		30, 20, 20, 25, 20,
+		30, 30,
 	}
 
 	printHeader := func() {
-		pdf.SetFillColor(200, 200, 200) // abu-abu header
+		pdf.SetFillColor(200, 200, 200)
 		pdf.SetFont("Arial", "B", 10)
+
+		lineHeight := 5.0
+
+		// Hitung tinggi maksimum header (berdasarkan wrapping)
+		maxHeight := 0.0
 		for i, h := range headers {
-			pdf.CellFormat(colWidths[i], 8, h, "1", 0, "C", true, 0, "")
+			lines := pdf.SplitLines([]byte(h), colWidths[i])
+			hh := float64(len(lines)) * lineHeight
+			if hh > maxHeight {
+				maxHeight = hh
+			}
 		}
-		pdf.Ln(-1)
+
+		xStart := pdf.GetX()
+		yStart := pdf.GetY()
+
+		// Cetak setiap header cell
+		for i, h := range headers {
+			x := pdf.GetX()
+			y := pdf.GetY()
+
+			// Gambar border kotak
+			pdf.Rect(x, y, colWidths[i], maxHeight, "DF") // DF = fill + border
+
+			// Cetak text dengan wrapping di tengah vertikal
+			lines := pdf.SplitLines([]byte(h), colWidths[i])
+			textHeight := float64(len(lines)) * lineHeight
+			yOffset := (maxHeight - textHeight) / 2
+
+			pdf.SetXY(x, y+yOffset)
+			pdf.MultiCell(colWidths[i], lineHeight, h, "", "C", false)
+			pdf.SetXY(x+colWidths[i], yStart)
+		}
+
+		pdf.SetXY(xStart, yStart+maxHeight)
 		pdf.SetFont("Arial", "", 9)
 	}
 
@@ -843,15 +913,13 @@ func exportPDF(data []models.RiskControlResponse) (blob []byte, name string, err
 	}
 
 	for _, v := range data {
-		status := "aktif"
-		if !v.Status {
-			status = "inaktif"
+		attribute, err := rc.arlodsService.GetMappingControlAttribute(pernr, int(v.ID))
+		if err != nil {
+			continue
 		}
-		createTime := lib.FormatDatePtr(v.CreatedAt)
-		updateTime := lib.FormatDatePtr(v.UpdatedAt)
 
+		code, name := BuildMaping(attribute.Data)
 		row := []string{
-			v.Kode,
 			v.RiskControl,
 			v.ControlType,
 			v.Nature,
@@ -861,16 +929,14 @@ func exportPDF(data []models.RiskControlResponse) (blob []byte, name string, err
 			v.OwnerGroup,
 			v.Owner,
 			v.Document,
-			status,
-			createTime,
-			updateTime,
+			code,
+			name,
 		}
 
 		rowHeight := getRowHeight(row)
 		xStart := pdf.GetX()
 		yStart := pdf.GetY()
 
-		// Check page break
 		if yStart+rowHeight+marginBottom > pageHeight {
 			pdf.AddPage()
 			printHeader()
@@ -878,7 +944,6 @@ func exportPDF(data []models.RiskControlResponse) (blob []byte, name string, err
 			yStart = pdf.GetY()
 		}
 
-		// Print each cell with MultiCell and border
 		for i, txt := range row {
 			x := pdf.GetX()
 			y := pdf.GetY()
@@ -901,12 +966,12 @@ func exportPDF(data []models.RiskControlResponse) (blob []byte, name string, err
 	return buf.Bytes(), fileName, nil
 }
 
-func exportExcel(data []models.RiskControlResponse) (blob []byte, name string, err error) {
+func (rc RiskControlService) exportExcel(pernr string, data []models.RiskControlResponse) (blob []byte, name string, err error) {
 	f := excelize.NewFile()
 	sheet := "risk-control"
 
 	f.SetSheetName("Sheet1", sheet)
-	headers := []string{"Code", "Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Status", "CreatedAt", "UpdatedAt", "Code Control Attribute", "Name Control Attribute"}
+	headers := []string{"Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Code Control Attribute", "Name Control Attribute"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		if err := f.SetCellValue(sheet, cell, h); err != nil {
@@ -915,28 +980,24 @@ func exportExcel(data []models.RiskControlResponse) (blob []byte, name string, e
 	}
 
 	for idx, v := range data {
-		status := "aktif"
-		if !v.Status {
-			status = "inaktif"
+		attribute, err := rc.arlodsService.GetMappingControlAttribute(pernr, int(v.ID))
+		if err != nil {
+			continue
 		}
-		createTime := lib.FormatDatePtr(v.CreatedAt)
-		updateTime := lib.FormatDatePtr(v.UpdatedAt)
 
-		f.SetCellValue("risk-control", fmt.Sprintf("A%d", idx+2), v.Kode)
-		f.SetCellValue("risk-control", fmt.Sprintf("B%d", idx+2), v.RiskControl)
-		f.SetCellValue("risk-control", fmt.Sprintf("C%d", idx+2), v.ControlType)
-		f.SetCellValue("risk-control", fmt.Sprintf("D%d", idx+2), v.Nature)
-		f.SetCellValue("risk-control", fmt.Sprintf("E%d", idx+2), v.KeyControl)
-		f.SetCellValue("risk-control", fmt.Sprintf("F%d", idx+2), v.Deskripsi)
-		f.SetCellValue("risk-control", fmt.Sprintf("G%d", idx+2), ReverseOwnerLvl(v.OwnerLvl))
-		f.SetCellValue("risk-control", fmt.Sprintf("H%d", idx+2), v.OwnerGroup)
-		f.SetCellValue("risk-control", fmt.Sprintf("I%d", idx+2), v.Owner)
-		f.SetCellValue("risk-control", fmt.Sprintf("J%d", idx+2), v.Document)
-		f.SetCellValue("risk-control", fmt.Sprintf("K%d", idx+2), status)
-		f.SetCellValue("risk-control", fmt.Sprintf("L%d", idx+2), createTime)
-		f.SetCellValue("risk-control", fmt.Sprintf("M%d", idx+2), updateTime)
-		f.SetCellValue("risk-control", fmt.Sprintf("N%d", idx+2), "")
-		f.SetCellValue("risk-control", fmt.Sprintf("O%d", idx+2), "")
+		code, name := BuildMaping(attribute.Data)
+
+		f.SetCellValue("risk-control", fmt.Sprintf("A%d", idx+2), v.RiskControl)
+		f.SetCellValue("risk-control", fmt.Sprintf("B%d", idx+2), v.ControlType)
+		f.SetCellValue("risk-control", fmt.Sprintf("C%d", idx+2), v.Nature)
+		f.SetCellValue("risk-control", fmt.Sprintf("D%d", idx+2), v.KeyControl)
+		f.SetCellValue("risk-control", fmt.Sprintf("E%d", idx+2), v.Deskripsi)
+		f.SetCellValue("risk-control", fmt.Sprintf("F%d", idx+2), ReverseOwnerLvl(v.OwnerLvl))
+		f.SetCellValue("risk-control", fmt.Sprintf("G%d", idx+2), v.OwnerGroup)
+		f.SetCellValue("risk-control", fmt.Sprintf("H%d", idx+2), v.Owner)
+		f.SetCellValue("risk-control", fmt.Sprintf("I%d", idx+2), v.Document)
+		f.SetCellValue("risk-control", fmt.Sprintf("J%d", idx+2), code)
+		f.SetCellValue("risk-control", fmt.Sprintf("K%d", idx+2), name)
 	}
 
 	var buf bytes.Buffer
@@ -950,24 +1011,24 @@ func exportExcel(data []models.RiskControlResponse) (blob []byte, name string, e
 
 }
 
-func exportCsv(data []models.RiskControlResponse) (blob []byte, name string, err error) {
+func (rc RiskControlService) exportCsv(pernr string, data []models.RiskControlResponse) (blob []byte, name string, err error) {
 	var buf bytes.Buffer
 	writer := csv.NewWriter(&buf)
 
-	headers := []string{"Code", "Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Status", "CreatedAt", "UpdatedAt", "Code Control Attribute", "Name Control Attribute"}
+	headers := []string{"Control", "Type", "Nature", "Key", "Description", "Owner Level", "Owner Group", "Owner", "Document", "Code Control Attribute", "Name Control Attribute"}
 	if err := writer.Write(headers); err != nil {
 		return nil, "", fmt.Errorf("failed to write csv header: %w", err)
 	}
 
 	for _, v := range data {
-		status := "aktif"
-		if !v.Status {
-			status = "inaktif"
+		attribute, err := rc.arlodsService.GetMappingControlAttribute(pernr, int(v.ID))
+		if err != nil {
+			continue
 		}
-		createTime := lib.FormatDatePtr(v.CreatedAt)
-		updateTime := lib.FormatDatePtr(v.UpdatedAt)
+
+		code, name := BuildMaping(attribute.Data)
+
 		row := []string{
-			v.Kode,
 			v.RiskControl,
 			v.ControlType,
 			v.Nature,
@@ -977,9 +1038,8 @@ func exportCsv(data []models.RiskControlResponse) (blob []byte, name string, err
 			v.OwnerGroup,
 			v.Owner,
 			v.Document,
-			status,
-			createTime,
-			updateTime,
+			code,
+			name,
 		}
 
 		if err := writer.Write(row); err != nil {
@@ -1012,4 +1072,26 @@ func ReverseOwnerLvl(lvl string) string {
 	}
 
 	return lvlInfo
+}
+
+func BuildMaping(data []dto.ListAttributeMap) (string, string) {
+	var (
+		code []string
+		name []string
+	)
+	for _, v := range data {
+		code = append(code, v.Code)
+		name = append(name, v.Name)
+	}
+
+	return strings.Join(code, "; "), strings.Join(name, "; ")
+}
+
+func IsValidCodeName(s string) bool {
+	// format: CODE - NAME
+	// CODE  : huruf/angka/strip
+	// NAME  : huruf, spasi, angka
+	pattern := `^[A-Za-z0-9\-]+ - [A-Za-z0-9 ]+$`
+	re := regexp.MustCompile(pattern)
+	return re.MatchString(s)
 }

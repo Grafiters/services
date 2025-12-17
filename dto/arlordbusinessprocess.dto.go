@@ -30,3 +30,22 @@ type BusinessProcessNode struct {
 	BusinessCycleCode    string
 	BusinessCycleName    string
 }
+
+type BusinessCycleParams struct {
+	Search string `form:"search"`
+	Page   int    `form:"page"`
+	Limit  int    `form:"limit"`
+	Offset int
+	Sort   string `form:"sort"`
+}
+
+type BusinessProcess struct {
+	ID   string `json:"id"`
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
+
+type BusinessProcessPagination struct {
+	List       []BusinessProcess `json:"list"`
+	Pagination Pagination        `json:"pagination"`
+}

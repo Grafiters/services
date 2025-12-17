@@ -18,6 +18,7 @@ import (
 	"time"
 
 	fileModel "riskmanagement/models/filemanager"
+	"riskmanagement/services/arlords"
 	filemanager "riskmanagement/services/filemanager"
 	"strings"
 
@@ -67,6 +68,7 @@ type RiskIndicatorService struct {
 	minio             minio.Minio
 	dbRaw             lib.Databases
 	logger            logger.Logger
+	arlodsService     arlords.ArlordsServiceDefinition
 	activityRepo      activity.ActivityDefinition
 	product           product.ProductDefinition
 	riskIndicatorRepo riskindicator.RiskIndicatorDefinition
@@ -83,6 +85,7 @@ func NewRiskIndicatorService(
 	logger logger.Logger,
 	activityRepo activity.ActivityDefinition,
 	product product.ProductDefinition,
+	arlodsService arlords.ArlordsServiceDefinition,
 	riskIndicatorRepo riskindicator.RiskIndicatorDefinition,
 	lampiran riskindicator.LampiranIndicatorDefinition,
 	filemanager filemanager.FileManagerDefinition,
@@ -94,6 +97,7 @@ func NewRiskIndicatorService(
 		minio:             minio,
 		dbRaw:             dbRaw,
 		logger:            logger,
+		arlodsService:     arlodsService,
 		riskIndicatorRepo: riskIndicatorRepo,
 		lampiran:          lampiran,
 		filemanager:       filemanager,
@@ -143,6 +147,15 @@ func (riskIndicator RiskIndicatorService) GetKode() (response []models.KodeRespo
 // Delete implements RiskIndicatorDefinition
 func (ri RiskIndicatorService) Delete(request *models.UpdateDelete) (response bool, err error) {
 	timeNow := lib.GetTimeNow("timestime")
+
+	maps, err := ri.MapRiskIssue.GetRiskIssue(request.ID)
+	if err != nil {
+		return false, err
+	}
+
+	if len(maps) > 0 {
+		return false, fmt.Errorf("data sudah termapping tidak bisa dihapus")
+	}
 
 	tx := ri.db.DB.Begin()
 
@@ -443,7 +456,8 @@ func (riskIndicator RiskIndicatorService) Store(request models.RiskIndicatorRequ
 
 // Update implements RiskIndicatorDefinition
 func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorRequest) (responses bool, err error) {
-	timeNow := lib.GetTimeNow("timestime")
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	now := time.Now().In(loc)
 
 	tx := riskIndicator.db.DB.Begin()
 
@@ -451,6 +465,8 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 	if err != nil {
 		return false, err
 	}
+
+	formatted := now.Format("2006-01-02 15:04:05")
 
 	updateIndicator := &models.RiskIndicator{
 		ID:                    requests.ID,
@@ -475,7 +491,8 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 		StatusIndikator:       requests.StatusIndikator,
 		DataSourceAnomaly:     requests.DataSourceAnomaly,
 		Status:                exists.Status,
-		UpdatedAt:             &timeNow,
+		CreatedAt:             exists.CreatedAt,
+		UpdatedAt:             &formatted,
 	}
 
 	include := []string{
@@ -500,6 +517,7 @@ func (riskIndicator RiskIndicatorService) Update(requests *models.RiskIndicatorR
 		"status_indikator",
 		"data_source_anomaly",
 		"status",
+		"created_at",
 		"updated_at",
 	}
 
@@ -1117,9 +1135,9 @@ func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.Previ
 		return dto.PreviewFileImport[[17]string]{}, err
 	}
 
-	indicatorMap := make(map[string]bool, len(indicator))
+	indicatorMap := make(map[string]int, len(indicator))
 	for _, a := range indicator {
-		indicatorMap[strings.ToLower(a.RiskIndicatorCode)] = true
+		indicatorMap[strings.ToLower(a.RiskIndicatorCode)] = int(a.ID)
 	}
 
 	activityList, err := ri.activityRepo.GetAll()
@@ -1142,6 +1160,39 @@ func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.Previ
 	productMap := make(map[string]modelProduct.ProductResponse, len(productList))
 	for _, p := range productList {
 		productMap[strings.ToLower(p.Product)] = p
+	}
+
+	topic, err := ri.arlodsService.GetTopicAnomaly(pernr)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query topic: %s", err)
+		return dto.PreviewFileImport[[17]string]{}, err
+	}
+
+	topicMap := make(map[string]string, 0)
+	for _, v := range topic.Data.List {
+		topicMap[strings.ToLower(v.Collection)] = strings.ToLower(v.Alias)
+	}
+
+	uker, err := ri.arlodsService.GetUker(pernr, 0)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query uker: %s", err)
+		return dto.PreviewFileImport[[17]string]{}, err
+	}
+
+	ukerMap := make(map[string]dto.UkerDevision, 0)
+	for _, v := range uker.Data {
+		ukerMap[strings.ToLower(v.UkerDivision)] = v
+	}
+
+	business, err := ri.arlodsService.GetBusinessCycle(pernr)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return dto.PreviewFileImport[[17]string]{}, err
+	}
+
+	businessMap := make(map[string]dto.BusinessProcess)
+	for _, v := range business.Data.List {
+		businessMap[strings.ToLower(v.Name)] = v
 	}
 
 	headers := []string{
@@ -1211,8 +1262,21 @@ func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.Previ
 		activityName := strings.ToLower(row[3])
 		productName := strings.ToLower(row[4])
 
-		if _, ok := indicatorMap[strings.ToLower(row[1])]; ok {
+		indicatorID := 0
+		indicatorID, stats := indicatorMap[strings.ToLower(row[1])]
+		if stats {
 			validation += fmt.Sprintf("Code Indicator sudah terdaftar: %s; ", row[0])
+		}
+
+		alias, stats := topicMap[strings.ToLower(row[1])]
+		if strings.ToLower(row[0]) == "arlods" {
+			if !stats {
+				validation += fmt.Sprintf("Data arlods tidak ditemukan: %s ", row[1])
+			} else {
+				if alias != strings.ToLower(row[2]) {
+					validation += fmt.Sprintf("Data name arlods tidak sesuai %s ", row[2])
+				}
+			}
 		}
 
 		activityData, activityStat := activityMap[activityName]
@@ -1233,7 +1297,92 @@ func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.Previ
 		activityIDStr := strconv.FormatInt(activityData.ID, 10)
 
 		if productActivityID != activityIDStr {
-			validation += fmt.Sprintf("Product tidak sesuai dengan Activity: %s; ", row[1])
+			validation += fmt.Sprintf("Product tidak sesuai dengan Activity: %s; ", row[3])
+		}
+
+		if len(row) > 9 {
+			businessCycle := strings.TrimSpace(row[9])
+
+			if businessCycle != "" {
+				if _, ok := businessMap[strings.ToLower(businessCycle)]; !ok {
+					validation += fmt.Sprintf(
+						"Business cycle tidak terdaftar: %s; ",
+						businessCycle,
+					)
+				}
+			}
+		}
+
+		if len(row) >= 16 {
+			uker := strings.TrimSpace(row[15])
+			header := strings.TrimSpace(row[16])
+			if strings.ToLower(strings.TrimSpace(row[0])) != "arlods" &&
+				(uker != "" || header != "") {
+				validation += "Data Uker dan Header hanya berlaku untuk data indicator dari sumber arlods saja"
+			}
+		}
+
+		if len(row) >= 16 {
+			if strings.ToLower(row[0]) == "arlods" {
+				if row[16] != "" && indicatorID != 0 {
+					maps, err := ri.arlodsService.GetHeader(pernr, row[1])
+					if err != nil {
+						validation += "data header indicator tidak ditemukan"
+					}
+
+					headerMap := lib.ParseStringToArray(row[15], ";")
+					headerSet := make(map[string][]string)
+					for _, h := range maps.Data {
+						headerSet[strings.TrimSpace(h)] = maps.Data
+					}
+
+					invalidHeaders := make([]string, 0)
+
+					for _, v := range headerMap {
+						v = strings.TrimSpace(v)
+
+						_, ok := headerSet[v]
+						if !ok {
+							invalidHeaders = append(invalidHeaders, v)
+						}
+					}
+
+					if len(invalidHeaders) > 0 {
+						validation += fmt.Sprintf(
+							"header tidak ditemukan: %s; ",
+							strings.Join(invalidHeaders, ", "),
+						)
+					}
+				}
+
+				if row[15] != "" && indicatorID != 0 {
+					invalidUkers := make([]string, 0)
+
+					ukerParse := lib.ParseStringToArray(row[16], ";")
+
+					for _, v := range ukerParse {
+						v = strings.TrimSpace(v)
+						val, ok := ukerMap[v]
+						if !ok || val.IndicatorID != indicatorID {
+							invalidUkers = append(invalidUkers, v)
+						}
+
+						if val, ok := ukerMap[v]; ok {
+							if val.IndicatorID == indicatorID && val.Selected {
+								validation += fmt.Sprintf("data uker %s sudah termapping", val.UkerDivision)
+							}
+						}
+					}
+
+					if len(invalidUkers) > 0 {
+						validation += fmt.Sprintf(
+							"uker tidak ditemukan: %s; ",
+							strings.Join(invalidUkers, ", "),
+						)
+					}
+				}
+
+			}
 		}
 
 		for i := range 17 {
@@ -1260,9 +1409,9 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 		return err
 	}
 
-	indicatorMap := make(map[string]bool, len(indicator))
+	indicatorMap := make(map[string]int, len(indicator))
 	for _, a := range indicator {
-		indicatorMap[strings.ToLower(a.RiskIndicatorCode)] = true
+		indicatorMap[strings.ToLower(a.RiskIndicatorCode)] = int(a.ID)
 	}
 
 	activityList, err := ri.activityRepo.GetAll()
@@ -1287,6 +1436,39 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 		productMap[strings.ToLower(p.Product)] = p
 	}
 
+	topic, err := ri.arlodsService.GetTopicAnomaly(pernr)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query topic: %s", err)
+		return err
+	}
+
+	topicMap := make(map[string]string, 0)
+	for _, v := range topic.Data.List {
+		topicMap[strings.ToLower(v.Collection)] = strings.ToLower(v.Alias)
+	}
+
+	uker, err := ri.arlodsService.GetUker(pernr, 0)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query uker: %s", err)
+		return err
+	}
+
+	ukerMap := make(map[string]dto.UkerDevision, 0)
+	for _, v := range uker.Data {
+		ukerMap[strings.ToLower(v.UkerDivision)] = v
+	}
+
+	business, err := ri.arlodsService.GetBusinessCycle(pernr)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return err
+	}
+
+	businessMap := make(map[string]dto.BusinessProcess)
+	for _, v := range business.Data.List {
+		businessMap[strings.ToLower(v.Name)] = v
+	}
+
 	headers := []string{
 		"Data Source Anomaly",
 		"Risk Indicator Code",
@@ -1308,7 +1490,11 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 	}
 
 	newRecord := make([]models.RiskIndicator, 0)
-
+	var (
+		ukerInputs   []dto.UpdateSelectedUker
+		headerInputs []dto.IndicatorHeader
+	)
+	timeNow := lib.GetTimeNow("timestime")
 	for index, row := range data {
 		if index == 0 {
 			if len(row) < 17 {
@@ -1330,6 +1516,8 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 			activityExist        bool  = false
 			productExist         bool  = false
 			validActivityProduct bool  = false
+			headerValid          bool  = true
+			ukerValid            bool  = true
 			currentActivituID    int64 = 0
 			currentProductID     int64 = 0
 		)
@@ -1337,8 +1525,21 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 		activityName := strings.ToLower(row[3])
 		productName := strings.ToLower(row[4])
 
-		if _, ok := indicatorMap[strings.ToLower(row[0])]; !ok {
+		indicatorID := 0
+		indicatorID, stats := indicatorMap[strings.ToLower(row[1])]
+		if stats {
 			indicatorExists = true
+		}
+
+		alias, stats := topicMap[strings.ToLower(row[1])]
+		if strings.ToLower(row[0]) == "arlods" {
+			if !stats {
+				indicatorExists = true
+			} else {
+				if alias != strings.ToLower(row[2]) {
+					indicatorExists = true
+				}
+			}
 		}
 
 		activityData, activityStat := activityMap[activityName]
@@ -1364,6 +1565,69 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 			validActivityProduct = true
 		}
 
+		if len(row) > 9 {
+			businessCycle := strings.TrimSpace(row[9])
+
+			if businessCycle != "" {
+				if _, ok := businessMap[strings.ToLower(businessCycle)]; !ok {
+					continue
+				}
+			}
+		}
+
+		if strings.ToLower(row[0]) == "arlods" && indicatorID != 0 {
+			if row[16] != "" {
+				maps, err := ri.arlodsService.GetHeader(pernr, row[1])
+				if err != nil || len(maps.Data) == 0 {
+					headerValid = false
+				} else {
+					headerMap := lib.ParseStringToArray(row[15], ";")
+					headerSet := make(map[string]struct{})
+					for _, h := range maps.Data {
+						headerSet[strings.TrimSpace(h)] = struct{}{}
+					}
+					validHeaders := make([]string, 0)
+
+					for _, v := range headerMap {
+						v = strings.TrimSpace(v)
+						if _, ok := headerSet[v]; !ok {
+							headerValid = false
+							break
+						}
+
+					}
+
+					if headerValid && len(validHeaders) > 0 {
+						headerInputs = append(headerInputs, dto.IndicatorHeader{
+							IndicatorID: indicatorID,
+							HeaderKey:   validHeaders,
+						})
+					}
+				}
+			}
+
+			if row[15] != "" {
+				ukerParse := lib.ParseStringToArray(row[16], ";")
+				for _, v := range ukerParse {
+					v = strings.TrimSpace(v)
+					val, ok := ukerMap[v]
+					if !ok || val.IndicatorID != indicatorID || val.Selected {
+						ukerValid = false
+						break
+					}
+
+					ukerInputs = append(ukerInputs, dto.UpdateSelectedUker{
+						IndicatorID: indicatorID,
+						UkerKey:     val.ID,
+						Selected:    true,
+					})
+				}
+			}
+		}
+
+		ri.logger.Zap.Debug(headerValid)
+		ri.logger.Zap.Debug(ukerValid)
+
 		if indicatorExists && activityExist && productExist && validActivityProduct {
 			newRecord = append(newRecord, models.RiskIndicator{
 				RiskIndicatorCode:     row[1],
@@ -1381,8 +1645,11 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 				KPI:                   row[12],
 				Type:                  row[13],
 				DataSourceAnomaly:     strings.ToLower(row[0]),
+				Status:                true,
+				CreatedAt:             &timeNow,
 			})
 		}
+
 	}
 
 	if len(newRecord) > 0 {
@@ -1390,9 +1657,29 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 		err := ri.riskIndicatorRepo.BulkCreateRiskIndicator(newRecord, tx)
 		if err != nil {
 			tx.Rollback()
-			ri.logger.Zap.Error("cannot create risk control data: %s ", err)
+			ri.logger.Zap.Error("cannot create risk indicator data: %s ", err)
 			return err
 		}
+
+		if len(headerInputs) > 0 {
+			err := ri.arlodsService.CreateSetHeader(pernr, headerInputs)
+			if err != nil {
+				tx.Rollback()
+				ri.logger.Zap.Error("cannot create mapping header: %s ", err)
+				return err
+			}
+		}
+
+		if len(ukerInputs) > 0 {
+			err := ri.arlodsService.CreateSetUker(pernr, ukerInputs)
+			if err != nil {
+				tx.Rollback()
+				ri.logger.Zap.Error("cannot create mapping uker: %s ", err)
+				return err
+			}
+		}
+
+		tx.Commit()
 	}
 
 	return nil
@@ -1411,17 +1698,17 @@ func (ri RiskIndicatorService) Download(pernr string, format string) ([]byte, st
 
 	switch format {
 	case "csv":
-		return exportCSV(data)
+		return ri.exportCSV(pernr, data)
 	case "xlsx":
-		return exportExcel(data)
+		return ri.exportExcel(pernr, data)
 	case "pdf":
-		return exportPDF(data)
+		return ri.exportPDF(pernr, data)
 	default:
 		return nil, "", fmt.Errorf("unsupported format export file")
 	}
 }
 
-func exportPDF(data []models.RiskIndicatorResponse) ([]byte, string, error) {
+func (ri RiskIndicatorService) exportPDF(pernr string, data []models.RiskIndicatorResponse) ([]byte, string, error) {
 	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.SetAutoPageBreak(false, 10)
 	pdf.SetMargins(10, 10, 10) // margin kiri, atas, kanan
@@ -1445,20 +1732,49 @@ func exportPDF(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 		"KPI",
 		"Tipe Data Anomali",
 		"Kondisi",
-		"Created Time",
-		"Updated Time",
 		"Mapping Set Header",
 		"Mapping Set Key Uker",
 	}
 
-	colWidths := []float64{20, 20, 25, 15, 15, 25, 15, 20, 20, 20, 20, 25, 20, 20, 20, 20, 20, 20, 20}
+	colWidths := []float64{20, 20, 25, 15, 15, 25, 15, 20, 20, 20, 20, 25, 20, 20, 20, 20, 20}
 	printHeader := func() {
-		pdf.SetFillColor(200, 200, 200) // abu-abu header
+		pdf.SetFillColor(200, 200, 200)
 		pdf.SetFont("Arial", "B", 10)
+
+		lineHeight := 5.0
+
+		// Hitung tinggi maksimum header (berdasarkan wrapping)
+		maxHeight := 0.0
 		for i, h := range headers {
-			pdf.CellFormat(colWidths[i], 8, h, "1", 0, "C", true, 0, "")
+			lines := pdf.SplitLines([]byte(h), colWidths[i])
+			hh := float64(len(lines)) * lineHeight
+			if hh > maxHeight {
+				maxHeight = hh
+			}
 		}
-		pdf.Ln(-1)
+
+		xStart := pdf.GetX()
+		yStart := pdf.GetY()
+
+		// Cetak setiap header cell
+		for i, h := range headers {
+			x := pdf.GetX()
+			y := pdf.GetY()
+
+			// Gambar border kotak
+			pdf.Rect(x, y, colWidths[i], maxHeight, "DF") // DF = fill + border
+
+			// Cetak text dengan wrapping di tengah vertikal
+			lines := pdf.SplitLines([]byte(h), colWidths[i])
+			textHeight := float64(len(lines)) * lineHeight
+			yOffset := (maxHeight - textHeight) / 2
+
+			pdf.SetXY(x, y+yOffset)
+			pdf.MultiCell(colWidths[i], lineHeight, h, "", "C", false)
+			pdf.SetXY(x+colWidths[i], yStart)
+		}
+
+		pdf.SetXY(xStart, yStart+maxHeight)
 		pdf.SetFont("Arial", "", 9)
 	}
 
@@ -1480,30 +1796,110 @@ func exportPDF(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 		return maxHeight
 	}
 
+	activityList, err := ri.activityRepo.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query activity: %s", err)
+		return nil, "", err
+	}
+
+	activityMap := make(map[int]modelActiv.ActivityResponse, len(activityList))
+	for _, a := range activityList {
+		activityMap[int(a.ID)] = a
+	}
+
+	productList, err := ri.product.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return nil, "", err
+	}
+
+	productMap := make(map[int]modelProduct.ProductResponse, len(productList))
+	for _, p := range productList {
+		productMap[int(p.ID)] = p
+	}
+
+	uker, err := ri.arlodsService.GetUker(pernr, 0)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query uker: %s", err)
+		return nil, "", err
+	}
+
+	business, err := ri.arlodsService.GetBusinessCycle(pernr)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return nil, "", err
+	}
+
+	businessMap := make(map[string]dto.BusinessProcess)
+	for _, v := range business.Data.List {
+		businessMap[strings.ToLower(v.ID)] = v
+	}
+
+	ukerMap := make(map[int][]string)
+
+	for _, v := range uker.Data {
+		if v.Selected {
+			ukerMap[v.IndicatorID] = append(
+				ukerMap[v.IndicatorID],
+				v.UkerDivision,
+			)
+		}
+	}
+
 	for _, d := range data {
-		createTime := lib.FormatDatePtr(d.CreatedAt)
-		updateTime := lib.FormatDatePtr(d.UpdatedAt)
+		headeData := make([]string, 0)
+		if d.DataSourceAnomaly == "arlods" {
+			header, err := ri.arlodsService.GetMapHeaderIndicator(pernr, int(d.ID))
+			if err != nil {
+				ri.logger.Zap.Debug("errored get mapping header ", err)
+				continue
+			}
+
+			for _, v := range header.List {
+				headeData = append(headeData, v.HeaderKey)
+			}
+
+		}
+
+		ukerData := make([]string, 0)
+		if u, ok := ukerMap[int(d.ID)]; ok {
+			ukerData = u
+		}
+
+		activity := ""
+		if v, ok := activityMap[int(d.ActivityID)]; ok {
+			activity = v.Name
+		}
+
+		product := ""
+		if v, ok := productMap[int(d.ProductID)]; ok {
+			product = v.Product
+		}
+
+		businesses := ""
+		val, ok := businessMap[strings.ToLower(d.BusinessCycleActivity)]
+		if ok {
+			businesses = val.Name
+		}
 
 		row := []string{
 			d.DataSourceAnomaly,                  // data_source_anomaly
 			d.RiskIndicatorCode,                  // risk_indicator_code
 			d.RiskIndicator,                      // risk_indicator
-			strconv.Itoa(int(d.ActivityID)),      // aktivitas
-			strconv.Itoa(int(d.ProductID)),       // produk
+			activity,                             // aktivitas
+			product,                              // produk
 			d.Deskripsi,                          // deskripsi
 			d.Satuan,                             // satuan
 			d.PeriodePemantauan,                  // periode_data
 			d.Batasan,                            // Batasan
-			d.BusinessCycleActivity,              // Business Cycle Aktivitas
+			businesses,                           // Business Cycle Aktivitas
 			strconv.Itoa(int(d.SLAVerifikasi)),   // sla_verifikasi
 			strconv.Itoa(int(d.SLATindakLanjut)), // sla_tindak_lanjut
 			d.KPI,                                // kpi
 			d.Type,                               // Tipe Data Anomali
 			ReverseCondition(d.Kondisi),          // Kondisi
-			createTime,
-			updateTime,
-			"",
-			"",
+			strings.Join(headeData, ";"),
+			strings.Join(ukerData, ";"),
 		}
 
 		rowHeight := getRowHeight(row)
@@ -1531,7 +1927,7 @@ func exportPDF(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 	}
 
 	var buf bytes.Buffer
-	err := pdf.Output(&buf)
+	err = pdf.Output(&buf)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to generate PDF: %w", err)
 	}
@@ -1541,7 +1937,7 @@ func exportPDF(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 	return buf.Bytes(), fileName, nil
 }
 
-func exportExcel(data []models.RiskIndicatorResponse) ([]byte, string, error) {
+func (ri RiskIndicatorService) exportExcel(pernr string, data []models.RiskIndicatorResponse) ([]byte, string, error) {
 	f := excelize.NewFile()
 	sheet := "risk-indicator"
 
@@ -1562,8 +1958,6 @@ func exportExcel(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 		"KPI",
 		"Tipe Data Anomali",
 		"Kondisi",
-		"Created Time",
-		"Updated Time",
 		"Mapping Set Header",
 		"Mapping Set Key Uker",
 	}
@@ -1575,30 +1969,107 @@ func exportExcel(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 		}
 	}
 
+	activityList, err := ri.activityRepo.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query activity: %s", err)
+		return nil, "", err
+	}
+
+	activityMap := make(map[int]modelActiv.ActivityResponse, len(activityList))
+	for _, a := range activityList {
+		activityMap[int(a.ID)] = a
+	}
+
+	productList, err := ri.product.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return nil, "", err
+	}
+
+	productMap := make(map[int]modelProduct.ProductResponse, len(productList))
+	for _, p := range productList {
+		productMap[int(p.ID)] = p
+	}
+
+	uker, err := ri.arlodsService.GetUker(pernr, 0)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query uker: %s", err)
+		return nil, "", err
+	}
+
+	business, err := ri.arlodsService.GetBusinessCycle(pernr)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return nil, "", err
+	}
+
+	businessMap := make(map[string]dto.BusinessProcess)
+	for _, v := range business.Data.List {
+		businessMap[strings.ToLower(v.ID)] = v
+	}
+
+	ukerMap := make(map[int][]string)
+
+	for _, v := range uker.Data {
+		if v.Selected {
+			ukerMap[v.IndicatorID] = append(
+				ukerMap[v.IndicatorID],
+				v.UkerDivision,
+			)
+		}
+	}
+
 	for idx, v := range data {
 		row := idx + 2
-		createTime := lib.FormatDatePtr(v.CreatedAt)
-		updateTime := lib.FormatDatePtr(v.UpdatedAt)
+		header, err := ri.arlodsService.GetMapHeaderIndicator(pernr, int(v.ID))
+		if err != nil {
+			ri.logger.Zap.Debug("errored get mapping header ", err)
+			continue
+		}
+
+		headeData := make([]string, 0)
+		for _, v := range header.List {
+			headeData = append(headeData, v.HeaderKey)
+		}
+
+		ukerData := make([]string, 0)
+		if u, ok := ukerMap[int(v.ID)]; ok {
+			ukerData = u
+		}
+
+		activity := ""
+		if val, ok := activityMap[int(v.ActivityID)]; ok {
+			activity = val.Name
+		}
+
+		product := ""
+		if val, ok := productMap[int(v.ProductID)]; ok {
+			product = val.Product
+		}
+
+		businesses := ""
+		val, ok := businessMap[strings.ToLower(v.BusinessCycleActivity)]
+		if ok {
+			businesses = val.Name
+		}
 
 		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), v.DataSourceAnomaly)
 		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), v.RiskIndicatorCode)
 		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), v.RiskIndicator)
-		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), strconv.FormatInt(v.ActivityID, 10))
-		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), strconv.FormatInt(v.ProductID, 10))
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), activity)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), product)
 		f.SetCellValue(sheet, fmt.Sprintf("F%d", row), v.Deskripsi)
 		f.SetCellValue(sheet, fmt.Sprintf("G%d", row), v.Satuan)
 		f.SetCellValue(sheet, fmt.Sprintf("H%d", row), v.PeriodePemantauan)
 		f.SetCellValue(sheet, fmt.Sprintf("I%d", row), v.Batasan)
-		f.SetCellValue(sheet, fmt.Sprintf("J%d", row), v.BusinessCycleActivity)
+		f.SetCellValue(sheet, fmt.Sprintf("J%d", row), businesses)
 		f.SetCellValue(sheet, fmt.Sprintf("K%d", row), strconv.FormatInt(v.SLAVerifikasi, 10))
 		f.SetCellValue(sheet, fmt.Sprintf("L%d", row), strconv.FormatInt(v.SLATindakLanjut, 10))
 		f.SetCellValue(sheet, fmt.Sprintf("M%d", row), v.KPI)
 		f.SetCellValue(sheet, fmt.Sprintf("N%d", row), v.Type)
 		f.SetCellValue(sheet, fmt.Sprintf("O%d", row), v.Kondisi)
-		f.SetCellValue(sheet, fmt.Sprintf("P%d", row), createTime)
-		f.SetCellValue(sheet, fmt.Sprintf("Q%d", row), updateTime)
-		f.SetCellValue(sheet, fmt.Sprintf("R%d", row), "")
-		f.SetCellValue(sheet, fmt.Sprintf("S%d", row), "")
+		f.SetCellValue(sheet, fmt.Sprintf("R%d", row), strings.Join(headeData, ";"))
+		f.SetCellValue(sheet, fmt.Sprintf("S%d", row), ukerData)
 	}
 
 	var buf bytes.Buffer
@@ -1611,7 +2082,7 @@ func exportExcel(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 	return buf.Bytes(), fileName, nil
 }
 
-func exportCSV(data []models.RiskIndicatorResponse) ([]byte, string, error) {
+func (ri RiskIndicatorService) exportCSV(pernr string, data []models.RiskIndicatorResponse) ([]byte, string, error) {
 	var buf bytes.Buffer
 	writer := csv.NewWriter(&buf)
 
@@ -1631,8 +2102,6 @@ func exportCSV(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 		"KPI",
 		"Tipe Data Anomali",
 		"Kondisi",
-		"Created Time",
-		"Updated Time",
 		"Mapping Set Header",
 		"Mapping Set Key Uker",
 	}
@@ -1640,30 +2109,107 @@ func exportCSV(data []models.RiskIndicatorResponse) ([]byte, string, error) {
 		return nil, "", fmt.Errorf("failed to write csv header: %w", err)
 	}
 
+	uker, err := ri.arlodsService.GetUker(pernr, 0)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query uker: %s", err)
+		return nil, "", err
+	}
+
+	ukerMap := make(map[int][]string)
+
+	for _, v := range uker.Data {
+		if v.Selected {
+			ukerMap[v.IndicatorID] = append(
+				ukerMap[v.IndicatorID],
+				v.UkerDivision,
+			)
+		}
+	}
+
+	activityList, err := ri.activityRepo.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query activity: %s", err)
+		return nil, "", err
+	}
+
+	activityMap := make(map[int]modelActiv.ActivityResponse, len(activityList))
+	for _, a := range activityList {
+		activityMap[int(a.ID)] = a
+	}
+
+	productList, err := ri.product.GetAll()
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return nil, "", err
+	}
+
+	productMap := make(map[int]modelProduct.ProductResponse, len(productList))
+	for _, p := range productList {
+		productMap[int(p.ID)] = p
+	}
+
+	business, err := ri.arlodsService.GetBusinessCycle(pernr)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+		return nil, "", err
+	}
+
+	businessMap := make(map[string]dto.BusinessProcess)
+	for _, v := range business.Data.List {
+		businessMap[strings.ToLower(v.ID)] = v
+	}
+
 	for _, d := range data {
-		createTime := lib.FormatDatePtr(d.CreatedAt)
-		updateTime := lib.FormatDatePtr(d.UpdatedAt)
+		header, err := ri.arlodsService.GetMapHeaderIndicator(pernr, int(d.ID))
+		if err != nil {
+			ri.logger.Zap.Debug("errored get mapping header ", err)
+			continue
+		}
+
+		headeData := make([]string, 0)
+		for _, v := range header.List {
+			headeData = append(headeData, v.HeaderKey)
+		}
+
+		ukerData := make([]string, 0)
+		if u, ok := ukerMap[int(d.ID)]; ok {
+			ukerData = u
+		}
+
+		activity := ""
+		if val, ok := activityMap[int(d.ActivityID)]; ok {
+			activity = val.Name
+		}
+
+		product := ""
+		if val, ok := productMap[int(d.ProductID)]; ok {
+			product = val.Product
+		}
+
+		businesses := ""
+		val, ok := businessMap[strings.ToLower(d.BusinessCycleActivity)]
+		if ok {
+			businesses = val.Name
+		}
 
 		row := []string{
 			d.DataSourceAnomaly,                  // data_source_anomaly
 			d.RiskIndicatorCode,                  // risk_indicator_code
 			d.RiskIndicator,                      // risk_indicator
-			strconv.Itoa(int(d.ActivityID)),      // aktivitas
-			strconv.Itoa(int(d.ProductID)),       // produk
+			activity,                             // aktivitas
+			product,                              // produk
 			d.Deskripsi,                          // deskripsi
 			d.Satuan,                             // satuan
 			d.PeriodePemantauan,                  // periode_data
 			d.Batasan,                            // Batasan
-			d.BusinessCycleActivity,              // Business Cycle Aktivitas
+			businesses,                           // Business Cycle Aktivitas
 			strconv.Itoa(int(d.SLAVerifikasi)),   // sla_verifikasi
 			strconv.Itoa(int(d.SLATindakLanjut)), // sla_tindak_lanjut
 			d.KPI,                                // kpi
 			d.Type,                               // Tipe Data Anomali
 			ReverseCondition(d.Kondisi),          // Kondisi
-			createTime,
-			updateTime,
-			"",
-			"",
+			strings.Join(headeData, ";"),
+			strings.Join(ukerData, ";"),
 		}
 
 		if err := writer.Write(row); err != nil {
