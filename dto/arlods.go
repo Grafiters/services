@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 type Response[T any] struct {
 	StatusCode int    `json:"status_code"`
 	Message    string `json:"message"`
@@ -218,4 +220,19 @@ func (m MappingEventSet) Contains(val string) bool {
 		m.ProductIDs[val] ||
 		m.Control[val] ||
 		m.Indicator[val]
+}
+
+type TopicList struct {
+	ID         string    `json:"id"`
+	Topic      string    `json:"topic"`
+	Alias      string    `json:"alias"`
+	Collection string    `json:"collection"`
+	IsDeleted  bool      `json:"is_deleted"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+type TopicListWithPaginate struct {
+	List       []TopicList `json:"list"`
+	Pagination Pagination  `json:"pagination"`
 }

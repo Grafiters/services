@@ -46,6 +46,11 @@ func GetTimeNow(param string) string {
 	}
 }
 
+func NowWIB() time.Time {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	return time.Now().In(loc)
+}
+
 func AddTime(year int, month int, days int) *string {
 	currentTime := time.Now()
 	time.LoadLocation("Asia/Jakarta")

@@ -213,7 +213,13 @@ func (LI RiskIndicatorRepository) Store(request *models.RiskIndicator, tx *gorm.
 
 // Update implements RiskIndicatorDefinition
 func (LI RiskIndicatorRepository) Update(request *models.RiskIndicator, include []string, tx *gorm.DB) (responses bool, err error) {
-	return true, tx.Save(&request).Error
+	err = tx.
+		Model(&models.RiskIndicator{}).
+		Where("id = ?", request.ID).
+		Select(include).
+		Updates(request).Error
+
+	return err == nil, err
 }
 
 // WithTrx implements RiskIndicatorDefinition
