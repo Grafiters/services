@@ -21,6 +21,11 @@ type MapIndicatorDefinition interface {
 	DeleteDataByID(id int64, tx *gorm.DB) (err error)
 	WithTrx(trxHandle *gorm.DB) MapIndicatorRepository
 	GetWithPaginate(id int, filter modelsIndicator.Paginate) (responses []models.MapIndicatorResponseFinal, total int, err error)
+	BulkCreate(
+		req []*models.MapIndicator,
+		tx *gorm.DB,
+	) error
+	GetAllWithRelation() (responses []models.MapIndicatorResponseFinal, err error)
 }
 
 type MapIndicatorRepository struct {
@@ -131,6 +136,26 @@ func (mp MapIndicatorRepository) GetWithPaginate(id int, filter modelsIndicator.
 	return responses, total, nil
 }
 
+func (mp MapIndicatorRepository) GetAllWithRelation() (responses []models.MapIndicatorResponseFinal, err error) {
+	dataQuery := `
+		SELECT
+			mi.id AS id,
+			mi.id_risk_issue AS id_risk_issue,
+			mi.id_indicator AS id_indicator,
+			ri.risk_indicator_code AS kode,
+			ri.risk_indicator AS risk_indicator,
+			mi.is_checked AS is_checked
+		FROM risk_issue_map_indicator mi
+		JOIN risk_indicator ri ON ri.id = mi.id_indicator
+	`
+	err = mp.db.DB.Raw(dataQuery).Scan(&responses).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return responses, nil
+}
+
 // Delete implements MapIndicatorDefinition
 func (mp MapIndicatorRepository) Delete(id int64) (err error) {
 	return mp.db.DB.Where("id = ?", id).Delete(&models.MapIndicatorResponseFinal{}).Error
@@ -177,6 +202,17 @@ func (mp MapIndicatorRepository) GetOneDataByID(id int64) (responses []models.Ma
 	}
 
 	return responses, err
+}
+
+func (mp MapIndicatorRepository) BulkCreate(
+	req []*models.MapIndicator,
+	tx *gorm.DB,
+) error {
+	if len(req) == 0 {
+		return nil
+	}
+
+	return tx.Create(req).Error
 }
 
 // Store implements MapIndicatorDefinition

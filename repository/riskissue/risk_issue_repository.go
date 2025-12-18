@@ -38,7 +38,7 @@ type RiskIssueDefinition interface {
 	GetMateriByCode(request models.RiskIssueCode) (responses []models.ListMateriNull, err error)
 	GetRiskIssueByActivityID(id int64) (responses []models.RiskIssueResponseByActivityNull, err error)
 	GetRiskEventName(id int64) (responses models.RiskIssueName, err error)
-
+	GetAllWithTx(tx *gorm.DB) ([]models.RiskIssue, error)
 	GenerateNewCode() (string, error)
 	UpdateStatus(id int64, status bool) error
 	BulkCreateRiskEvent(items []models.RiskIssue, tx *gorm.DB) error
@@ -74,6 +74,12 @@ func (riskIssue RiskIssueRepository) WithTrx(trxHandle *gorm.DB) RiskIssueReposi
 
 	riskIssue.db.DB = trxHandle
 	return riskIssue
+}
+
+func (r RiskIssueRepository) GetAllWithTx(tx *gorm.DB) ([]models.RiskIssue, error) {
+	var res []models.RiskIssue
+	err := tx.Find(&res).Error
+	return res, err
 }
 
 // GetAllWithPaginate implements RiskIssueDefinition

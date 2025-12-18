@@ -17,6 +17,10 @@ type MapKejadianDefinition interface {
 	Delete(id int64) (err error)
 	GetOneDataByID(id int64) (responses []models.MapKejadianResponseFinal, err error)
 	DeleteDataByID(id int64, tx *gorm.DB) (err error)
+	BulkCreate(
+		req []*models.MapKejadian,
+		tx *gorm.DB,
+	) error
 	WithTrx(trxHandle *gorm.DB) MapKejadianRepository
 }
 
@@ -52,7 +56,7 @@ func (mp MapKejadianRepository) DeleteDataByID(id int64, tx *gorm.DB) (err error
 
 // GetAll implements MapKejadianDefinition
 func (mp MapKejadianRepository) GetAll() (responses []models.MapKejadianResponse, err error) {
-	return responses, mp.db.DB.Find(&responses).Error
+	return responses, mp.db.DB.Table("risk_issue_map_kejadian").Find(&responses).Error
 }
 
 // GetOne implements MapKejadianDefinition
@@ -100,6 +104,17 @@ func (mp MapKejadianRepository) Store(request *models.MapKejadian, tx *gorm.DB) 
 // Update implements MapKejadianDefinition
 func (mp MapKejadianRepository) Update(request *models.MapKejadian, tx *gorm.DB) (responses bool, err error) {
 	return true, tx.Save(&request).Error
+}
+
+func (mp MapKejadianRepository) BulkCreate(
+	req []*models.MapKejadian,
+	tx *gorm.DB,
+) error {
+	if len(req) == 0 {
+		return nil
+	}
+
+	return tx.Create(req).Error
 }
 
 // WithTrx implements MapKejadianDefinition

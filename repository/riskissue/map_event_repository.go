@@ -18,6 +18,10 @@ type MapEventDefinition interface {
 	GetOneDataByID(id int64) (responses []models.MapEventResponseFinal, err error)
 	DeleteDataByID(id int64, tx *gorm.DB) (err error)
 	WithTrx(trxHandle *gorm.DB) MapEventRepository
+	BulkCreate(
+		req []*models.MapEvent,
+		tx *gorm.DB,
+	) error
 }
 
 type MapEventRepository struct {
@@ -100,6 +104,17 @@ func (mp MapEventRepository) Store(request *models.MapEvent, tx *gorm.DB) (respo
 // Update implements MapEventDefinition
 func (mp MapEventRepository) Update(request *models.MapEvent, tx *gorm.DB) (responses bool, err error) {
 	return true, tx.Save(&request).Error
+}
+
+func (mp MapEventRepository) BulkCreate(
+	req []*models.MapEvent,
+	tx *gorm.DB,
+) error {
+	if len(req) == 0 {
+		return nil
+	}
+
+	return tx.Create(req).Error
 }
 
 // WithTrx implements MapEventDefinition
