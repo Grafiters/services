@@ -17,6 +17,10 @@ type MapProductDefinition interface {
 	Delete(id int64) (err error)
 	GetOneDataByID(id int64) (responses []models.MapProductResponseFinal, err error)
 	DeleteDataByID(id int64, tx *gorm.DB) (err error)
+	BulkCreate(
+		req []*models.MapProduct,
+		tx *gorm.DB,
+	) error
 	WithTrx(trxHandle *gorm.DB) MapProductRepository
 }
 
@@ -94,6 +98,17 @@ func (mp MapProductRepository) Store(request *models.MapProduct, tx *gorm.DB) (r
 // Update implements MapProductDefinition
 func (mp MapProductRepository) Update(request *models.MapProduct, tx *gorm.DB) (responses bool, err error) {
 	return true, tx.Save(&request).Error
+}
+
+func (mp MapProductRepository) BulkCreate(
+	req []*models.MapProduct,
+	tx *gorm.DB,
+) error {
+	if len(req) == 0 {
+		return nil
+	}
+
+	return tx.Create(req).Error
 }
 
 // WithTrx implements MapProductDefinition

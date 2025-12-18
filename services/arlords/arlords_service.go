@@ -25,6 +25,9 @@ type ArlordsServiceDefinition interface {
 	CreateSetHeader(pernr string, req []dto.IndicatorHeader) (err error)
 	GetBusinessCycle(pernr string) (response dto.Response[dto.BusinessProcessPagination], err error)
 	GetMappingEventBusinessProess(pernr string, issueID int) (response dto.Response[dto.MappingRiskEventBusinesProcessRelationRespnse], err error)
+	BulkGetBusinessProcessByActivity(pernr string, code []string) (response dto.Response[[]dto.BusinessHierarchyFlatResponse], err error)
+	BulkGetMappingEventBusinessProcess(pernr string, code []string) (response dto.Response[[]dto.MappingRiskEventBusinesProcessRelation], err error)
+	BulkCreateMappingBusinessProcess(pernr string, data []dto.MapingBusinessProcessRequest) (err error)
 }
 
 type ArlordService struct {
@@ -426,4 +429,92 @@ func (as ArlordService) GetMappingEventBusinessProess(pernr string, issueID int)
 	}
 
 	return response, nil
+}
+
+func (as ArlordService) BulkGetBusinessProcessByActivity(pernr string, code []string) (response dto.Response[[]dto.BusinessHierarchyFlatResponse], err error) {
+	err = InitURL()
+	if err != nil {
+		return response, fmt.Errorf("failed to init module: %s", err)
+	}
+
+	authToken := as.jwtService.CreateArlordsToken(pernr)
+	headers := map[string]string{
+		"Authorization": "Bearer " + authToken,
+		"Content-Type":  "application/json",
+		"pernr":         pernr,
+	}
+
+	path := "/business-process/bulk-get-process"
+	u, _ := url.Parse(baseUrl + path)
+	q := u.Query()
+	for _, v := range code {
+		q.Add("activity_code", v)
+	}
+	u.RawQuery = q.Encode()
+	pathUrl := u.String()
+
+	err = lib.MakeRequest("GET", pathUrl, headers, nil, &response)
+	if err != nil {
+		as.logger.Zap.Error("Error when request to get bulk data business: %s", err)
+		return response, err
+	}
+
+	return response, nil
+}
+
+func (as ArlordService) BulkGetMappingEventBusinessProcess(pernr string, code []string) (response dto.Response[[]dto.MappingRiskEventBusinesProcessRelation], err error) {
+	err = InitURL()
+	if err != nil {
+		return response, fmt.Errorf("failed to init module: %s", err)
+	}
+
+	authToken := as.jwtService.CreateArlordsToken(pernr)
+	headers := map[string]string{
+		"Authorization": "Bearer " + authToken,
+		"Content-Type":  "application/json",
+		"pernr":         pernr,
+	}
+
+	path := "/event/bulk-get-mapping-business-process"
+	u, _ := url.Parse(baseUrl + path)
+	q := u.Query()
+	for _, v := range code {
+		q.Add("activity_code", v)
+	}
+	u.RawQuery = q.Encode()
+	pathUrl := u.String()
+
+	err = lib.MakeRequest("GET", pathUrl, headers, nil, &response)
+	if err != nil {
+		as.logger.Zap.Error("Error when request to get bulk data business: %s", err)
+		return response, err
+	}
+
+	return response, nil
+}
+
+func (as ArlordService) BulkCreateMappingBusinessProcess(pernr string, data []dto.MapingBusinessProcessRequest) (err error) {
+	err = InitURL()
+	if err != nil {
+		return fmt.Errorf("failed to init module: %s", err)
+	}
+
+	authToken := as.jwtService.CreateArlordsToken(pernr)
+	headers := map[string]string{
+		"Authorization": "Bearer " + authToken,
+		"Content-Type":  "application/json",
+		"pernr":         pernr,
+	}
+
+	u, _ := url.Parse(baseUrl + "/event//business-process")
+	pathUrl := u.String()
+
+	var response dto.HttpResResponse
+	err = lib.MakeRequest("POST", pathUrl, headers, data, &response)
+	if err != nil {
+		as.logger.Zap.Error("Error when to save mapping risk event: %s ", err)
+		return err
+	}
+
+	return nil
 }

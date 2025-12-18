@@ -23,6 +23,14 @@ type MapControlDefinition interface {
 	DeleteDataByID(id int64, tx *gorm.DB) (err error)
 	WithTrx(trxHandle *gorm.DB) MapControlRepository
 	GetWithPagination(id int, filter riskControlModels.Paginate) (responses []models.MapControlResponseFinal, total int, err error)
+	GetAllWithRelation() (
+		responses []models.MapControlResponseFinal,
+		err error,
+	)
+	BulkCreate(
+		req []*models.MapControl,
+		tx *gorm.DB,
+	) error
 }
 
 type MapControlRepository struct {
@@ -138,6 +146,31 @@ func (mp MapControlRepository) GetWithPagination(id int, filter riskControlModel
 	return responses, total, nil
 }
 
+func (mp MapControlRepository) GetAllWithRelation() (
+	responses []models.MapControlResponseFinal,
+	err error,
+) {
+	query := `
+		SELECT
+			mc.id AS id,
+			mc.id_risk_issue AS id_risk_issue,
+			mc.id_control AS id_control,
+			rc.kode AS kode,
+			rc.risk_control AS risk_control,
+			mc.is_checked AS is_checked
+		FROM risk_issue_map_control mc
+		JOIN risk_control rc ON rc.id = mc.id_control
+		ORDER BY mc.id
+	`
+
+	err = mp.db.DB.Raw(query).Scan(&responses).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return responses, nil
+}
+
 // Delete implements MapControlDefinition
 func (mp MapControlRepository) Delete(id int64) (err error) {
 	return mp.db.DB.Where("id = ?", id).Delete(&models.MapControlResponseFinal{}).Error
@@ -184,6 +217,17 @@ func (mp MapControlRepository) GetOneDataByID(id int64) (responses []models.MapC
 	}
 
 	return responses, err
+}
+
+func (mp MapControlRepository) BulkCreate(
+	req []*models.MapControl,
+	tx *gorm.DB,
+) error {
+	if len(req) == 0 {
+		return nil
+	}
+
+	return tx.Create(req).Error
 }
 
 // Store implements MapControlDefinition
