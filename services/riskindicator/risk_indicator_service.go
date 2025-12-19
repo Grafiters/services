@@ -1689,7 +1689,7 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 			}
 		}
 
-		// tx.Commit()
+		tx.Commit()
 	}
 
 	return nil
