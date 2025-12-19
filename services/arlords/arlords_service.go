@@ -506,7 +506,7 @@ func (as ArlordService) BulkCreateMappingBusinessProcess(pernr string, data []dt
 		"pernr":         pernr,
 	}
 
-	u, _ := url.Parse(baseUrl + "/event//business-process")
+	u, _ := url.Parse(baseUrl + "/event/business-process")
 	pathUrl := u.String()
 
 	var response dto.HttpResResponse

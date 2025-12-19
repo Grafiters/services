@@ -381,7 +381,7 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 				jabExists = true
 			}
 
-			if IsValidCodeName(row[7]) {
+			if !IsValidCodeName(row[7]) {
 				validation += fmt.Sprintf("Owner invalid format, format must be <code> - <name>: %s; ", row[7])
 			}
 
@@ -400,17 +400,17 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 
 		if strings.ToLower(row[6]) == "departemen" {
 			if row[7] == "" && row[6] == "" {
-				jabExists = true
+				depExists = true
 			}
 
-			if IsValidCodeName(row[7]) {
+			if !IsValidCodeName(row[7]) {
 				validation += fmt.Sprintf("Owner invalid format, format must be <code> - <name>: %s; ", row[7])
 			}
 
 			for _, c := range departemen {
 				jab := lib.ParseStringToArray(row[7], "-")
 				if strings.EqualFold(c.Orgeh, jab[0]) {
-					jabExists = true
+					depExists = true
 					break
 				}
 			}
@@ -624,7 +624,7 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 			if v[7] == "" && v[6] == "" {
 				jabExists = true
 			}
-			if IsValidCodeName(v[7]) {
+			if !IsValidCodeName(v[7]) {
 				continue
 			}
 			for _, c := range departemen {

@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"regexp"
 	"riskmanagement/dto"
 	"riskmanagement/lib"
 	modelActiv "riskmanagement/models/activity"
@@ -1192,7 +1193,7 @@ func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.Previ
 
 	businessMap := make(map[string]dto.BusinessProcess)
 	for _, v := range business.Data.List {
-		businessMap[strings.ToLower(v.Name)] = v
+		businessMap[strings.ToLower(v.Code)] = v
 	}
 
 	headers := []string{
@@ -1300,8 +1301,12 @@ func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.Previ
 			validation += fmt.Sprintf("Product tidak sesuai dengan Activity: %s; ", row[3])
 		}
 
-		if len(row) > 9 {
-			businessCycle := strings.TrimSpace(row[9])
+		if row[9] != "" {
+			if !IsValidCodeName(row[9]) {
+				validation += fmt.Sprintf("Owner invalid format, format must be <code> - <name>: %s; ", row[9])
+			}
+			parse := lib.ParseStringToArray(row[9], " - ")
+			businessCycle := strings.TrimSpace(parse[0])
 
 			if businessCycle != "" {
 				if _, ok := businessMap[strings.ToLower(businessCycle)]; !ok {
@@ -1466,7 +1471,7 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 
 	businessMap := make(map[string]dto.BusinessProcess)
 	for _, v := range business.Data.List {
-		businessMap[strings.ToLower(v.Name)] = v
+		businessMap[strings.ToLower(v.Code)] = v
 	}
 
 	headers := []string{
@@ -1564,13 +1569,18 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 		if productActivityID == activityIDStr {
 			validActivityProduct = true
 		}
-
-		if len(row) > 9 {
-			businessCycle := strings.TrimSpace(row[9])
-
-			if businessCycle != "" {
-				if _, ok := businessMap[strings.ToLower(businessCycle)]; !ok {
-					continue
+		currentBusinessID := ""
+		if row[9] != "" {
+			parse := lib.ParseStringToArray(row[9], " - ")
+			if len(parse) > 0 {
+				businessCycle := strings.TrimSpace(parse[0])
+				if businessCycle != "" {
+					if val, ok := businessMap[strings.ToLower(businessCycle)]; ok {
+						activityExist = true
+						currentBusinessID = val.ID
+					} else {
+						continue
+					}
 				}
 			}
 		}
@@ -1628,7 +1638,7 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 		ri.logger.Zap.Debug(headerValid)
 		ri.logger.Zap.Debug(ukerValid)
 
-		if indicatorExists && activityExist && productExist && validActivityProduct {
+		if !indicatorExists && activityExist && productExist && validActivityProduct {
 			newRecord = append(newRecord, models.RiskIndicator{
 				RiskIndicatorCode:     row[1],
 				RiskIndicator:         row[2],
@@ -1636,7 +1646,7 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 				ProductID:             currentProductID,
 				Deskripsi:             row[5],
 				Satuan:                row[6],
-				BusinessCycleActivity: row[9],
+				BusinessCycleActivity: currentBusinessID,
 				Batasan:               row[8],
 				Kondisi:               ConditionMap(row[14]),
 				SLAVerifikasi:         lib.ToInt64(row[10]),
@@ -2259,4 +2269,13 @@ func ReverseCondition(text string) string {
 	}
 
 	return condition
+}
+
+func IsValidCodeName(s string) bool {
+	// format: CODE - NAME
+	// CODE  : huruf/angka/strip
+	// NAME  : huruf, spasi, angka
+	pattern := `^[A-Za-z0-9\-]+ - [A-Za-z0-9 ]+$`
+	re := regexp.MustCompile(pattern)
+	return re.MatchString(s)
 }

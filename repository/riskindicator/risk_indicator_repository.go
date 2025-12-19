@@ -627,7 +627,7 @@ func (LI RiskIndicatorRepository) GetMateriIfFinish(request *models.RequestMater
 }
 
 func (li RiskIndicatorRepository) UpdateStatus(id int64, status bool) error {
-	err := li.db.DB.Table("risk_indicator").Where("id = ?", id).Update("status", status).Error
+	err := li.db.DB.Table("risk_indicator").Where("id = ?", id).Update("status", status).Update("updated_at", gorm.Expr("NOW()")).Error
 
 	return err
 }
