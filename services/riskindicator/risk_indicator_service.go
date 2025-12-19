@@ -1303,7 +1303,7 @@ func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.Previ
 
 		if row[9] != "" {
 			if !IsValidCodeName(row[9]) {
-				validation += fmt.Sprintf("Owner invalid format, format must be <code> - <name>: %s; ", row[9])
+				validation += fmt.Sprintf("Business cycle invalid format, format must be <code> - <name>: %s; ", row[9])
 			}
 			parse := lib.ParseStringToArray(row[9], " - ")
 			businessCycle := strings.TrimSpace(parse[0])

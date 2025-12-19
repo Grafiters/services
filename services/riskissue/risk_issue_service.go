@@ -1846,7 +1846,7 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 		productMapped := []string{}
 		for _, p := range product {
 			if !IsValidCodeName(p) {
-				validation += fmt.Sprintf("penyebab kejadian level 3 invalid format, format must be <code> - <name>: %s; ", p)
+				validation += fmt.Sprintf("product 3 invalid format, format must be <code> - <name>: %s; ", p)
 				continue
 			}
 

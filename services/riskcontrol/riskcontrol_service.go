@@ -394,7 +394,7 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 			}
 
 			if !jabExists {
-				validation += fmt.Sprintf("Owner tidak terdaftar: %s; ", row[7])
+				validation += fmt.Sprintf("Owner tidak terdaftar di jabatan data: %s; ", row[7])
 			}
 		}
 
@@ -416,7 +416,7 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 			}
 
 			if !depExists {
-				validation += fmt.Sprintf("Owner tidak terdaftar: %s; ", row[7])
+				validation += fmt.Sprintf("Owner tidak terdaftar di departemen data: %s; ", row[7])
 			}
 		}
 
