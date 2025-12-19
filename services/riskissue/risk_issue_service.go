@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"regexp"
 	"riskmanagement/dto"
 	"riskmanagement/lib"
 	modelsControl "riskmanagement/models/riskcontrol"
@@ -1637,6 +1638,11 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 		subProcessStr := lib.ParseStringToArray(row[23], ";")
 		activityStr := lib.ParseStringToArray(row[25], ";")
 
+		if !IsValidCodeName(row[0]) {
+			validation += fmt.Sprintf("risk type invalid format, format must be <code> - <name>: %s", row[0])
+			continue
+		}
+
 		riskType := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(row[0], "-")))
 		eventLv1 := lib.ParseStringToArray(row[4], ";")
 		eventLv2 := lib.ParseStringToArray(row[5], ";")
@@ -1655,6 +1661,22 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 
 		evnLv1map, evnLv2map, evnLv3map := []string{}, []string{}, []string{}
 		for i := range eventLv1 {
+			if !IsValidCodeName(eventLv1[i]) {
+				validation += fmt.Sprintf("event level 1 invalid format, format must be <code> - <name>: %s; ", eventLv1[i])
+			}
+
+			if !IsValidCodeName(eventLv2[i]) {
+				validation += fmt.Sprintf("event level 2 invalid format, format must be <code> - <name>: %s; ", eventLv2[i])
+			}
+
+			if !IsValidCodeName(eventLv3[i]) {
+				validation += fmt.Sprintf("event level 3 invalid format, format must be <code> - <name>: %s; ", eventLv3[i])
+			}
+
+			if !IsValidCodeName(eventLv1[i]) || !IsValidCodeName(eventLv2[i]) || !IsValidCodeName(eventLv3[i]) {
+				continue
+			}
+
 			lv1 := normalizeEventCode(eventLv1[i])
 			lv2 := normalizeEventCode(eventLv2[i])
 			lv3 := normalizeEventCode(eventLv3[i])
@@ -1730,6 +1752,22 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 		// Incident
 		incLv1Map, incLv2Map, incLv3Map := []string{}, []string{}, []string{}
 		for i := range incident {
+			if !IsValidCodeName(incident[i]) {
+				validation += fmt.Sprintf("penyebab kejadian level 1 invalid format, format must be <code> - <name>: %s; ", incident[i])
+			}
+
+			if !IsValidCodeName(subIncident[i]) {
+				validation += fmt.Sprintf("penyebab kejadian level 2 invalid format, format must be <code> - <name>: %s; ", subIncident[i])
+			}
+
+			if !IsValidCodeName(subsubIncident[i]) {
+				validation += fmt.Sprintf("penyebab kejadian level 3 invalid format, format must be <code> - <name>: %s; ", subsubIncident[i])
+			}
+
+			if !IsValidCodeName(incident[i]) || !IsValidCodeName(subIncident[i]) || !IsValidCodeName(subsubIncident[i]) {
+				continue
+			}
+
 			lv1 := normalizeEventCode(incident[i])
 			lv2 := normalizeEventCode(subIncident[i])
 			lv3 := normalizeEventCode(subsubIncident[i])
@@ -1807,6 +1845,11 @@ func (riskIssue RiskIssueService) PreviewData(pernr string, data [][]string) (dt
 
 		productMapped := []string{}
 		for _, p := range product {
+			if !IsValidCodeName(p) {
+				validation += fmt.Sprintf("penyebab kejadian level 3 invalid format, format must be <code> - <name>: %s; ", p)
+				continue
+			}
+
 			p = normalizeEventCode(p)
 			if p == "" {
 				continue
@@ -2131,6 +2174,10 @@ func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) erro
 			continue
 		}
 
+		if !IsValidCodeName(row[0]) {
+			continue
+		}
+
 		riskTypeCode := strings.ToLower(lib.SafeFirst(lib.ParseStringToArray(row[0], "-")))
 		riskTypeID := int64(0)
 		if id, ok := riskTypeMap[riskTypeCode]; ok {
@@ -2172,6 +2219,9 @@ func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) erro
 		evnLv2 := lib.ParseStringToArray(row[5], ";")
 		evnLv3 := lib.ParseStringToArray(row[6], ";")
 		for i := range evnLv3 {
+			if !IsValidCodeName(evnLv1[i]) || !IsValidCodeName(evnLv2[i]) || !IsValidCodeName(evnLv3[i]) {
+				continue
+			}
 			lv1 := normalizeEventCode(evnLv1[i])
 			lv2 := normalizeEventCode(evnLv2[i])
 			lv3 := normalizeEventCode(evnLv3[i])
@@ -2209,6 +2259,9 @@ func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) erro
 		incLv2 := lib.ParseStringToArray(row[8], ";")
 		incLv3 := lib.ParseStringToArray(row[9], ";")
 		for i := range incLv3 {
+			if !IsValidCodeName(incLv1[i]) || !IsValidCodeName(incLv2[i]) || !IsValidCodeName(incLv3[i]) {
+				continue
+			}
 			lv1 := normalizeEventCode(incLv1[i])
 			lv2 := normalizeEventCode(incLv2[i])
 			lv3 := normalizeEventCode(incLv3[i])
@@ -2265,6 +2318,9 @@ func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) erro
 
 		product := lib.ParseStringToArray(row[10], ";")
 		for _, v := range product {
+			if !IsValidCodeName(v) {
+				continue
+			}
 			p := normalizeEventCode(v)
 			if p == "" {
 				continue
@@ -3460,46 +3516,6 @@ func (riskissue RiskIssueService) exportCSV(pernr string, data []models.RiskIssu
 	return buf.Bytes(), fileName, nil
 }
 
-func extractBusinessProcessNodes(
-	bc dto.BusinessProcessMap,
-	cache map[string]dto.BusinessProcessNode,
-) {
-
-	// Loop SBC (sub business cycle)
-	for _, sbc := range bc.BusinessProcessMap {
-
-		// Loop Process
-		for _, p := range sbc.BusinessProcessMap {
-
-			// Loop SubProcess
-			for _, sp := range p.BusinessProcessMap {
-
-				// Loop Activity
-				for _, ac := range sp.BusinessProcessMap {
-					// Simpan ke cache (key: activity code lowercase)
-					cache[strings.ToLower(ac.Code)] = dto.BusinessProcessNode{
-						ActivityCode:         ac.Code,
-						ActivityName:         ac.Name,
-						SubProcessCode:       sp.Code,
-						SubProcessName:       sp.Name,
-						ProcessCode:          p.Code,
-						ProcessName:          p.Name,
-						SubBusinessCycleCode: sbc.Code,
-						SubBusinessCycleName: sbc.Name,
-						BusinessCycleCode:    bc.Code,
-						BusinessCycleName:    bc.Name,
-						ActivityID:           ac.ID,
-						SubProcessID:         sp.ID,
-						ProcessID:            p.ID,
-						SubBusinessCycleID:   sbc.ID,
-						BusinessCycleID:      bc.ID,
-					}
-				}
-			}
-		}
-	}
-}
-
 func (riskIssue RiskIssueService) GetRiskCategories(id []int64) ([]string, error) {
 	data, err := riskIssue.riskissueRepo.GetRiskCategories(id)
 	if err != nil {
@@ -3531,4 +3547,13 @@ func normalizeEventCode(s string) string {
 	}
 
 	return strings.ToLower(strings.TrimSpace(s))
+}
+
+func IsValidCodeName(s string) bool {
+	// format: CODE - NAME
+	// CODE  : huruf/angka/strip
+	// NAME  : huruf, spasi, angka
+	pattern := `^[A-Za-z0-9\-]+ - [A-Za-z0-9 ]+$`
+	re := regexp.MustCompile(pattern)
+	return re.MatchString(s)
 }
