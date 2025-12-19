@@ -509,8 +509,14 @@ func (as ArlordService) BulkCreateMappingBusinessProcess(pernr string, data []dt
 	u, _ := url.Parse(baseUrl + "/event/business-process")
 	pathUrl := u.String()
 
+	var request dto.BulkMappingRiskEventRequest
+	request = dto.BulkMappingRiskEventRequest{
+		Data: data,
+	}
+
+	as.logger.Zap.Debug(data)
 	var response dto.HttpResResponse
-	err = lib.MakeRequest("POST", pathUrl, headers, data, &response)
+	err = lib.MakeRequest("POST", pathUrl, headers, request, &response)
 	if err != nil {
 		as.logger.Zap.Error("Error when to save mapping risk event: %s ", err)
 		return err

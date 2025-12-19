@@ -35,7 +35,7 @@ type RiskIndicatorDefinition interface {
 	// WithTrx(trxHandle *gorm.DB) RiskIndicatorService
 	GetAll() (responses []models.RiskIndicatorResponse, err error)
 	GetOne(id int64) (responses models.RiskIndicatorGetOne, status bool, err error)
-	GetAllWithPaginate(request models.Paginate) (responses []models.RiskIndicatorResponse, pagination lib.Pagination, err error)
+	GetAllWithPaginate(pernr string, request models.Paginate) (responses []models.RiskIndicatorResponse, pagination lib.Pagination, err error)
 	Store(request models.RiskIndicatorRequest) (responses bool, err error)
 	Update(requests *models.RiskIndicatorRequest) (responses bool, err error)
 	DeleteFilesByID(id int64) (response bool, err error)
@@ -195,7 +195,7 @@ func (ri RiskIndicatorService) Delete(request *models.UpdateDelete) (response bo
 }
 
 // GetAllWithPaginate implements RiskIndicatorDefinition
-func (ri RiskIndicatorService) GetAllWithPaginate(request models.Paginate) (responses []models.RiskIndicatorResponse, pagination lib.Pagination, err error) {
+func (ri RiskIndicatorService) GetAllWithPaginate(pernr string, request models.Paginate) (responses []models.RiskIndicatorResponse, pagination lib.Pagination, err error) {
 	offset, page, limit, order, sort := lib.SetPaginationParameter(request.Page, request.Limit, request.Order, request.Sort)
 
 	request.Offset = offset
@@ -203,15 +203,29 @@ func (ri RiskIndicatorService) GetAllWithPaginate(request models.Paginate) (resp
 	request.Sort = sort
 	request.Limit = limit
 
-	ri.logger.Zap.Debug(request)
-
 	dataPgs, totalRows, totalData, err := ri.riskIndicatorRepo.GetAllWithPaginate(&request)
 	if err != nil {
 		ri.logger.Zap.Error(err)
 		return responses, pagination, err
 	}
 
+	business, err := ri.arlodsService.GetBusinessCycle(pernr)
+	if err != nil {
+		ri.logger.Zap.Error("Errored to query product: %s", err)
+	}
+
+	businessMap := make(map[string]dto.BusinessProcess)
+	for _, v := range business.Data.List {
+		businessMap[strings.ToLower(v.ID)] = v
+	}
+
 	for _, response := range dataPgs {
+		businessCycle := ""
+		if response.BusinessCycleActivity != "" {
+			if val, ok := businessMap[response.BusinessCycleActivity]; ok {
+				businessCycle = val.Name
+			}
+		}
 		responses = append(responses, models.RiskIndicatorResponse{
 			ID:                    response.ID,
 			RiskIndicatorCode:     response.RiskIndicatorCode,
@@ -221,7 +235,7 @@ func (ri RiskIndicatorService) GetAllWithPaginate(request models.Paginate) (resp
 			Deskripsi:             response.Deskripsi,
 			Satuan:                response.Satuan,
 			Sifat:                 response.Sifat,
-			BusinessCycleActivity: response.BusinessCycleActivity,
+			BusinessCycleActivity: businessCycle,
 			Batasan:               response.Batasan,
 			Kondisi:               response.Kondisi,
 			Type:                  response.Type,
@@ -1266,7 +1280,7 @@ func (ri RiskIndicatorService) Preview(pernr string, data [][]string) (dto.Previ
 		indicatorID := 0
 		indicatorID, stats := indicatorMap[strings.ToLower(row[1])]
 		if stats {
-			validation += fmt.Sprintf("Code Indicator sudah terdaftar: %s; ", row[0])
+			validation += fmt.Sprintf("Code Indicator sudah terdaftar: %s; ", row[1])
 		}
 
 		alias, stats := topicMap[strings.ToLower(row[1])]
@@ -1645,15 +1659,15 @@ func (ri RiskIndicatorService) ImportData(pernr string, data [][]string) error {
 				ActivityID:            currentActivituID,
 				ProductID:             currentProductID,
 				Deskripsi:             row[5],
-				Satuan:                row[6],
+				Satuan:                strings.ToLower(row[6]),
 				BusinessCycleActivity: currentBusinessID,
-				Batasan:               row[8],
+				Batasan:               strings.ToLower(row[8]),
 				Kondisi:               ConditionMap(row[14]),
 				SLAVerifikasi:         lib.ToInt64(row[10]),
 				SLATindakLanjut:       lib.ToInt64(row[11]),
-				PeriodePemantauan:     row[7],
+				PeriodePemantauan:     strings.ToLower(row[7]),
 				KPI:                   row[12],
-				Type:                  row[13],
+				Type:                  strings.ToLower(row[13]),
 				DataSourceAnomaly:     strings.ToLower(row[0]),
 				Status:                true,
 				CreatedAt:             &timeNow,

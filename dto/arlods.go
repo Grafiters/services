@@ -143,7 +143,7 @@ type MappingRiskEventRequest struct {
 }
 
 type BulkMappingRiskEventRequest struct {
-	Data []MappingRiskEventRequest `json:"data"`
+	Data []MapingBusinessProcessRequest `json:"data"`
 }
 type RiskEventBulkGetMapping struct {
 	EventID []string `form:"event_id"`

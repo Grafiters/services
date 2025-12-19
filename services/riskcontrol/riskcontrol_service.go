@@ -587,8 +587,8 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 		}
 
 		var (
-			exists    bool = false
-			jabExists bool = false
+			exists    bool   = false
+			jabExists string = ""
 		)
 
 		parseCodeControAttribute := lib.ParseStringToArray(v[9], ";")
@@ -601,20 +601,21 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 
 		if strings.ToLower(v[6]) == "jabatan" {
 			if v[7] == "" && v[6] == "" {
-				jabExists = true
+				jabExists = ""
 			}
 
-			if IsValidCodeName(v[7]) {
+			if !IsValidCodeName(v[7]) {
 				continue
 			}
 			for _, c := range jabatan {
 				if v[7] == "" {
-					jabExists = true
+					jabExists = ""
 					continue
 				}
 				jab := lib.ParseStringToArray(v[7], "-")
+				rc.logger.Zap.Debug(strings.EqualFold(c.Hilfm, jab[0]))
 				if strings.EqualFold(c.Hilfm, jab[0]) {
-					jabExists = true
+					jabExists = c.Hilfm
 					break
 				}
 			}
@@ -622,24 +623,24 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 
 		if strings.ToLower(v[6]) == "departemen" {
 			if v[7] == "" && v[6] == "" {
-				jabExists = true
+				jabExists = ""
 			}
 			if !IsValidCodeName(v[7]) {
 				continue
 			}
 			for _, c := range departemen {
 				if v[7] == "" {
-					jabExists = true
+					jabExists = ""
 				}
 				jab := lib.ParseStringToArray(v[7], "-")
 				if strings.EqualFold(c.Orgeh, jab[0]) {
-					jabExists = true
+					jabExists = c.Orgeh
 					break
 				}
 			}
 		}
 
-		if !exists && jabExists {
+		if !exists {
 			if i == 1 {
 				code = genCode
 			} else {
@@ -658,9 +659,9 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 				KeyControl:  v[3],
 				Deskripsi:   v[4],
 				Status:      true,
-				OwnerLvl:    v[5],
-				OwnerGroup:  v[6],
-				Owner:       v[7],
+				OwnerLvl:    strings.ToLower(v[5]),
+				OwnerGroup:  strings.ToLower(v[6]),
+				Owner:       jabExists,
 				Document:    v[8],
 				CreatedAt:   &timeNow,
 			})
@@ -729,11 +730,34 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 		return err
 	}
 
-	err = rc.RequestAttributeStore(pernr, attribute)
-	if err != nil {
-		tx.Rollback()
-		rc.logger.Zap.Error(err)
-		return err
+	if len(attribute) > 0 {
+		control, err := rc.repository.GetAllWithTx(tx)
+		if err != nil {
+			tx.Rollback()
+			rc.logger.Zap.Error(err)
+			return err
+		}
+
+		codeToID := make(map[string]int64)
+		for _, t := range control {
+			codeToID[t.Kode] = t.ID
+		}
+
+		newAttribute := make(map[string][]string)
+
+		for code, values := range attribute {
+			if id, ok := codeToID[code]; ok {
+				idStr := strconv.FormatInt(id, 10)
+				newAttribute[idStr] = values
+			}
+		}
+
+		err = rc.RequestAttributeStore(pernr, newAttribute)
+		if err != nil {
+			tx.Rollback()
+			rc.logger.Zap.Error(err)
+			return err
+		}
 	}
 
 	tx.Commit()
@@ -757,7 +781,6 @@ func (rc RiskControlService) RequestAttributeStore(pernr string, data map[string
 		"pernr":         pernr,
 	}
 
-	rc.logger.Zap.Debug(data)
 	for i, v := range data {
 		attrReqest = append(attrReqest, models.RiskControlAttributeRequest{
 			ControlID: i,
