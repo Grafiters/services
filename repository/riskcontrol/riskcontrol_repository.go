@@ -292,7 +292,8 @@ func (rc RiskControlRepository) UpdateStatus(id int64, status bool) error {
 	err := rc.db.DB.
 		Table("risk_control"). // pastikan ini sesuai nama table di DB
 		Where("id = ?", id).
-		Update("status", status).Error // GORM syntax: Update(column, value)
+		Update("status", status).
+		Update("updated_at", gorm.Expr("NOW()")).Error // GORM syntax: Update(column, value)
 
 	return err
 }
