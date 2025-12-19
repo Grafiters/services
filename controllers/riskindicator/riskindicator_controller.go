@@ -49,14 +49,20 @@ func (riskIndicator RiskIndicatorController) GetAll(c *gin.Context) {
 
 func (riskIndicator RiskIndicatorController) GetAllWithPaginate(c *gin.Context) {
 	requests := models.Paginate{}
+	pernr, exists := c.Get("pernr")
+	if !exists {
+		lib.ReturnToJson(c, 401, "401", "Unauthorized", nil)
+		return
+	}
 
+	pernrStr := pernr.(string)
 	if err := c.Bind(&requests); err != nil {
 		riskIndicator.logger.Zap.Error(err)
 		lib.ReturnToJson(c, 200, "400", "Input tidak sesuai : "+err.Error(), "")
 		return
 	}
 
-	datas, pagination, err := riskIndicator.service.GetAllWithPaginate(requests)
+	datas, pagination, err := riskIndicator.service.GetAllWithPaginate(pernrStr, requests)
 	if err != nil {
 		riskIndicator.logger.Zap.Error(err)
 	}

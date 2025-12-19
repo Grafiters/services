@@ -50,7 +50,8 @@ func (m JWTAuthMiddleware) Handler() gin.HandlerFunc {
 		contentType := c.ContentType()
 		var pernr string
 
-		if contentType == "application/json" {
+		switch contentType {
+		case "application/json":
 			body, _ := io.ReadAll(c.Request.Body)
 			// simpan ulang body biar bisa dipakai lagi downstream
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
@@ -70,7 +71,7 @@ func (m JWTAuthMiddleware) Handler() gin.HandlerFunc {
 				pernr = data.Pernr
 			}
 
-		} else if contentType == "multipart/form-data" {
+		case "multipart/form-data":
 			pernr = c.PostForm("pernr")
 		}
 
@@ -86,6 +87,7 @@ func (m JWTAuthMiddleware) Handler() gin.HandlerFunc {
 
 			if authorized {
 				// fmt.Println("mashok 1")
+				c.Set("pernr", pernr)
 				c.Next()
 				return
 			}

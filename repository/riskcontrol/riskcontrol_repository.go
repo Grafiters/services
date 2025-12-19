@@ -24,6 +24,7 @@ type RiskControlDefinition interface {
 	GenLastCode() (string, error)
 	UpdateStatus(id int64, status bool) error
 	BulkCreateRiskControl(items []models.RiskControlRequest, tx *gorm.DB) error
+	GetAllWithTx(tx *gorm.DB) (response []models.RiskControlResponse, err error)
 	SearchRiskControlByIssue(request *models.KeywordRequest) (responses []models.RiskControlResponses, totalRows int, totalData int, err error)
 }
 
@@ -50,6 +51,10 @@ func NewRiskControlRepository(
 // Delete implements RiskControlDefinition
 func (riskControl RiskControlRepository) Delete(id int64) (err error) {
 	return riskControl.db.DB.Where("id = ?", id).Delete(&models.RiskControlResponse{}).Error
+}
+
+func (riskControl RiskControlRepository) GetAllWithTx(tx *gorm.DB) (response []models.RiskControlResponse, err error) {
+	return response, tx.Find(&response).Error
 }
 
 // GetAll implements RiskControlDefinition
