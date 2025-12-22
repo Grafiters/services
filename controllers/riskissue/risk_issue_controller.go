@@ -74,6 +74,32 @@ func (riskIssue RiskIssueController) GetOne(c *gin.Context) {
 	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
 }
 
+func (riskIssue RiskIssueController) GetByCode(c *gin.Context) {
+	request := models.RiskIssueRequest{}
+
+	if err := c.Bind(&request); err != nil {
+		riskIssue.logger.Zap.Error()
+		lib.ReturnToJson(c, 200, "400", "Input Tidak Sesuai : "+err.Error(), "")
+		return
+	}
+
+	data, status, err := riskIssue.service.GetByCode(request.RiskIssueCode)
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "500", "Internal Error", false)
+		return
+	}
+
+	if !status {
+		riskIssue.logger.Zap.Error(err)
+		lib.ReturnToJson(c, 200, "404", "Data tidak ditemukan", nil)
+		return
+	}
+
+	lib.ReturnToJson(c, 200, "200", "Inquery data berhasil", data)
+
+}
+
 func (riskIssue RiskIssueController) Store(c *gin.Context) {
 	data := models.RiskIssueRequest{}
 

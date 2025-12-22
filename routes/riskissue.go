@@ -22,6 +22,7 @@ func (s RiskIssueRoutes) Setup() {
 		api.POST("/getAll", s.RiskIssueController.GetAll)
 		api.POST("/getAllWithPaginate", s.RiskIssueController.GetAllWithPaginate)
 		api.POST("/getOne", s.RiskIssueController.GetOne)
+		api.POST("/getByCode", s.RiskIssueController.GetByCode)
 		api.POST("/store", s.RiskIssueController.Store)
 		api.POST("/update", s.RiskIssueController.Update)
 		api.POST("/deleteMapAktifitas", s.RiskIssueController.DeleteMapAktifitas)
