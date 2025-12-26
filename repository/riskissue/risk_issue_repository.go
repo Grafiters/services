@@ -16,6 +16,7 @@ type RiskIssueDefinition interface {
 	GetAll() (responses []models.RiskIssueResponse, err error)
 	GetAllWithPaginate(request *models.Paginate) (responses []models.RiskIssueResponse, totalData int, totalRows int, err error)
 	GetOne(id int64) (responses models.RiskIssueResponse, err error)
+	GetByCode(code string) (response models.RiskIssueResponse, err error)
 	Store(request *models.RiskIssue, tx *gorm.DB) (responses *models.RiskIssue, err error)
 	Update(request *models.RiskIssueUpdate, include []string, tx *gorm.DB) (responses bool, err error)
 	DeleteMapProses(id int64, tx *gorm.DB) (err error)
@@ -224,6 +225,16 @@ func (riskIssue RiskIssueRepository) GetOne(id int64) (responses models.RiskIssu
 
 	return responses, err
 }
+
+func (riskIssue RiskIssueRepository) GetByCode(code string) (response models.RiskIssueResponse, err error) {
+	err = riskIssue.db.DB.Raw(`SELECT * FROM risk_issue WHERE risk_issue_code = ?`, code).Find(&response).Error
+	if err != nil {
+		riskIssue.logger.Zap.Error(err)
+		return response, err
+	}
+	return response, err
+}
+
 func (riskIssue RiskIssueRepository) Store(request *models.RiskIssue, tx *gorm.DB) (responses *models.RiskIssue, err error) {
 
 	var RiskIssueCode string

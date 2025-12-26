@@ -41,6 +41,7 @@ var (
 type RiskIssueDefinition interface {
 	GetAll() (responses []models.RiskIssueResponse, err error)
 	GetOne(id int64) (responses models.RiskIssueResponseGetOne, status bool, err error)
+	GetByCode(code string) (response models.RiskIssueResponse, status bool, err error)
 	GetAllWithPaginate(request models.Paginate) (responses []models.RiskIssueResponse, pagination lib.Pagination, err error)
 	Store(request models.RiskIssueRequest) (responses bool, err error)
 	Update(request *models.RiskIssueRequest) (status bool, err error)
@@ -235,6 +236,13 @@ func (riskIssue RiskIssueService) GetOne(id int64) (responses models.RiskIssueRe
 	}
 
 	return responses, false, err
+}
+
+// data, status, err := riskIssue.service.GetByCode(request.RiskIssueCode)
+func (riskIssue RiskIssueService) GetByCode(code string) (response models.RiskIssueResponse, status bool, err error) {
+	dataRiskIssue, err := riskIssue.riskissueRepo.GetByCode(code)
+
+	return dataRiskIssue, true, err
 }
 
 // Store implements RiskIssueDefinition
