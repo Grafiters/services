@@ -376,7 +376,11 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 			}
 		}
 
-		if strings.ToLower(row[6]) == "jabatan" {
+		rc.logger.Zap.Debug("===============")
+		ownerGroup := strings.TrimSpace(row[6])
+		controlOwner := strings.TrimSpace(row[7])
+
+		if ownerGroup != "" && controlOwner != "" && strings.ToLower(row[6]) == "jabatan" {
 			if row[7] == "" && row[6] == "" {
 				jabExists = true
 			}
@@ -398,7 +402,7 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 			}
 		}
 
-		if strings.ToLower(row[6]) == "departemen" {
+		if ownerGroup != "" && controlOwner != "" && strings.ToLower(row[6]) == "departemen" {
 			if row[7] == "" && row[6] == "" {
 				depExists = true
 			}
