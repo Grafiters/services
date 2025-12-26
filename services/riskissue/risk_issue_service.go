@@ -2464,6 +2464,7 @@ func (riskIssue RiskIssueService) ImportData(pernr string, data [][]string) erro
 			return err
 		}
 	}
+
 	newMapProductReq := make([]*models.MapProduct, 0)
 	if len(newMapProduct) > 0 {
 		for riskIssueCode, v := range newMapProduct {

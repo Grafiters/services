@@ -376,7 +376,6 @@ func (rc RiskControlService) Preview(pernr string, data [][]string) (dto.Preview
 			}
 		}
 
-		rc.logger.Zap.Debug("===============")
 		ownerGroup := strings.TrimSpace(row[6])
 		controlOwner := strings.TrimSpace(row[7])
 
@@ -603,7 +602,10 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 			}
 		}
 
-		if strings.ToLower(v[6]) == "jabatan" {
+		ownerGroup := strings.TrimSpace(v[6])
+		controlOwner := strings.TrimSpace(v[7])
+
+		if ownerGroup != "" && controlOwner != "" && strings.ToLower(v[6]) == "jabatan" {
 			if v[7] == "" && v[6] == "" {
 				jabExists = ""
 			}
@@ -625,7 +627,7 @@ func (rc RiskControlService) ImportData(pernr string, data [][]string) error {
 			}
 		}
 
-		if strings.ToLower(v[6]) == "departemen" {
+		if ownerGroup != "" && controlOwner != "" && strings.ToLower(v[6]) == "departemen" {
 			if v[7] == "" && v[6] == "" {
 				jabExists = ""
 			}
